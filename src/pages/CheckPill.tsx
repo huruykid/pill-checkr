@@ -20,10 +20,26 @@ import {
   AlertCircle, 
   Loader2,
   CheckCircle,
-  Image as ImageIcon
+  Image as ImageIcon,
+  AlertTriangle,
+  Lightbulb,
+  RefreshCw
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+interface QualityIssue {
+  issue: string;
+  severity: "minor" | "moderate" | "major";
+  description: string;
+  fix: string;
+}
+
+interface QualityFeedback {
+  quality: "good" | "fair" | "poor";
+  issues: QualityIssue[];
+  recommendation: string | null;
+}
 
 const SHAPES = [
   { value: "round", label: "Round" },
@@ -64,6 +80,9 @@ export default function CheckPill() {
   const [hasReference, setHasReference] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [qualityFeedback, setQualityFeedback] = useState<QualityFeedback | null>(null);
+  const [showRetakePrompt, setShowRetakePrompt] = useState(false);
+  const [currentReportId, setCurrentReportId] = useState<string | null>(null);
 
   const handleFileSelect = useCallback((file: File) => {
     // Validate file type
@@ -103,6 +122,8 @@ export default function CheckPill() {
     setImageFile(null);
     setImagePreview(null);
     setImageError(null);
+    setQualityFeedback(null);
+    setShowRetakePrompt(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -129,6 +150,25 @@ export default function CheckPill() {
       });
 
       if (error) throw error;
+
+      // Check image quality and show feedback
+      const feedback: QualityFeedback = {
+        quality: data.imageQuality,
+        issues: data.qualityIssues || [],
+        recommendation: data.overallRecommendation
+      };
+      setQualityFeedback(feedback);
+
+      // Store the report ID for potential "continue anyway"
+      setCurrentReportId(data.reportId);
+
+      // If image quality is poor, show retake prompt instead of navigating
+      if (data.imageQuality === "poor") {
+        setShowRetakePrompt(true);
+        toast.warning("Image quality is low. Consider retaking the photo for better results.");
+        setIsAnalyzing(false);
+        return;
+      }
 
       // Navigate to results with the report ID
       navigate(`/results/${data.reportId}`);
@@ -241,6 +281,95 @@ export default function CheckPill() {
                 <div className="flex items-center gap-2 rounded-lg bg-danger-light px-3 py-2 text-sm text-danger">
                   <AlertCircle className="h-4 w-4" />
                   {imageError}
+                </div>
+              )}
+
+              {/* Quality Feedback Panel */}
+              {showRetakePrompt && qualityFeedback && (
+                <div className="space-y-4 rounded-xl border-2 border-warning bg-warning/10 p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-warning" />
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-foreground">Low Image Quality Detected</h3>
+                      <p className="text-sm text-muted-foreground">
+                        The analysis may be inaccurate due to image quality issues. Consider retaking the photo.
+                      </p>
+                    </div>
+                  </div>
+
+                  {qualityFeedback.issues.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-foreground">Issues Found:</h4>
+                      <div className="space-y-2">
+                        {qualityFeedback.issues.map((issue, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`rounded-lg p-3 ${
+                              issue.severity === "major" 
+                                ? "bg-danger/10 border border-danger/20" 
+                                : issue.severity === "moderate"
+                                ? "bg-warning/10 border border-warning/20"
+                                : "bg-muted/50 border border-border"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-xs font-medium uppercase px-2 py-0.5 rounded ${
+                                issue.severity === "major" 
+                                  ? "bg-danger/20 text-danger" 
+                                  : issue.severity === "moderate"
+                                  ? "bg-warning/20 text-warning"
+                                  : "bg-muted text-muted-foreground"
+                              }`}>
+                                {issue.severity}
+                              </span>
+                              <span className="font-medium text-foreground capitalize">{issue.issue}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">{issue.description}</p>
+                            <div className="flex items-start gap-2 text-sm">
+                              <Lightbulb className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
+                              <span className="text-foreground">{issue.fix}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {qualityFeedback.recommendation && (
+                    <div className="rounded-lg bg-primary/10 border border-primary/20 p-3">
+                      <div className="flex items-start gap-2">
+                        <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
+                        <div>
+                          <h4 className="font-medium text-foreground mb-1">Top Recommendation</h4>
+                          <p className="text-sm text-foreground">{qualityFeedback.recommendation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={clearImage}
+                      className="flex-1"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Retake Photo
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        // Allow user to proceed anyway with the stored report ID
+                        if (currentReportId) {
+                          navigate(`/results/${currentReportId}`);
+                        }
+                      }}
+                      className="flex-1"
+                      disabled={!currentReportId}
+                    >
+                      Continue Anyway
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

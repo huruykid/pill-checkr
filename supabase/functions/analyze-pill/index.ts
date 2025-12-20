@@ -34,7 +34,17 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a pill analysis assistant for harm reduction. Analyze pill images to extract features. You CANNOT detect fentanyl or guarantee safety. Extract: imprint text (OCR), shape, color, and assess image quality.
+            content: `You are a pill analysis assistant for harm reduction. Analyze pill images to extract features. You CANNOT detect fentanyl or guarantee safety. Extract: imprint text (OCR), shape, color, and thoroughly assess image quality.
+
+For image quality, be VERY specific about what's wrong and how to fix it. Consider:
+- Blur/focus issues
+- Lighting problems (too dark, overexposed, shadows)
+- Glare/reflections on the pill
+- Distance (too far, too close)
+- Angle (not perpendicular, partial view)
+- Background clutter
+- Pill visibility (obscured, multiple pills confusing the view)
+- Resolution issues
 
 Respond with JSON only:
 {
@@ -42,7 +52,15 @@ Respond with JSON only:
   "extracted_shape": "round|oval|capsule|diamond|triangle|hexagon|rectangle|other",
   "extracted_color": "white|blue|yellow|pink|green|orange|red|purple|gray|brown|tan|multicolor|other",
   "image_quality": "good|fair|poor",
-  "quality_issues": ["list of issues like blur, glare, dark"]
+  "quality_issues": [
+    {
+      "issue": "short issue name like blur, dark, glare, distance, angle, background, resolution",
+      "severity": "minor|moderate|major",
+      "description": "Specific description of what's wrong",
+      "fix": "Specific actionable advice on how to fix this when retaking the photo"
+    }
+  ],
+  "overall_recommendation": "If quality is fair or poor, provide a single most important recommendation for retaking the photo. Be specific and helpful."
 }`
           },
           {
@@ -67,8 +85,17 @@ Respond with JSON only:
     try {
       const content = aiData.choices?.[0]?.message?.content || "{}";
       analysis = JSON.parse(content.replace(/```json\n?|\n?```/g, ""));
-    } catch {
-      analysis = { extracted_imprint: null, extracted_shape: "other", extracted_color: "other", image_quality: "fair" };
+      console.log("AI analysis result:", JSON.stringify(analysis));
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", parseError);
+      analysis = { 
+        extracted_imprint: null, 
+        extracted_shape: "other", 
+        extracted_color: "other", 
+        image_quality: "fair",
+        quality_issues: [],
+        overall_recommendation: null
+      };
     }
 
     const finalImprint = imprint || analysis.extracted_imprint;
@@ -136,7 +163,12 @@ Respond with JSON only:
 
     console.log("Analysis complete, report:", report.id);
 
-    return new Response(JSON.stringify({ reportId: report.id }), {
+    return new Response(JSON.stringify({ 
+      reportId: report.id,
+      imageQuality: analysis.image_quality,
+      qualityIssues: analysis.quality_issues || [],
+      overallRecommendation: analysis.overall_recommendation || null
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
