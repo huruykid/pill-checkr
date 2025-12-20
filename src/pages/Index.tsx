@@ -24,8 +24,8 @@ const Index = () => {
             </h1>
             
             <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-              A free tool to help assess consistency with known reference pills 
-              using image analysis and matching. Not a guarantee of safety.
+              Like a librarian, we can tell you if a pill looks similar to known references — 
+              but we can't promise what's inside. Not a lab test. Not a guarantee of safety.
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -82,9 +82,9 @@ const Index = () => {
               <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-xl bg-accent">
                 <Shield className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="mb-2 font-semibold text-lg">Feature Extraction</h3>
+              <h3 className="mb-2 font-semibold text-lg">Reference Lookup</h3>
               <p className="text-sm text-muted-foreground">
-                Our system extracts features and matches against reference pills
+                Like a librarian comparing book covers, we check against known references
               </p>
             </div>
 
