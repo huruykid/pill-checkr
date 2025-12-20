@@ -190,10 +190,9 @@ export default function Results() {
               {matches.length === 0 ? (
                 <div className="py-6 text-center">
                   <XCircle className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground font-medium">No matching references found</p>
+                  <p className="text-muted-foreground font-medium">Unable to match to known references</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Like a librarian unable to find this book cover in the catalog — 
-                    this doesn't mean it's fake, but we can't verify it matches known authentic examples.
+                    This pill could not be confidently matched to any entries in our reference database.
                   </p>
                 </div>
               ) : (
@@ -234,11 +233,8 @@ export default function Results() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gauge className="h-5 w-5 text-primary" />
-                Cover Consistency Check
+                Uncertainty & Consistency Check
               </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                How well does this pill's appearance match known authentic examples?
-              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Anomaly Score Display */}
