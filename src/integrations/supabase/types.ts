@@ -50,6 +50,7 @@ export type Database = {
           drug_name: string
           explanation: string | null
           id: string
+          match_reasons: string | null
           matched_color: Database["public"]["Enums"]["pill_color"] | null
           matched_imprint: string | null
           matched_shape: Database["public"]["Enums"]["pill_shape"] | null
@@ -61,6 +62,7 @@ export type Database = {
           drug_name: string
           explanation?: string | null
           id?: string
+          match_reasons?: string | null
           matched_color?: Database["public"]["Enums"]["pill_color"] | null
           matched_imprint?: string | null
           matched_shape?: Database["public"]["Enums"]["pill_shape"] | null
@@ -72,6 +74,7 @@ export type Database = {
           drug_name?: string
           explanation?: string | null
           id?: string
+          match_reasons?: string | null
           matched_color?: Database["public"]["Enums"]["pill_color"] | null
           matched_imprint?: string | null
           matched_shape?: Database["public"]["Enums"]["pill_shape"] | null
@@ -118,43 +121,93 @@ export type Database = {
         }
         Relationships: []
       }
+      pill_reference_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          pill_reference_id: string
+          source: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          pill_reference_id: string
+          source?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          pill_reference_id?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pill_reference_images_pill_reference_id_fkey"
+            columns: ["pill_reference_id"]
+            isOneToOne: false
+            referencedRelation: "pill_reference"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
+          anomaly_reasons: string[] | null
+          anomaly_score: number | null
           color: Database["public"]["Enums"]["pill_color"] | null
           created_at: string
           has_reference_object: boolean | null
           id: string
           image_quality: Database["public"]["Enums"]["image_quality"] | null
           imprint_text: string | null
+          match_confidence:
+            | Database["public"]["Enums"]["confidence_level"]
+            | null
           notes: string | null
           photo_url: string | null
           risk_level: Database["public"]["Enums"]["risk_level"] | null
+          risk_reasons: string[] | null
           shape: Database["public"]["Enums"]["pill_shape"] | null
           user_id: string | null
         }
         Insert: {
+          anomaly_reasons?: string[] | null
+          anomaly_score?: number | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
           has_reference_object?: boolean | null
           id?: string
           image_quality?: Database["public"]["Enums"]["image_quality"] | null
           imprint_text?: string | null
+          match_confidence?:
+            | Database["public"]["Enums"]["confidence_level"]
+            | null
           notes?: string | null
           photo_url?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          risk_reasons?: string[] | null
           shape?: Database["public"]["Enums"]["pill_shape"] | null
           user_id?: string | null
         }
         Update: {
+          anomaly_reasons?: string[] | null
+          anomaly_score?: number | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
           has_reference_object?: boolean | null
           id?: string
           image_quality?: Database["public"]["Enums"]["image_quality"] | null
           imprint_text?: string | null
+          match_confidence?:
+            | Database["public"]["Enums"]["confidence_level"]
+            | null
           notes?: string | null
           photo_url?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          risk_reasons?: string[] | null
           shape?: Database["public"]["Enums"]["pill_shape"] | null
           user_id?: string | null
         }

@@ -24,8 +24,8 @@ const Index = () => {
             </h1>
             
             <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-              A free tool to help assess potential risks of counterfeit or laced pills 
-              using image analysis and reference matching.
+              A free tool to help assess consistency with known reference pills 
+              using image analysis and matching. Not a guarantee of safety.
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -82,9 +82,9 @@ const Index = () => {
               <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-xl bg-accent">
                 <Shield className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="mb-2 font-semibold text-lg">AI Analysis</h3>
+              <h3 className="mb-2 font-semibold text-lg">Feature Extraction</h3>
               <p className="text-sm text-muted-foreground">
-                Our AI extracts features and matches against known pills
+                Our system extracts features and matches against reference pills
               </p>
             </div>
 
@@ -97,7 +97,7 @@ const Index = () => {
               </div>
               <h3 className="mb-2 font-semibold text-lg">Get Guidance</h3>
               <p className="text-sm text-muted-foreground">
-                View risk signals and harm reduction recommendations
+                View possible matches, consistency notes, and harm reduction steps
               </p>
             </div>
           </div>
@@ -118,7 +118,7 @@ const Index = () => {
                 "Imprint text recognition (OCR)",
                 "Shape and color classification",
                 "Reference database matching",
-                "Risk level signaling",
+                "Consistency / anomaly scoring",
                 "Harm reduction guidance",
               ].map((feature) => (
                 <div 

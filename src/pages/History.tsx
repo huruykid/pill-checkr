@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { RiskBadge } from "@/components/shared/RiskBadge";
+import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
-import { History as HistoryIcon, Search, Trash2, AlertCircle } from "lucide-react";
+import { History as HistoryIcon, Search, Trash2, AlertCircle, Gauge } from "lucide-react";
 
 interface HistoryItem {
   id: string;
@@ -14,6 +15,8 @@ interface HistoryItem {
   imprint: string | null;
   shape: string | null;
   color: string | null;
+  anomalyScore?: number;
+  matchConfidence?: "low" | "medium" | "high";
 }
 
 export default function History() {
@@ -115,13 +118,26 @@ export default function History() {
                           <RiskBadge level={item.riskLevel} size="sm" showIcon={false} />
                           <div className="min-w-0 flex-1">
                             <p className="font-medium text-foreground truncate">
-                              {item.imprint || "Unknown imprint"}
+                              {item.imprint || "Unable to match"}
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                              {item.shape && `${item.shape}`}
-                              {item.color && ` • ${item.color}`}
-                              {item.date && ` • ${format(new Date(item.date), "MMM d, yyyy")}`}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                              {item.shape && <span>{item.shape}</span>}
+                              {item.color && <span>• {item.color}</span>}
+                              {item.date && <span>• {format(new Date(item.date), "MMM d, yyyy")}</span>}
+                            </div>
+                            {(item.anomalyScore !== undefined || item.matchConfidence) && (
+                              <div className="flex items-center gap-3 mt-1">
+                                {item.anomalyScore !== undefined && (
+                                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Gauge className="h-3 w-3" />
+                                    Inconsistency: {item.anomalyScore}/100
+                                  </span>
+                                )}
+                                {item.matchConfidence && (
+                                  <ConfidenceBadge level={item.matchConfidence} size="sm" />
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </Link>
