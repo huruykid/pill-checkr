@@ -16,17 +16,17 @@ export function Header() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b-4 border-secondary bg-foreground">
+      <div className="container flex h-14 items-center justify-between">
         <Link 
           to="/" 
           className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shadow-sm">
-            <Shield className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+            <Shield className="h-4 w-4 text-secondary-foreground" />
           </div>
-          <span className="font-display text-xl font-bold text-foreground">
-            Fent Finder
+          <span className="font-display text-2xl text-background tracking-wider">
+            FENT FINDER
           </span>
         </Link>
 
@@ -35,9 +35,11 @@ export function Header() {
           {navLinks.map((link) => (
             <Link key={link.to} to={link.to}>
               <Button
-                variant={isActive(link.to) ? "secondary" : "ghost"}
+                variant="ghost"
                 size="sm"
-                className="gap-2"
+                className={`gap-2 text-background/80 hover:text-background hover:bg-background/10 ${
+                  isActive(link.to) ? "text-secondary bg-background/10" : ""
+                }`}
               >
                 <link.icon className="h-4 w-4" />
                 {link.label}
@@ -50,7 +52,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="md:hidden text-background hover:bg-background/10"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -64,7 +66,7 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="border-t border-border/50 bg-background md:hidden animate-fade-in">
+        <div className="border-t border-background/20 bg-foreground md:hidden animate-fade-in">
           <nav className="container flex flex-col gap-1 py-4">
             {navLinks.map((link) => (
               <Link 
@@ -73,8 +75,10 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Button
-                  variant={isActive(link.to) ? "secondary" : "ghost"}
-                  className="w-full justify-start gap-3"
+                  variant="ghost"
+                  className={`w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10 ${
+                    isActive(link.to) ? "text-secondary" : ""
+                  }`}
                 >
                   <link.icon className="h-5 w-5" />
                   {link.label}

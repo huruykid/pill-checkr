@@ -3,161 +3,159 @@
 @tailwind utilities;
 
 /* Fent Finder Design System
-   A calm, trustworthy, accessible design for harm reduction
-   Colors: Soft teal primary, warm amber warnings, clean neutrals
+   Bold, urgent harm reduction aesthetic
+   Inspired by: The Real Deal on Fentanyl
+   Colors: Bold crimson red, golden yellow accents, high contrast
 */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* Core palette - Calming teal with warm accents */
-    --background: 180 20% 99%;
-    --foreground: 200 25% 15%;
+    /* Core palette - Bold and urgent */
+    --background: 0 0% 95%;
+    --foreground: 0 0% 10%;
 
-    --card: 180 15% 98%;
-    --card-foreground: 200 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 180 15% 98%;
-    --popover-foreground: 200 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Primary - Soft teal (trustworthy, calming) */
-    --primary: 174 58% 39%;
+    /* Primary - Bold Crimson Red */
+    --primary: 0 75% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 174 45% 50%;
-    --primary-dark: 174 65% 28%;
+    --primary-light: 0 70% 55%;
+    --primary-dark: 0 80% 35%;
 
-    /* Secondary - Soft slate */
-    --secondary: 200 15% 94%;
-    --secondary-foreground: 200 25% 25%;
+    /* Secondary - Golden Yellow (accent) */
+    --secondary: 45 95% 55%;
+    --secondary-foreground: 0 0% 10%;
 
-    /* Muted - Gentle gray-teal */
-    --muted: 180 10% 95%;
-    --muted-foreground: 200 12% 50%;
+    /* Muted - Warm gray */
+    --muted: 30 10% 90%;
+    --muted-foreground: 0 0% 40%;
 
-    /* Accent - Light teal highlight */
-    --accent: 174 40% 92%;
-    --accent-foreground: 174 58% 30%;
+    /* Accent - Light golden */
+    --accent: 45 90% 92%;
+    --accent-foreground: 45 95% 25%;
 
-    /* Warning - Warm amber (non-alarming) */
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 95% 15%;
-    --warning-light: 43 96% 95%;
+    /* Warning - Golden amber */
+    --warning: 45 95% 55%;
+    --warning-foreground: 45 100% 10%;
+    --warning-light: 45 95% 92%;
 
-    /* Danger - Soft coral (serious but not panic) */
-    --danger: 0 65% 55%;
+    /* Danger - Deep red */
+    --danger: 0 75% 45%;
     --danger-foreground: 0 0% 100%;
-    --danger-light: 0 70% 96%;
+    --danger-light: 0 80% 95%;
 
-    /* Success - Soft green */
-    --success: 142 55% 42%;
+    /* Success - Forest green */
+    --success: 145 60% 35%;
     --success-foreground: 0 0% 100%;
-    --success-light: 142 50% 95%;
+    --success-light: 145 50% 92%;
 
     /* Risk levels */
-    --risk-low: 142 55% 42%;
-    --risk-medium: 38 92% 50%;
-    --risk-high: 0 65% 55%;
+    --risk-low: 145 60% 35%;
+    --risk-medium: 45 95% 45%;
+    --risk-high: 0 75% 45%;
 
     /* Confidence levels */
-    --confidence-low: 0 65% 55%;
-    --confidence-medium: 38 92% 50%;
-    --confidence-high: 142 55% 42%;
+    --confidence-low: 0 75% 45%;
+    --confidence-medium: 45 95% 45%;
+    --confidence-high: 145 60% 35%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 180 12% 88%;
-    --input: 180 12% 88%;
-    --ring: 174 58% 39%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 75% 45%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Sidebar */
-    --sidebar-background: 180 15% 97%;
-    --sidebar-foreground: 200 25% 25%;
-    --sidebar-primary: 174 58% 39%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 15%;
+    --sidebar-primary: 0 75% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 174 40% 92%;
-    --sidebar-accent-foreground: 174 58% 30%;
-    --sidebar-border: 180 12% 88%;
-    --sidebar-ring: 174 58% 39%;
+    --sidebar-accent: 45 90% 92%;
+    --sidebar-accent-foreground: 45 95% 25%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 0 75% 45%;
 
     /* Typography */
-    --font-sans: 'DM Sans', 'Inter', system-ui, sans-serif;
-    --font-display: 'DM Sans', 'Inter', system-ui, sans-serif;
+    --font-sans: 'Space Grotesk', system-ui, sans-serif;
+    --font-display: 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif;
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(200 25% 15% / 0.04);
-    --shadow-md: 0 4px 6px -1px hsl(200 25% 15% / 0.06), 0 2px 4px -2px hsl(200 25% 15% / 0.04);
-    --shadow-lg: 0 10px 15px -3px hsl(200 25% 15% / 0.08), 0 4px 6px -4px hsl(200 25% 15% / 0.04);
-    --shadow-xl: 0 20px 25px -5px hsl(200 25% 15% / 0.1), 0 8px 10px -6px hsl(200 25% 15% / 0.06);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.12), 0 8px 10px -6px hsl(0 0% 0% / 0.08);
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(174 58% 39%), hsl(174 45% 50%));
-    --gradient-card: linear-gradient(180deg, hsl(180 15% 99%), hsl(180 15% 97%));
-    --gradient-subtle: linear-gradient(180deg, hsl(180 20% 99%), hsl(180 15% 96%));
+    --gradient-hero: linear-gradient(135deg, hsl(0 75% 45%), hsl(0 70% 35%));
+    --gradient-accent: linear-gradient(135deg, hsl(45 95% 55%), hsl(45 90% 45%));
   }
 
   .dark {
-    --background: 200 25% 8%;
-    --foreground: 180 15% 95%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 200 20% 12%;
-    --card-foreground: 180 15% 95%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 200 20% 12%;
-    --popover-foreground: 180 15% 95%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 174 55% 45%;
-    --primary-foreground: 200 25% 8%;
-    --primary-light: 174 50% 55%;
-    --primary-dark: 174 60% 35%;
+    --primary: 0 70% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 0 65% 60%;
+    --primary-dark: 0 75% 40%;
 
-    --secondary: 200 15% 18%;
-    --secondary-foreground: 180 15% 90%;
+    --secondary: 45 90% 50%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 200 15% 15%;
-    --muted-foreground: 200 10% 60%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 174 30% 18%;
-    --accent-foreground: 174 55% 70%;
+    --accent: 45 50% 15%;
+    --accent-foreground: 45 90% 70%;
 
-    --warning: 38 90% 55%;
-    --warning-foreground: 38 95% 10%;
-    --warning-light: 38 40% 15%;
+    --warning: 45 90% 50%;
+    --warning-foreground: 45 100% 10%;
+    --warning-light: 45 50% 15%;
 
-    --danger: 0 60% 50%;
+    --danger: 0 70% 50%;
     --danger-foreground: 0 0% 100%;
-    --danger-light: 0 40% 15%;
+    --danger-light: 0 50% 15%;
 
-    --success: 142 50% 45%;
-    --success-foreground: 142 50% 10%;
-    --success-light: 142 30% 15%;
+    --success: 145 55% 40%;
+    --success-foreground: 145 50% 10%;
+    --success-light: 145 40% 15%;
 
-    --risk-low: 142 50% 45%;
-    --risk-medium: 38 90% 55%;
-    --risk-high: 0 60% 50%;
+    --risk-low: 145 55% 40%;
+    --risk-medium: 45 90% 50%;
+    --risk-high: 0 70% 50%;
 
-    --confidence-low: 0 60% 50%;
-    --confidence-medium: 38 90% 55%;
-    --confidence-high: 142 50% 45%;
+    --confidence-low: 0 70% 50%;
+    --confidence-medium: 45 90% 50%;
+    --confidence-high: 145 55% 40%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 200 15% 20%;
-    --input: 200 15% 20%;
-    --ring: 174 55% 45%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 70% 50%;
 
-    --sidebar-background: 200 20% 10%;
-    --sidebar-foreground: 180 15% 90%;
-    --sidebar-primary: 174 55% 45%;
-    --sidebar-primary-foreground: 200 25% 8%;
-    --sidebar-accent: 174 30% 18%;
-    --sidebar-accent-foreground: 174 55% 70%;
-    --sidebar-border: 200 15% 20%;
-    --sidebar-ring: 174 55% 45%;
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 0 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 50% 15%;
+    --sidebar-accent-foreground: 45 90% 70%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 0 70% 50%;
   }
 }
 
@@ -179,7 +177,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    @apply font-semibold tracking-tight;
+    @apply font-bold tracking-wide uppercase;
   }
 }
 
@@ -210,6 +208,15 @@
     @apply bg-success-light text-success;
   }
 
+  /* Bold section backgrounds */
+  .section-primary {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .section-secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+
   /* Glass effect */
   .glass {
     @apply bg-card/80 backdrop-blur-md border border-border/50;
@@ -228,6 +235,11 @@
   /* Card hover effect */
   .card-hover {
     @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  /* Bold border accent */
+  .border-accent-bold {
+    @apply border-4 border-secondary;
   }
 
   /* Subtle animation */
@@ -284,10 +296,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
+  @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors;
 }
 
 /* Selection */
 ::selection {
-  @apply bg-primary/20 text-foreground;
+  @apply bg-secondary/40 text-foreground;
 }
