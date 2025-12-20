@@ -45,7 +45,33 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Red Section - Bold Info */}
+      {/* Golden Section - Help Your Friends */}
+      <section className="bg-secondary py-16 md:py-20">
+        <div className="container">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="mb-2 font-display text-4xl text-secondary-foreground md:text-5xl lg:text-6xl tracking-wide">
+              HELP YOUR
+            </h2>
+            <h2 className="mb-6 font-display text-4xl text-primary md:text-5xl lg:text-6xl tracking-wide italic">
+              FRIENDS
+            </h2>
+            
+            <p className="mb-8 text-lg text-secondary-foreground/90 md:text-xl font-sans">
+              Know the signs of overdose. Carry naloxone. You could save a life.
+              Learn how to recognize when someone needs help and what to do.
+            </p>
+
+            <Link to="/education">
+              <Button variant="outline" size="lg" className="gap-2">
+                Learn How to Help
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Red Section - Pill Safety 101 */}
       <section className="bg-primary py-16 md:py-20">
         <div className="container">
           <div className="mx-auto max-w-3xl text-center">
