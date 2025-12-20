@@ -1,0 +1,4 @@
+project_id = "ptisltjfqomavvlnghcm"
+
+[functions.analyze-pill]
+verify_jwt = false
