@@ -8,7 +8,7 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section - Light with bold typography */}
-      <section className="relative overflow-hidden bg-background py-16 md:py-24 texture-halftone text-foreground">
+      <section className="relative overflow-hidden bg-background py-16 md:py-24 texture-skulls text-foreground">
         <div className="container relative z-10">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="mb-4 font-display text-5xl tracking-wide text-foreground md:text-6xl lg:text-7xl">
@@ -46,7 +46,7 @@ const Index = () => {
       </section>
 
       {/* Golden Section - Help Your Friends */}
-      <section className="relative bg-secondary py-16 md:py-20 texture-halftone-dense text-secondary-foreground overflow-hidden">
+      <section className="relative bg-secondary py-16 md:py-20 texture-skulls-dense text-secondary-foreground overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute top-8 left-[15%] h-6 w-6 rounded-full bg-primary" />
         <div className="absolute top-1/3 right-[20%] h-8 w-8 rounded-full bg-primary" />
@@ -77,7 +77,7 @@ const Index = () => {
       </section>
 
       {/* Red Section - Pill Safety 101 */}
-      <section className="relative bg-primary py-16 md:py-20 texture-halftone text-primary-foreground overflow-hidden">
+      <section className="relative bg-primary py-16 md:py-20 texture-skulls text-primary-foreground overflow-hidden">
         {/* Decorative diagonal lines */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -173,7 +173,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="relative border-t-4 border-secondary bg-muted py-12 md:py-16 texture-halftone text-foreground">
+      <section className="relative border-t-4 border-secondary bg-muted py-12 md:py-16 texture-skulls text-foreground">
         <div className="container relative z-10">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-8 text-center font-display text-3xl md:text-4xl">
