@@ -51,12 +51,7 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
         <AlertTriangle className="h-6 w-6 text-warning shrink-0 mt-0.5" />
         <div className="space-y-3">
           <p className="font-semibold text-warning-foreground">
-            Librarian, Not Chemist
-          </p>
-          <p className="text-sm text-warning-foreground/90">
-            Think of this app as a librarian: we can look at a pill's "cover" and tell you if it 
-            looks similar to known references. But like a librarian, we cannot promise what's 
-            actually inside — only a lab (chemist) can do that.
+            Important Disclaimer
           </p>
           <ul className="space-y-2 text-sm text-warning-foreground/90">
             <li className="flex items-start gap-2">
