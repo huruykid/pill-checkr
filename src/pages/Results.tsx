@@ -18,9 +18,9 @@ import {
   Pill,
   ImageOff,
   Loader2,
-  Phone,
-  AlertCircle,
   Info,
+  HelpCircle,
+  Gauge,
 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -32,31 +32,12 @@ interface ResultsData {
   matches: Match[];
 }
 
-const riskReasons: Record<string, string[]> = {
-  high: [
-    "No confident match found in reference database",
-    "Pill characteristics inconsistent with known pharmaceuticals",
-    "Image quality may affect analysis accuracy",
-    "This type of pill is commonly counterfeited",
-  ],
-  medium: [
-    "Match confidence is not definitive",
-    "Some features do not match reference exactly",
-    "Consider additional verification methods",
-  ],
-  low: [
-    "Pill matches known reference database entry",
-    "Visual characteristics are consistent",
-    "Still recommended to verify through other means",
-  ],
-};
-
 const harmReductionSteps = [
   "Never use alone - have someone with you who can call for help",
   "Start with a small test dose and wait to feel effects",
   "Have naloxone (Narcan) available and know how to use it",
   "Know the signs of overdose: slow breathing, blue lips, unresponsive",
-  "If in doubt, don't use - seek drug checking services if available",
+  "If unable to confidently match, treat as higher risk",
   "Call 911 immediately if you suspect an overdose",
 ];
 
@@ -121,6 +102,8 @@ export default function Results() {
         imprint: data.report.imprint_text,
         shape: data.report.shape,
         color: data.report.color,
+        anomalyScore: data.report.anomaly_score,
+        matchConfidence: data.report.match_confidence,
       });
       localStorage.setItem("pillCheckHistory", JSON.stringify(history.slice(0, 50)));
       toast.success("Saved to history");
@@ -160,6 +143,19 @@ export default function Results() {
 
   const { report, matches } = data;
   const riskLevel = (report.risk_level || "medium") as "low" | "medium" | "high";
+  const anomalyScore = report.anomaly_score ?? 0;
+  const anomalyReasons = report.anomaly_reasons ?? [];
+  const riskReasons = report.risk_reasons ?? [];
+  const matchConfidence = report.match_confidence as "low" | "medium" | "high" | null;
+
+  // Get anomaly level description
+  const getAnomalyDescription = (score: number) => {
+    if (score >= 60) return { text: "High inconsistency", color: "text-danger" };
+    if (score >= 30) return { text: "Moderate inconsistency", color: "text-warning" };
+    return { text: "Low inconsistency", color: "text-success" };
+  };
+
+  const anomalyInfo = getAnomalyDescription(anomalyScore);
 
   return (
     <Layout>
@@ -182,53 +178,27 @@ export default function Results() {
             <Disclaimer variant="emergency" className="mb-8" />
           )}
 
-          {/* Risk Signal Panel */}
-          <Card className="mb-8">
+          {/* Section A: Possible Matches */}
+          <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                {riskLevel === "high" && <AlertTriangle className="h-5 w-5 text-danger" />}
-                {riskLevel === "medium" && <AlertCircle className="h-5 w-5 text-warning" />}
-                {riskLevel === "low" && <CheckCircle className="h-5 w-5 text-success" />}
-                Risk Assessment
+                <Pill className="h-5 w-5 text-primary" />
+                Possible Matches
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {riskReasons[riskLevel].map((reason, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm">
-                    <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${
-                      riskLevel === "high" ? "bg-danger" : 
-                      riskLevel === "medium" ? "bg-warning" : "bg-success"
-                    }`} />
-                    <span className="text-muted-foreground">{reason}</span>
-                  </li>
-                ))}
-              </ul>
-              
-              {report.image_quality === "poor" && (
-                <div className="mt-4 flex items-center gap-2 rounded-lg bg-warning-light px-3 py-2 text-sm text-warning">
-                  <ImageOff className="h-4 w-4" />
-                  Image quality is poor - results may be less accurate
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Top Matches */}
-          <div className="mb-8">
-            <h2 className="mb-4 text-xl font-semibold">Top Matches</h2>
-            {matches.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center">
+              {matches.length === 0 ? (
+                <div className="py-6 text-center">
                   <XCircle className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">No matches found in reference database</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {matches.map((match) => (
-                  <Card key={match.id} className="overflow-hidden">
-                    <CardContent className="p-4">
+                  <p className="text-muted-foreground font-medium">Unable to match to known references</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    This pill could not be confidently matched to any entries in our reference database.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {matches.map((match) => (
+                    <div key={match.id} className="rounded-lg border border-border p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-start gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -241,6 +211,9 @@ export default function Results() {
                               {match.matched_shape && ` ${match.matched_shape}`}
                               {match.matched_color && ` • ${match.matched_color}`}
                             </p>
+                            {match.match_reasons && (
+                              <p className="mt-1 text-sm text-primary/80">{match.match_reasons}</p>
+                            )}
                             {match.explanation && (
                               <p className="mt-2 text-sm text-muted-foreground">{match.explanation}</p>
                             )}
@@ -248,14 +221,103 @@ export default function Results() {
                         </div>
                         <ConfidenceBadge level={(match.confidence || "low") as "low" | "medium" | "high"} />
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* What To Do Next */}
+          {/* Section B: Uncertainty & Consistency Check */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gauge className="h-5 w-5 text-primary" />
+                Uncertainty & Consistency Check
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Anomaly Score Display */}
+              <div className="rounded-lg bg-muted/50 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium text-foreground">Inconsistency Score</span>
+                  <span className={`font-bold text-lg ${anomalyInfo.color}`}>
+                    {anomalyScore}/100
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                  <div 
+                    className={`h-full transition-all ${
+                      anomalyScore >= 60 ? "bg-danger" : 
+                      anomalyScore >= 30 ? "bg-warning" : "bg-success"
+                    }`}
+                    style={{ width: `${anomalyScore}%` }}
+                  />
+                </div>
+                <p className={`text-sm mt-2 ${anomalyInfo.color}`}>
+                  {anomalyInfo.text}
+                </p>
+              </div>
+
+              {/* Match Confidence */}
+              {matchConfidence && (
+                <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
+                  <HelpCircle className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <span className="text-sm text-muted-foreground">Match Confidence: </span>
+                    <span className={`font-medium ${
+                      matchConfidence === "high" ? "text-success" :
+                      matchConfidence === "medium" ? "text-warning" : "text-danger"
+                    }`}>
+                      {matchConfidence.charAt(0).toUpperCase() + matchConfidence.slice(1)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Anomaly Reasons */}
+              {anomalyReasons.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Consistency notes:</p>
+                  <ul className="space-y-2">
+                    {anomalyReasons.map((reason, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm">
+                        <span className="mt-1.5 h-2 w-2 rounded-full bg-warning shrink-0" />
+                        <span className="text-muted-foreground">{reason}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Risk Reasons */}
+              {riskReasons.length > 0 && (
+                <div className="space-y-2 border-t border-border pt-4">
+                  <p className="text-sm font-medium text-muted-foreground">Risk assessment notes:</p>
+                  <ul className="space-y-2">
+                    {riskReasons.map((reason, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm">
+                        <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${
+                          riskLevel === "high" ? "bg-danger" : 
+                          riskLevel === "medium" ? "bg-warning" : "bg-success"
+                        }`} />
+                        <span className="text-muted-foreground">{reason}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {report.image_quality === "poor" && (
+                <div className="flex items-center gap-2 rounded-lg bg-warning-light px-3 py-2 text-sm text-warning">
+                  <ImageOff className="h-4 w-4" />
+                  Image quality is poor - results may be less accurate
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Section C: What To Do Next */}
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

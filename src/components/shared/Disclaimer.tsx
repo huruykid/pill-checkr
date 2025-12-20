@@ -36,7 +36,7 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
       )}>
         <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
         <p className="text-warning-foreground">
-          This tool cannot detect fentanyl. Not medical advice.
+          This tool cannot confirm fentanyl or guarantee safety. Not medical advice.
         </p>
       </div>
     );
@@ -60,11 +60,11 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
-              <span>This tool <strong>cannot</strong> directly detect fentanyl or other adulterants</span>
+              <span>This tool <strong>cannot</strong> confirm fentanyl or guarantee any pill is safe</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
-              <span>We <strong>cannot</strong> guarantee any pill is safe</span>
+              <span>If we <strong>cannot confidently match</strong> a pill, treat it as higher risk</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
