@@ -8,8 +8,8 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section - Light with bold typography */}
-      <section className="relative overflow-hidden bg-background py-16 md:py-24">
-        <div className="container relative">
+      <section className="relative overflow-hidden bg-background py-16 md:py-24 texture-halftone text-foreground">
+        <div className="container relative z-10">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="mb-4 font-display text-5xl tracking-wide text-foreground md:text-6xl lg:text-7xl">
               THE REAL
@@ -46,8 +46,13 @@ const Index = () => {
       </section>
 
       {/* Golden Section - Help Your Friends */}
-      <section className="bg-secondary py-16 md:py-20">
-        <div className="container">
+      <section className="relative bg-secondary py-16 md:py-20 texture-halftone-dense text-secondary-foreground overflow-hidden">
+        {/* Decorative circles */}
+        <div className="absolute top-8 left-[15%] h-6 w-6 rounded-full bg-primary" />
+        <div className="absolute top-1/3 right-[20%] h-8 w-8 rounded-full bg-primary" />
+        <div className="absolute bottom-12 left-[25%] h-5 w-5 rounded-full bg-primary" />
+        
+        <div className="container relative z-10">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-2 font-display text-4xl text-secondary-foreground md:text-5xl lg:text-6xl tracking-wide">
               HELP YOUR
@@ -72,8 +77,15 @@ const Index = () => {
       </section>
 
       {/* Red Section - Pill Safety 101 */}
-      <section className="bg-primary py-16 md:py-20">
-        <div className="container">
+      <section className="relative bg-primary py-16 md:py-20 texture-halftone text-primary-foreground overflow-hidden">
+        {/* Decorative diagonal lines */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-full" style={{
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 20px, currentColor 20px, currentColor 21px)'
+          }} />
+        </div>
+        
+        <div className="container relative z-10">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-6 font-display text-4xl text-primary-foreground md:text-5xl lg:text-6xl tracking-wide">
               PILL SAFETY 101
@@ -161,8 +173,8 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="border-t-4 border-secondary bg-muted py-12 md:py-16">
-        <div className="container">
+      <section className="relative border-t-4 border-secondary bg-muted py-12 md:py-16 texture-halftone text-foreground">
+        <div className="container relative z-10">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-8 text-center font-display text-3xl md:text-4xl">
               WHAT WE PROVIDE
