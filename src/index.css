@@ -217,155 +217,24 @@
     @apply bg-secondary text-secondary-foreground;
   }
 
-  /* SCARY Halloween skull & pill textures */
-  .texture-skulls {
-    position: relative;
-  }
-  
-  .texture-skulls::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: 
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 24 24'%3E%3Cg fill='%23000' opacity='0.12'%3E%3Ccircle cx='9' cy='10' r='2.5'/%3E%3Ccircle cx='15' cy='10' r='2.5'/%3E%3Cpath d='M8 18v3h2v-1.5h4v1.5h2v-3'/%3E%3Cpath d='M11 14h2v2h-2z'/%3E%3Cpath d='M16 18a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 18'/%3E%3C/g%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='5' ry='10' fill='%23000' opacity='0.08'/%3E%3Cline x1='7' y1='12' x2='17' y2='12' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E");
-    background-size: 70px 70px, 45px 45px;
-    background-position: 0 0, 35px 22px;
-    pointer-events: none;
-  }
-
-  .texture-skulls-dense {
-    position: relative;
-  }
-  
-  .texture-skulls-dense::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: 
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cg fill='%23000' opacity='0.18'%3E%3Ccircle cx='9' cy='10' r='3'/%3E%3Ccircle cx='15' cy='10' r='3'/%3E%3Cpath d='M8 18v3h2v-1.5h4v1.5h2v-3'/%3E%3Cpath d='M11 14h2v2h-2z'/%3E%3Cpath d='M16 18a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 18'/%3E%3C/g%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='5' ry='10' fill='%23000' opacity='0.12'/%3E%3Cline x1='7' y1='12' x2='17' y2='12' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E");
-    background-size: 50px 50px, 35px 35px;
-    background-position: 0 0, 25px 17px;
-    pointer-events: none;
-  }
-
-  /* Crossbones and pills - extra scary */
-  .texture-danger {
-    position: relative;
-  }
-  
-  .texture-danger::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: 
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 40 40'%3E%3Cg fill='%23000' opacity='0.1'%3E%3Cline x1='5' y1='5' x2='35' y2='35' stroke='%23000' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='35' y1='5' x2='5' y2='35' stroke='%23000' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='5' cy='5' r='4'/%3E%3Ccircle cx='35' cy='5' r='4'/%3E%3Ccircle cx='5' cy='35' r='4'/%3E%3Ccircle cx='35' cy='35' r='4'/%3E%3C/g%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='4' ry='9' fill='%23000' opacity='0.08' transform='rotate(30 12 12)'/%3E%3C/svg%3E");
-    background-size: 80px 80px, 50px 50px;
-    background-position: 0 0, 40px 25px;
-    pointer-events: none;
-  }
-
-  /* Dripping blood effect */
-  .texture-drip {
-    position: relative;
-  }
-  
-  .texture-drip::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='100' viewBox='0 0 60 100'%3E%3Cpath d='M30 0 Q30 40 25 60 Q18 85 30 100 Q42 85 35 60 Q30 40 30 0' fill='%23000' opacity='0.06'/%3E%3C/svg%3E");
-    background-size: 60px 100px;
-    background-repeat: repeat-x;
-    background-position: top;
-    pointer-events: none;
-  }
-
-  /* Scattered pills chaos */
-  .texture-pills {
-    position: relative;
-  }
-  
-  .texture-pills::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: 
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='4' ry='9' fill='%23000' opacity='0.1'/%3E%3Cline x1='8' y1='12' x2='16' y2='12' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='4' ry='9' fill='%23000' opacity='0.07' transform='rotate(45 12 12)'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='35' height='35' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='4' ry='9' fill='%23000' opacity='0.05' transform='rotate(-30 12 12)'/%3E%3C/svg%3E");
-    background-size: 60px 60px, 45px 45px, 40px 40px;
-    background-position: 0 0, 30px 20px, 15px 40px;
-    pointer-events: none;
-  }
-
-  /* Halftone texture patterns */
-  .texture-halftone {
-    position: relative;
-  }
-  
-  .texture-halftone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-    background-size: 8px 8px;
-    opacity: 0.08;
-    pointer-events: none;
-  }
-
-  .texture-halftone-dense {
-    position: relative;
-  }
-  
-  .texture-halftone-dense::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, currentColor 1.5px, transparent 1.5px);
-    background-size: 6px 6px;
-    opacity: 0.12;
-    pointer-events: none;
-  }
-
-  .texture-diagonal {
-    position: relative;
-  }
-  
-  .texture-diagonal::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: repeating-linear-gradient(
-      45deg,
-      currentColor 0,
-      currentColor 1px,
-      transparent 0,
-      transparent 50%
-    );
-    background-size: 10px 10px;
-    opacity: 0.05;
-    pointer-events: none;
-  }
-
-  .texture-noise {
-    position: relative;
-  }
-  
-  .texture-noise::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.03;
-    pointer-events: none;
-  }
-
   /* Glass effect */
   .glass {
     @apply bg-card/80 backdrop-blur-md border border-border/50;
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Focus ring */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  /* Card hover effect */
+  .card-hover {
+    @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200;
   }
 
   /* Bold border accent */
