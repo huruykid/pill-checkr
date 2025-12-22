@@ -1,10 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const InputSchema = z.object({
+  image: z.string()
+    .min(1, "Image data is required")
+    .max(15 * 1024 * 1024, "Image data exceeds maximum size of 15MB"),
+  imprint: z.string().max(50, "Imprint must be 50 characters or less").optional().nullable(),
+  shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
+  color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
+  hasReferenceObject: z.boolean().default(false)
+});
 
 // Match scoring weights
 const MATCH_WEIGHTS = {
@@ -167,7 +179,26 @@ serve(async (req) => {
   }
 
   try {
-    const { image, imprint, shape, color, hasReferenceObject } = await req.json();
+    // Parse and validate input
+    const rawInput = await req.json();
+    const validationResult = InputSchema.safeParse(rawInput);
+    
+    if (!validationResult.success) {
+      console.error("Input validation failed:", validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input", 
+          details: validationResult.error.errors.map(e => e.message).join(", ")
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    const { image, imprint, shape, color, hasReferenceObject } = validationResult.data;
+    console.log("Input validated successfully");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
