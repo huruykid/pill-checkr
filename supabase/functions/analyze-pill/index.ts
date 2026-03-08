@@ -362,6 +362,8 @@ Respond with JSON only:
         anomaly_score: anomalyScore,
         anomaly_reasons: anomalyReasons,
         risk_reasons: riskReasons,
+        photo_url: photoUrl || null,
+        user_id: userId || null,
       })
       .select()
       .single();
