@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -21,40 +21,105 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ApiImportTab, type ApiImportParams, type ApiImportResult, type ImportStats } from "@/components/admin/ApiImportTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Pill, BookOpen, ShieldCheck } from "lucide-react";
+import { Loader2, Plus, Trash2, Pill, BookOpen, ShieldCheck, Database as DatabaseIcon } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type PillReference = Database["public"]["Tables"]["pill_reference"]["Row"];
 type EducationPost = Database["public"]["Tables"]["education_posts"]["Row"];
+type PillShape = Database["public"]["Enums"]["pill_shape"];
+type PillColor = Database["public"]["Enums"]["pill_color"];
+
+const SHAPES: PillShape[] = ["round", "oval", "capsule", "diamond", "triangle", "hexagon", "rectangle", "other"];
+const COLORS: PillColor[] = ["white", "blue", "yellow", "pink", "green", "orange", "red", "purple", "gray", "brown", "tan", "multicolor", "other"];
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  // Pill references state
   const [pills, setPills] = useState<PillReference[]>([]);
   const [pillsLoading, setPillsLoading] = useState(true);
   const [pillDialog, setPillDialog] = useState(false);
-  const [newPill, setNewPill] = useState({ drug_name: "", imprint: "", shape: "round", color: "white", notes: "" });
+  const [newPill, setNewPill] = useState<{ drug_name: string; imprint: string; shape: PillShape; color: PillColor; notes: string }>({
+    drug_name: "",
+    imprint: "",
+    shape: "round",
+    color: "white",
+    notes: "",
+  });
 
-  // Education state
   const [posts, setPosts] = useState<EducationPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [postDialog, setPostDialog] = useState(false);
   const [newPost, setNewPost] = useState({ title: "", slug: "", summary: "", body: "" });
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-      return;
+  const [importing, setImporting] = useState(false);
+  const [latestImport, setLatestImport] = useState<ApiImportResult | null>(null);
+  const [importStats, setImportStats] = useState<ImportStats | null>(null);
+
+  const fetchPills = async () => {
+    setPillsLoading(true);
+    const { data, error } = await supabase.from("pill_reference").select("*").order("drug_name");
+
+    if (error) {
+      toast.error("Failed to load pill references");
+      setPills([]);
+    } else {
+      setPills(data || []);
     }
-    if (user) checkAdmin();
-  }, [user, authLoading]);
+
+    setPillsLoading(false);
+  };
+
+  const fetchPosts = async () => {
+    setPostsLoading(true);
+    const { data, error } = await supabase.from("education_posts").select("*").order("created_at", { ascending: false });
+
+    if (error) {
+      toast.error("Failed to load education posts");
+      setPosts([]);
+    } else {
+      setPosts(data || []);
+    }
+
+    setPostsLoading(false);
+  };
+
+  const fetchImportStats = async () => {
+    const [
+      totalCount,
+      manualCount,
+      rxImageCount,
+      dailyMedCount,
+      lastSync,
+    ] = await Promise.all([
+      supabase.from("pill_reference").select("id", { head: true, count: "exact" }),
+      supabase.from("pill_reference").select("id", { head: true, count: "exact" }).eq("source", "manual"),
+      supabase.from("pill_reference").select("id", { head: true, count: "exact" }).eq("source", "rximage"),
+      supabase.from("pill_reference").select("id", { head: true, count: "exact" }).eq("source", "dailymed"),
+      supabase
+        .from("pill_reference")
+        .select("last_synced")
+        .not("last_synced", "is", null)
+        .order("last_synced", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    setImportStats({
+      total: totalCount.count || 0,
+      manual: manualCount.count || 0,
+      rximage: rxImageCount.count || 0,
+      dailymed: dailyMedCount.count || 0,
+      lastSyncedAt: lastSync.data?.last_synced || null,
+    });
+  };
 
   const checkAdmin = async () => {
     try {
@@ -64,15 +129,15 @@ export default function Admin() {
         .eq("user_id", user!.id)
         .eq("role", "admin")
         .maybeSingle();
-      
+
       if (!data) {
         toast.error("Access denied. Admin role required.");
         navigate("/");
         return;
       }
+
       setIsAdmin(true);
-      fetchPills();
-      fetchPosts();
+      await Promise.all([fetchPills(), fetchPosts(), fetchImportStats()]);
     } catch {
       navigate("/");
     } finally {
@@ -80,38 +145,40 @@ export default function Admin() {
     }
   };
 
-  const fetchPills = async () => {
-    const { data } = await supabase.from("pill_reference").select("*").order("drug_name");
-    setPills(data || []);
-    setPillsLoading(false);
-  };
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+      return;
+    }
 
-  const fetchPosts = async () => {
-    const { data } = await supabase.from("education_posts").select("*").order("created_at", { ascending: false });
-    setPosts(data || []);
-    setPostsLoading(false);
-  };
+    if (user) {
+      void checkAdmin();
+    }
+  }, [user, authLoading, navigate]);
 
   const addPill = async () => {
     if (!newPill.drug_name || !newPill.imprint) {
       toast.error("Drug name and imprint are required");
       return;
     }
+
     const { error } = await supabase.from("pill_reference").insert({
       drug_name: newPill.drug_name,
       imprint: newPill.imprint,
-      shape: newPill.shape as any,
-      color: newPill.color as any,
+      shape: newPill.shape,
+      color: newPill.color,
       notes: newPill.notes || null,
     });
+
     if (error) {
       toast.error("Failed to add pill reference");
       return;
     }
+
     toast.success("Pill reference added");
     setPillDialog(false);
     setNewPill({ drug_name: "", imprint: "", shape: "round", color: "white", notes: "" });
-    fetchPills();
+    await Promise.all([fetchPills(), fetchImportStats()]);
   };
 
   const deletePill = async (id: string) => {
@@ -120,8 +187,9 @@ export default function Admin() {
       toast.error("Failed to delete");
       return;
     }
+
     toast.success("Deleted");
-    fetchPills();
+    await Promise.all([fetchPills(), fetchImportStats()]);
   };
 
   const addPost = async () => {
@@ -129,20 +197,23 @@ export default function Admin() {
       toast.error("Title, slug, and body are required");
       return;
     }
+
     const { error } = await supabase.from("education_posts").insert({
       title: newPost.title,
       slug: newPost.slug,
       summary: newPost.summary || null,
       body: newPost.body,
     });
+
     if (error) {
       toast.error("Failed to add post");
       return;
     }
+
     toast.success("Post added");
     setPostDialog(false);
     setNewPost({ title: "", slug: "", summary: "", body: "" });
-    fetchPosts();
+    await fetchPosts();
   };
 
   const deletePost = async (id: string) => {
@@ -151,8 +222,37 @@ export default function Admin() {
       toast.error("Failed to delete");
       return;
     }
+
     toast.success("Deleted");
-    fetchPosts();
+    await fetchPosts();
+  };
+
+  const runApiImport = async ({ source, category, limit, dryRun }: ApiImportParams) => {
+    setImporting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("import-pill-data", {
+        body: { source, category, limit, dryRun, enrichLimit: limit },
+      });
+
+      if (error) throw error;
+
+      const result = data as ApiImportResult;
+      setLatestImport(result);
+
+      toast.success(
+        dryRun
+          ? `Dry run complete: ${result.inserted} insertable, ${result.updated} updatable, ${result.duplicatesSkipped} duplicates`
+          : `Import complete: ${result.inserted} inserted, ${result.updated} updated, ${result.enriched} enriched`,
+      );
+
+      await Promise.all([fetchPills(), fetchImportStats()]);
+    } catch (error) {
+      console.error(error);
+      toast.error("Import failed. Please try again.");
+    } finally {
+      setImporting(false);
+    }
   };
 
   if (authLoading || checking) {
@@ -166,9 +266,6 @@ export default function Admin() {
   }
 
   if (!isAdmin) return null;
-
-  const SHAPES = ["round", "oval", "capsule", "diamond", "triangle", "hexagon", "rectangle", "other"];
-  const COLORS = ["white", "blue", "yellow", "pink", "green", "orange", "red", "purple", "gray", "brown", "tan", "multicolor", "other"];
 
   return (
     <Layout>
@@ -188,6 +285,10 @@ export default function Admin() {
               <TabsTrigger value="education" className="gap-2">
                 <BookOpen className="h-4 w-4" />
                 Education ({posts.length})
+              </TabsTrigger>
+              <TabsTrigger value="imports" className="gap-2">
+                <DatabaseIcon className="h-4 w-4" />
+                API Import
               </TabsTrigger>
             </TabsList>
 
@@ -213,19 +314,19 @@ export default function Admin() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Shape</Label>
-                          <Select value={newPill.shape} onValueChange={(v) => setNewPill({ ...newPill, shape: v })}>
+                          <Select value={newPill.shape} onValueChange={(value: PillShape) => setNewPill({ ...newPill, shape: value })}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              {SHAPES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                              {SHAPES.map((shape) => <SelectItem key={shape} value={shape}>{shape}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
                           <Label>Color</Label>
-                          <Select value={newPill.color} onValueChange={(v) => setNewPill({ ...newPill, color: v })}>
+                          <Select value={newPill.color} onValueChange={(value: PillColor) => setNewPill({ ...newPill, color: value })}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              {COLORS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                              {COLORS.map((color) => <SelectItem key={color} value={color}>{color}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
@@ -313,6 +414,15 @@ export default function Admin() {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="imports">
+              <ApiImportTab
+                isImporting={importing}
+                latestImport={latestImport}
+                stats={importStats}
+                onImport={runApiImport}
+              />
             </TabsContent>
           </Tabs>
         </div>

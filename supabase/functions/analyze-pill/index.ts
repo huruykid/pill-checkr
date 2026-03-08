@@ -34,6 +34,12 @@ const CONFIDENCE_THRESHOLDS = {
   medium: 50,
 };
 
+const SOURCE_PRIORITY: Record<string, number> = {
+  manual: 3,
+  rximage: 2,
+  dailymed: 1,
+};
+
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
   extracted: { imprint: string | null; shape: string | null; color: string | null },
@@ -318,7 +324,13 @@ Respond with JSON only:
       return { ...ref, score, matchReasons: reasons };
     })
     .filter(m => m.score > 0)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => {
+      const scoreDelta = b.score - a.score;
+      if (scoreDelta !== 0) return scoreDelta;
+      const sourceA = SOURCE_PRIORITY[a.source || ""] || 0;
+      const sourceB = SOURCE_PRIORITY[b.source || ""] || 0;
+      return sourceB - sourceA;
+    })
     .slice(0, 3);
 
     // Determine match confidence from top match

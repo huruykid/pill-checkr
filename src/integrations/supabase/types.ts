@@ -96,28 +96,40 @@ export type Database = {
           color: Database["public"]["Enums"]["pill_color"]
           created_at: string
           drug_name: string
+          external_id: string | null
           id: string
           imprint: string
+          last_synced: string | null
+          ndc_code: string | null
           notes: string | null
           shape: Database["public"]["Enums"]["pill_shape"]
+          source: string | null
         }
         Insert: {
           color?: Database["public"]["Enums"]["pill_color"]
           created_at?: string
           drug_name: string
+          external_id?: string | null
           id?: string
           imprint: string
+          last_synced?: string | null
+          ndc_code?: string | null
           notes?: string | null
           shape?: Database["public"]["Enums"]["pill_shape"]
+          source?: string | null
         }
         Update: {
           color?: Database["public"]["Enums"]["pill_color"]
           created_at?: string
           drug_name?: string
+          external_id?: string | null
           id?: string
           imprint?: string
+          last_synced?: string | null
+          ndc_code?: string | null
           notes?: string | null
           shape?: Database["public"]["Enums"]["pill_shape"]
+          source?: string | null
         }
         Relationships: []
       }
