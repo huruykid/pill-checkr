@@ -34,6 +34,12 @@ const CONFIDENCE_THRESHOLDS = {
   medium: 50,
 };
 
+const SOURCE_PRIORITY: Record<string, number> = {
+  manual: 3,
+  rximage: 2,
+  dailymed: 1,
+};
+
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
   extracted: { imprint: string | null; shape: string | null; color: string | null },
