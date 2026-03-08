@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface QualityIssue {
   issue: string;
@@ -70,6 +71,7 @@ const COLORS = [
 
 export default function CheckPill() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -85,26 +87,18 @@ export default function CheckPill() {
   const [currentReportId, setCurrentReportId] = useState<string | null>(null);
 
   const handleFileSelect = useCallback((file: File) => {
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       setImageError("Please select an image file");
       return;
     }
-
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setImageError("Image must be less than 10MB");
       return;
     }
-
     setImageFile(file);
     setImageError(null);
-
-    // Create preview
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target?.result as string);
-    };
+    reader.onload = (e) => setImagePreview(e.target?.result as string);
     reader.readAsDataURL(file);
   }, []);
 
@@ -124,13 +118,29 @@ export default function CheckPill() {
     setImageError(null);
     setQualityFeedback(null);
     setShowRetakePrompt(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("pill-images")
+        .upload(fileName, file, { contentType: file.type });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage
+        .from("pill-images")
+        .getPublicUrl(fileName);
+      return urlData.publicUrl;
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      return null;
     }
   };
 
   const handleAnalyze = async () => {
-    if (!imagePreview) {
+    if (!imagePreview || !imageFile) {
       toast.error("Please upload an image first");
       return;
     }
@@ -138,6 +148,9 @@ export default function CheckPill() {
     setIsAnalyzing(true);
 
     try {
+      // Upload image to storage
+      const photoUrl = await uploadImage(imageFile);
+
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
         body: {
@@ -146,23 +159,21 @@ export default function CheckPill() {
           shape: shape || null,
           color: color || null,
           hasReferenceObject: hasReference,
+          photoUrl: photoUrl || null,
+          userId: user?.id || null,
         },
       });
 
       if (error) throw error;
 
-      // Check image quality and show feedback
       const feedback: QualityFeedback = {
         quality: data.imageQuality,
         issues: data.qualityIssues || [],
         recommendation: data.overallRecommendation
       };
       setQualityFeedback(feedback);
-
-      // Store the report ID for potential "continue anyway"
       setCurrentReportId(data.reportId);
 
-      // If image quality is poor, show retake prompt instead of navigating
       if (data.imageQuality === "poor") {
         setShowRetakePrompt(true);
         toast.warning("Image quality is low. Consider retaking the photo for better results.");
@@ -170,7 +181,6 @@ export default function CheckPill() {
         return;
       }
 
-      // Navigate to results with the report ID
       navigate(`/results/${data.reportId}`);
     } catch (error) {
       console.error("Analysis error:", error);
@@ -184,18 +194,15 @@ export default function CheckPill() {
     <Layout>
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
-          {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="mb-2 text-3xl font-bold md:text-4xl">Check a Pill</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground font-sans normal-case">
               Upload a clear photo for analysis. Include a reference object like a coin for better accuracy.
             </p>
           </div>
 
-          {/* Disclaimer */}
           <Disclaimer variant="compact" className="mb-8" />
 
-          {/* Form */}
           <div className="space-y-8">
             {/* Image Upload */}
             <div className="space-y-3">
@@ -348,21 +355,14 @@ export default function CheckPill() {
                   )}
 
                   <div className="flex gap-3 pt-2">
-                    <Button
-                      variant="outline"
-                      onClick={clearImage}
-                      className="flex-1"
-                    >
+                    <Button variant="outline" onClick={clearImage} className="flex-1">
                       <RefreshCw className="mr-2 h-4 w-4" />
                       Retake Photo
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        // Allow user to proceed anyway with the stored report ID
-                        if (currentReportId) {
-                          navigate(`/results/${currentReportId}`);
-                        }
+                        if (currentReportId) navigate(`/results/${currentReportId}`);
                       }}
                       className="flex-1"
                       disabled={!currentReportId}
@@ -459,6 +459,12 @@ export default function CheckPill() {
                 <>Analyze Pill</>
               )}
             </Button>
+
+            {!user && (
+              <p className="text-center text-sm text-muted-foreground">
+                <a href="/auth" className="text-primary hover:underline">Sign in</a> to save your check history automatically.
+              </p>
+            )}
           </div>
         </div>
       </div>

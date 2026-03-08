@@ -15,7 +15,9 @@ const InputSchema = z.object({
   imprint: z.string().max(50, "Imprint must be 50 characters or less").optional().nullable(),
   shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
   color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
-  hasReferenceObject: z.boolean().default(false)
+  hasReferenceObject: z.boolean().default(false),
+  photoUrl: z.string().url().optional().nullable(),
+  userId: z.string().uuid().optional().nullable(),
 });
 
 // Match scoring weights
@@ -197,7 +199,7 @@ serve(async (req) => {
       );
     }
     
-    const { image, imprint, shape, color, hasReferenceObject } = validationResult.data;
+    const { image, imprint, shape, color, hasReferenceObject, photoUrl, userId } = validationResult.data;
     console.log("Input validated successfully");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -360,6 +362,8 @@ Respond with JSON only:
         anomaly_score: anomalyScore,
         anomaly_reasons: anomalyReasons,
         risk_reasons: riskReasons,
+        photo_url: photoUrl || null,
+        user_id: userId || null,
       })
       .select()
       .single();
