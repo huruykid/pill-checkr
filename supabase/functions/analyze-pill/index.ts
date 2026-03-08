@@ -199,7 +199,7 @@ serve(async (req) => {
       );
     }
     
-    const { image, imprint, shape, color, hasReferenceObject } = validationResult.data;
+    const { image, imprint, shape, color, hasReferenceObject, photoUrl, userId } = validationResult.data;
     console.log("Input validated successfully");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
