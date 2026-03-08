@@ -324,7 +324,13 @@ Respond with JSON only:
       return { ...ref, score, matchReasons: reasons };
     })
     .filter(m => m.score > 0)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => {
+      const scoreDelta = b.score - a.score;
+      if (scoreDelta !== 0) return scoreDelta;
+      const sourceA = SOURCE_PRIORITY[a.source || ""] || 0;
+      const sourceB = SOURCE_PRIORITY[b.source || ""] || 0;
+      return sourceB - sourceA;
+    })
     .slice(0, 3);
 
     // Determine match confidence from top match
