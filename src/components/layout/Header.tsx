@@ -1,11 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, History, BookOpen, Search } from "lucide-react";
+import { Shield, Menu, X, History, BookOpen, Search, User, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const navLinks = [
     { to: "/check", label: "Check a Pill", icon: Search },
@@ -46,6 +48,30 @@ export function Header() {
               </Button>
             </Link>
           ))}
+          {user ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-background/80 hover:text-background hover:bg-background/10"
+              onClick={() => signOut()}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          ) : (
+            <Link to="/auth">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`gap-2 text-background/80 hover:text-background hover:bg-background/10 ${
+                  isActive("/auth") ? "text-secondary bg-background/10" : ""
+                }`}
+              >
+                <User className="h-4 w-4" />
+                Sign In
+              </Button>
+            </Link>
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -85,6 +111,26 @@ export function Header() {
                 </Button>
               </Link>
             ))}
+            {user ? (
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10"
+                onClick={() => { signOut(); setMobileMenuOpen(false); }}
+              >
+                <LogOut className="h-5 w-5" />
+                Sign Out
+              </Button>
+            ) : (
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10"
+                >
+                  <User className="h-5 w-5" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       )}

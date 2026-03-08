@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import {
   AlertTriangle,
   CheckCircle,
@@ -44,19 +45,17 @@ const harmReductionSteps = [
 export default function Results() {
   const { reportId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (reportId) {
-      fetchResults();
-    }
+    if (reportId) fetchResults();
   }, [reportId]);
 
   const fetchResults = async () => {
     try {
-      // Fetch report
       const { data: report, error: reportError } = await supabase
         .from("reports")
         .select("*")
@@ -70,7 +69,6 @@ export default function Results() {
         return;
       }
 
-      // Fetch matches
       const { data: matches, error: matchesError } = await supabase
         .from("matches")
         .select("*")
@@ -78,7 +76,6 @@ export default function Results() {
         .order("rank", { ascending: true });
 
       if (matchesError) throw matchesError;
-
       setData({ report, matches: matches || [] });
     } catch (error) {
       console.error("Error fetching results:", error);
@@ -93,20 +90,29 @@ export default function Results() {
     
     setSaving(true);
     try {
-      // For anonymous users, save to localStorage
-      const history = JSON.parse(localStorage.getItem("pillCheckHistory") || "[]");
-      history.unshift({
-        id: data.report.id,
-        date: data.report.created_at,
-        riskLevel: data.report.risk_level,
-        imprint: data.report.imprint_text,
-        shape: data.report.shape,
-        color: data.report.color,
-        anomalyScore: data.report.anomaly_score,
-        matchConfidence: data.report.match_confidence,
-      });
-      localStorage.setItem("pillCheckHistory", JSON.stringify(history.slice(0, 50)));
-      toast.success("Saved to history");
+      if (user) {
+        // Authenticated: update report with user_id
+        await supabase
+          .from("reports")
+          .update({ user_id: user.id })
+          .eq("id", data.report.id);
+        toast.success("Saved to your account history");
+      } else {
+        // Anonymous: save to localStorage
+        const history = JSON.parse(localStorage.getItem("pillCheckHistory") || "[]");
+        history.unshift({
+          id: data.report.id,
+          date: data.report.created_at,
+          riskLevel: data.report.risk_level,
+          imprint: data.report.imprint_text,
+          shape: data.report.shape,
+          color: data.report.color,
+          anomalyScore: data.report.anomaly_score,
+          matchConfidence: data.report.match_confidence,
+        });
+        localStorage.setItem("pillCheckHistory", JSON.stringify(history.slice(0, 50)));
+        toast.success("Saved to local history");
+      }
     } catch (error) {
       console.error("Error saving to history:", error);
       toast.error("Failed to save to history");
@@ -148,7 +154,6 @@ export default function Results() {
   const riskReasons = report.risk_reasons ?? [];
   const matchConfidence = report.match_confidence as "low" | "medium" | "high" | null;
 
-  // Get anomaly level description
   const getAnomalyDescription = (score: number) => {
     if (score >= 60) return { text: "High inconsistency", color: "text-danger" };
     if (score >= 30) return { text: "Moderate inconsistency", color: "text-warning" };
@@ -161,19 +166,29 @@ export default function Results() {
     <Layout>
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-3xl">
-          {/* Back Button */}
           <Link to="/check" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
             Back to Check
           </Link>
 
-          {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="mb-4 text-3xl font-bold md:text-4xl">Analysis Results</h1>
             <RiskBadge level={riskLevel} size="lg" />
           </div>
 
-          {/* Emergency Banner for High Risk */}
+          {/* Show pill photo if available */}
+          {report.photo_url && (
+            <Card className="mb-6 overflow-hidden">
+              <CardContent className="p-0">
+                <img
+                  src={report.photo_url}
+                  alt="Uploaded pill"
+                  className="w-full max-h-[250px] object-contain bg-muted/30"
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {riskLevel === "high" && (
             <Disclaimer variant="emergency" className="mb-8" />
           )}
@@ -237,7 +252,6 @@ export default function Results() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Anomaly Score Display */}
               <div className="rounded-lg bg-muted/50 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-medium text-foreground">Inconsistency Score</span>
@@ -259,7 +273,6 @@ export default function Results() {
                 </p>
               </div>
 
-              {/* Match Confidence */}
               {matchConfidence && (
                 <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
                   <HelpCircle className="h-5 w-5 text-muted-foreground" />
@@ -275,7 +288,6 @@ export default function Results() {
                 </div>
               )}
 
-              {/* Anomaly Reasons */}
               {anomalyReasons.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-muted-foreground">Consistency notes:</p>
@@ -290,7 +302,6 @@ export default function Results() {
                 </div>
               )}
 
-              {/* Risk Reasons */}
               {riskReasons.length > 0 && (
                 <div className="space-y-2 border-t border-border pt-4">
                   <p className="text-sm font-medium text-muted-foreground">Risk assessment notes:</p>
@@ -337,7 +348,6 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          {/* Disclaimer */}
           <Disclaimer className="mb-8" />
 
           {/* Actions */}
@@ -353,7 +363,7 @@ export default function Results() {
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
-              Save to History
+              {user ? "Save to Account" : "Save to History"}
             </Button>
             <Link to="/check" className="flex-1">
               <Button variant="default" className="w-full">
