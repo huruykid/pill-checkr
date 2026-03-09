@@ -135,7 +135,7 @@ export function ApiImportTab({ isImporting, latestImport, stats, onImport }: Api
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rximage">RxImage (Primary import)</SelectItem>
+                  <SelectItem value="curated">Curated Dataset (Primary import)</SelectItem>
                   <SelectItem value="dailymed">DailyMed (Enrichment)</SelectItem>
                 </SelectContent>
               </Select>
