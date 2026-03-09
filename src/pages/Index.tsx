@@ -55,8 +55,8 @@ const Index = () => {
             
             <p className="mb-8 text-lg text-primary-foreground/90 md:text-xl font-sans">
               Counterfeit pills are increasingly common and often contain deadly doses 
-              of fentanyl. This tool helps you compare pills against known references — 
-              but only lab testing can confirm what's inside.
+              of fentanyl. This tool visually compares your pill photos against reference 
+              images of known legitimate pills — but only lab testing can confirm what's inside.
             </p>
 
             <Link to="/education">
