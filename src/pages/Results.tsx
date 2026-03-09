@@ -253,6 +253,9 @@ export default function Results() {
             </CardContent>
           </Card>
 
+          {/* Counterfeit Warning - shown if any match has high counterfeit risk */}
+          {hasCounterfeitRisk && <CounterfeitWarning className="mb-6" />}
+
           {/* Section B: Uncertainty & Consistency Check */}
           <Card className="mb-6">
             <CardHeader>
