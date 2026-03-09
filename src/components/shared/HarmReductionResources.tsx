@@ -66,7 +66,7 @@ export function HarmReductionResources({ className }: HarmReductionResourcesProp
                   They cost ~$1 each and take 2-5 minutes.
                 </p>
                 <a
-                  href="https://dancesafe.org/fentanyl-test-strips/"
+                  href="https://dancesafe.org/product/fentanyl-test-strips-pack-of-10-free-shipping/"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
