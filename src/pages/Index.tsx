@@ -19,7 +19,7 @@ const Index = () => {
             
             <p className="mb-8 text-lg text-muted-foreground md:text-xl font-sans">
               A free tool to help assess consistency with known reference pills 
-              using image analysis and matching. Not a guarantee of safety.
+              using visual comparison and image analysis. Not a guarantee of safety.
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -55,8 +55,8 @@ const Index = () => {
             
             <p className="mb-8 text-lg text-primary-foreground/90 md:text-xl font-sans">
               Counterfeit pills are increasingly common and often contain deadly doses 
-              of fentanyl. This tool helps you compare pills against known references — 
-              but only lab testing can confirm what's inside.
+              of fentanyl. This tool visually compares your pill photos against reference 
+              images of known legitimate pills — but only lab testing can confirm what's inside.
             </p>
 
             <Link to="/education">
@@ -112,9 +112,9 @@ const Index = () => {
               <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-sm bg-muted">
                 <Shield className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="mb-2 font-display text-xl">REFERENCE MATCHING</h3>
+              <h3 className="mb-2 font-display text-xl">VISUAL MATCHING</h3>
               <p className="text-sm text-muted-foreground font-sans">
-                We compare against known pill references to find possible matches
+                We visually compare your photo against reference images of known pills
               </p>
             </div>
 
@@ -148,6 +148,7 @@ const Index = () => {
                 "Imprint text recognition (OCR)",
                 "Shape and color classification",
                 "Reference database matching",
+                "Visual image comparison",
                 "Consistency / anomaly scoring",
                 "Harm reduction guidance",
               ].map((feature) => (
