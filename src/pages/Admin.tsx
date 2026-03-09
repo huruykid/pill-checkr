@@ -95,13 +95,13 @@ export default function Admin() {
     const [
       totalCount,
       manualCount,
-      rxImageCount,
+      curatedCount,
       dailyMedCount,
       lastSync,
     ] = await Promise.all([
       supabase.from("pill_reference").select("id", { head: true, count: "exact" }),
       supabase.from("pill_reference").select("id", { head: true, count: "exact" }).eq("source", "manual"),
-      supabase.from("pill_reference").select("id", { head: true, count: "exact" }).eq("source", "rximage"),
+      supabase.from("pill_reference").select("id", { head: true, count: "exact" }).eq("source", "curated"),
       supabase.from("pill_reference").select("id", { head: true, count: "exact" }).eq("source", "dailymed"),
       supabase
         .from("pill_reference")
@@ -115,7 +115,7 @@ export default function Admin() {
     setImportStats({
       total: totalCount.count || 0,
       manual: manualCount.count || 0,
-      rximage: rxImageCount.count || 0,
+      curated: curatedCount.count || 0,
       dailymed: dailyMedCount.count || 0,
       lastSyncedAt: lastSync.data?.last_synced || null,
     });

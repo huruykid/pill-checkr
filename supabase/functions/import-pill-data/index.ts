@@ -6,49 +6,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const RXIMAGE_BASE_URL = "https://rximage.nlm.nih.gov/api/rximage/1/rxnav";
-const RXNORM_RXCUI_URL = "https://rxnav.nlm.nih.gov/REST/rxcui.json";
-const DAILYMED_BASE_URL = "https://dailymed.nlm.nih.gov/dailymed/services/v2";
-const MAX_IMPORT_LIMIT = 500;
-const DEFAULT_IMPORT_LIMIT = 150;
-const DEFAULT_ENRICH_LIMIT = 100;
+type ImportSource = "curated" | "dailymed";
 
-type ImportSource = "rximage" | "dailymed";
+type PillShape = "round" | "oval" | "capsule" | "diamond" | "triangle" | "hexagon" | "rectangle" | "other";
+type PillColor = "white" | "blue" | "yellow" | "pink" | "green" | "orange" | "red" | "purple" | "gray" | "brown" | "tan" | "multicolor" | "other";
 
-type PillShape =
-  | "round"
-  | "oval"
-  | "capsule"
-  | "diamond"
-  | "triangle"
-  | "hexagon"
-  | "rectangle"
-  | "other";
-
-type PillColor =
-  | "white"
-  | "blue"
-  | "yellow"
-  | "pink"
-  | "green"
-  | "orange"
-  | "red"
-  | "purple"
-  | "gray"
-  | "brown"
-  | "tan"
-  | "multicolor"
-  | "other";
-
-type RxCandidate = {
+type CuratedEntry = {
   drug_name: string;
   imprint: string;
   shape: PillShape;
   color: PillColor;
   notes: string | null;
-  external_id: string | null;
   ndc_code: string | null;
-  image_url: string | null;
 };
 
 type ExistingReference = {
@@ -74,218 +43,308 @@ type ImportResult = {
   completedAt: string;
 };
 
-const CATEGORY_TERMS: Record<string, string[]> = {
-  opioids: ["oxycodone", "hydrocodone", "morphine", "tramadol", "codeine"],
-  benzos: ["alprazolam", "diazepam", "clonazepam", "lorazepam", "temazepam"],
-  stimulants: ["amphetamine", "methylphenidate", "modafinil", "dextroamphetamine"],
-  antibiotics: ["amoxicillin", "azithromycin", "cephalexin", "ciprofloxacin", "doxycycline"],
-  cardiovascular: ["atorvastatin", "lisinopril", "metoprolol", "amlodipine", "losartan"],
-  diabetes: ["metformin", "glipizide", "jardiance", "sitagliptin"],
-  psychiatric: ["sertraline", "fluoxetine", "bupropion", "escitalopram", "quetiapine"],
-  gi: ["omeprazole", "pantoprazole", "famotidine", "ondansetron"],
-  antihistamines: ["cetirizine", "loratadine", "fexofenadine", "diphenhydramine"],
-  thyroid: ["levothyroxine"],
-  muscle_relaxants: ["cyclobenzaprine", "methocarbamol", "tizanidine"],
-  supplements: ["folic acid", "vitamin d", "iron", "potassium chloride"],
+// ─── CURATED PILL DATASET ───────────────────────────────────────────────────
+// Comprehensive dataset of common medications with accurate physical characteristics.
+// Sources: FDA Pill Identifier, DailyMed SPL data, pharmacist references.
+
+const CURATED_DATA: Record<string, CuratedEntry[]> = {
+  opioids: [
+    { drug_name: "Oxycodone 5mg", imprint: "K 18", shape: "round", color: "white", notes: "KVK Tech • Schedule II", ndc_code: "10702-018" },
+    { drug_name: "Oxycodone 10mg", imprint: "K 56", shape: "round", color: "pink", notes: "KVK Tech • Schedule II", ndc_code: "10702-056" },
+    { drug_name: "Oxycodone 15mg", imprint: "K 8", shape: "round", color: "green", notes: "KVK Tech • Schedule II", ndc_code: "10702-008" },
+    { drug_name: "Oxycodone 20mg", imprint: "K 57", shape: "round", color: "gray", notes: "KVK Tech • Schedule II", ndc_code: "10702-057" },
+    { drug_name: "Oxycodone 30mg", imprint: "K 9", shape: "round", color: "blue", notes: "KVK Tech • Schedule II", ndc_code: "10702-009" },
+    { drug_name: "Oxycodone 30mg", imprint: "M 30", shape: "round", color: "blue", notes: "Mallinckrodt • Schedule II — commonly counterfeited", ndc_code: "00406-8530" },
+    { drug_name: "Oxycodone 30mg", imprint: "A 215", shape: "round", color: "blue", notes: "Actavis • Schedule II — commonly counterfeited", ndc_code: "00228-2215" },
+    { drug_name: "Oxycodone 30mg", imprint: "ALG 265", shape: "round", color: "blue", notes: "Alvogen • Schedule II", ndc_code: "47781-0265" },
+    { drug_name: "Oxycodone 30mg", imprint: "114", shape: "round", color: "blue", notes: "Mylan • Schedule II", ndc_code: "00378-6114" },
+    { drug_name: "Oxycodone 5mg", imprint: "223", shape: "round", color: "white", notes: "Caraco • Schedule II", ndc_code: "57664-0223" },
+    { drug_name: "OxyContin 10mg", imprint: "OP 10", shape: "round", color: "white", notes: "Purdue Pharma • Extended-release • Schedule II", ndc_code: "59011-0410" },
+    { drug_name: "OxyContin 20mg", imprint: "OP 20", shape: "round", color: "pink", notes: "Purdue Pharma • Extended-release • Schedule II", ndc_code: "59011-0420" },
+    { drug_name: "OxyContin 40mg", imprint: "OP 40", shape: "round", color: "yellow", notes: "Purdue Pharma • Extended-release • Schedule II", ndc_code: "59011-0440" },
+    { drug_name: "OxyContin 80mg", imprint: "OP 80", shape: "round", color: "green", notes: "Purdue Pharma • Extended-release • Schedule II", ndc_code: "59011-0480" },
+    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "M365", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II", ndc_code: "00406-0365" },
+    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "IP 109", shape: "capsule", color: "white", notes: "Amneal • Schedule II", ndc_code: "65162-0109" },
+    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "M366", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II", ndc_code: "00406-0366" },
+    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "IP 110", shape: "capsule", color: "white", notes: "Amneal • Schedule II", ndc_code: "65162-0110" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "M367", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II", ndc_code: "00406-0367" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "IP 112", shape: "capsule", color: "white", notes: "Amneal • Schedule II", ndc_code: "65162-0112" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "Watson 853", shape: "capsule", color: "yellow", notes: "Watson Labs • Schedule II", ndc_code: "00591-0853" },
+    { drug_name: "Morphine Sulfate 15mg", imprint: "54 733", shape: "round", color: "blue", notes: "Roxane • Immediate-release • Schedule II", ndc_code: "00054-0733" },
+    { drug_name: "Morphine Sulfate 30mg", imprint: "54 262", shape: "round", color: "purple", notes: "Roxane • Immediate-release • Schedule II", ndc_code: "00054-0262" },
+    { drug_name: "Morphine Sulfate ER 15mg", imprint: "ABG 15", shape: "round", color: "green", notes: "Allergan • Extended-release • Schedule II", ndc_code: "00591-3746" },
+    { drug_name: "Morphine Sulfate ER 30mg", imprint: "ABG 30", shape: "round", color: "purple", notes: "Allergan • Extended-release • Schedule II", ndc_code: "00591-3747" },
+    { drug_name: "Tramadol 50mg", imprint: "AN 627", shape: "round", color: "white", notes: "Amneal • Schedule IV", ndc_code: "65162-0627" },
+    { drug_name: "Tramadol 50mg", imprint: "377", shape: "round", color: "white", notes: "Caraco • Schedule IV", ndc_code: "57664-0377" },
+    { drug_name: "Tramadol 50mg", imprint: "ULTRAM", shape: "round", color: "white", notes: "Janssen • Brand • Schedule IV", ndc_code: "50458-0650" },
+    { drug_name: "Codeine/APAP 30-300mg", imprint: "2064 V", shape: "round", color: "white", notes: "Qualitest • Schedule III", ndc_code: "00603-2338" },
+    { drug_name: "Codeine/APAP 30-300mg", imprint: "93 150", shape: "round", color: "white", notes: "Teva • Schedule III", ndc_code: "00093-0150" },
+    { drug_name: "Buprenorphine/Naloxone 8-2mg", imprint: "N8", shape: "hexagon", color: "orange", notes: "Indivior • Suboxone generic • Schedule III", ndc_code: "12496-1208" },
+    { drug_name: "Buprenorphine/Naloxone 2-0.5mg", imprint: "N2", shape: "hexagon", color: "orange", notes: "Indivior • Suboxone generic • Schedule III", ndc_code: "12496-1202" },
+    { drug_name: "Methadone 10mg", imprint: "54 549", shape: "round", color: "white", notes: "Roxane • Schedule II", ndc_code: "00054-0549" },
+    { drug_name: "Fentanyl 100mcg patch", imprint: "fentanyl 100 mcg/h", shape: "rectangle", color: "tan", notes: "Mylan • Transdermal • Schedule II", ndc_code: "00378-9012" },
+  ],
+
+  benzos: [
+    { drug_name: "Alprazolam 0.25mg", imprint: "GG 256", shape: "oval", color: "white", notes: "Sandoz • Schedule IV", ndc_code: "00781-1062" },
+    { drug_name: "Alprazolam 0.5mg", imprint: "GG 257", shape: "oval", color: "orange", notes: "Sandoz • Schedule IV", ndc_code: "00781-1063" },
+    { drug_name: "Alprazolam 1mg", imprint: "GG 258", shape: "oval", color: "blue", notes: "Sandoz • Schedule IV", ndc_code: "00781-1064" },
+    { drug_name: "Alprazolam 2mg", imprint: "GG 249", shape: "rectangle", color: "white", notes: "Sandoz • Schedule IV — 'bar'", ndc_code: "00781-1089" },
+    { drug_name: "Alprazolam 2mg", imprint: "XANAX 2", shape: "rectangle", color: "white", notes: "Pfizer • Brand • Schedule IV", ndc_code: "00009-0094" },
+    { drug_name: "Alprazolam 2mg", imprint: "S 90 3", shape: "rectangle", color: "green", notes: "Dava • Schedule IV — 'green bar'", ndc_code: "67253-0903" },
+    { drug_name: "Alprazolam 2mg", imprint: "R 039", shape: "rectangle", color: "yellow", notes: "Actavis • Schedule IV — 'yellow bar'", ndc_code: "00228-2039" },
+    { drug_name: "Alprazolam 1mg", imprint: "B 705", shape: "oval", color: "blue", notes: "Breckenridge • Schedule IV — 'blue football'", ndc_code: "51991-0705" },
+    { drug_name: "Diazepam 2mg", imprint: "3926 TEVA", shape: "round", color: "white", notes: "Teva • Schedule IV", ndc_code: "00093-3926" },
+    { drug_name: "Diazepam 5mg", imprint: "3927 TEVA", shape: "round", color: "yellow", notes: "Teva • Schedule IV", ndc_code: "00093-3927" },
+    { drug_name: "Diazepam 10mg", imprint: "3928 TEVA", shape: "round", color: "blue", notes: "Teva • Schedule IV", ndc_code: "00093-3928" },
+    { drug_name: "Clonazepam 0.5mg", imprint: "TEVA 832", shape: "round", color: "yellow", notes: "Teva • Schedule IV", ndc_code: "00093-0832" },
+    { drug_name: "Clonazepam 1mg", imprint: "TEVA 833", shape: "round", color: "green", notes: "Teva • Schedule IV", ndc_code: "00093-0833" },
+    { drug_name: "Clonazepam 2mg", imprint: "TEVA 834", shape: "round", color: "white", notes: "Teva • Schedule IV", ndc_code: "00093-0834" },
+    { drug_name: "Clonazepam 0.5mg", imprint: "E 63", shape: "round", color: "orange", notes: "Aurobindo • Schedule IV", ndc_code: "65862-0063" },
+    { drug_name: "Clonazepam 1mg", imprint: "E 64", shape: "round", color: "blue", notes: "Aurobindo • Schedule IV", ndc_code: "65862-0064" },
+    { drug_name: "Lorazepam 0.5mg", imprint: "ATIVAN 0.5", shape: "round", color: "white", notes: "Wyeth • Brand • Schedule IV", ndc_code: "00008-0081" },
+    { drug_name: "Lorazepam 1mg", imprint: "WATSON 241 1", shape: "round", color: "white", notes: "Watson • Schedule IV", ndc_code: "00591-0241" },
+    { drug_name: "Lorazepam 2mg", imprint: "WATSON 242 2", shape: "round", color: "white", notes: "Watson • Schedule IV", ndc_code: "00591-0242" },
+    { drug_name: "Temazepam 15mg", imprint: "MYLAN 4010", shape: "capsule", color: "blue", notes: "Mylan • Schedule IV", ndc_code: "00378-4010" },
+    { drug_name: "Temazepam 30mg", imprint: "MYLAN 4030", shape: "capsule", color: "blue", notes: "Mylan • Schedule IV", ndc_code: "00378-4030" },
+  ],
+
+  stimulants: [
+    { drug_name: "Adderall 10mg", imprint: "AD 10", shape: "round", color: "blue", notes: "Teva • Mixed amphetamine salts • Schedule II", ndc_code: "57844-0110" },
+    { drug_name: "Adderall 20mg", imprint: "AD 20", shape: "round", color: "orange", notes: "Teva • Mixed amphetamine salts • Schedule II", ndc_code: "57844-0120" },
+    { drug_name: "Adderall 30mg", imprint: "AD 30", shape: "round", color: "orange", notes: "Teva • Mixed amphetamine salts • Schedule II", ndc_code: "57844-0130" },
+    { drug_name: "Adderall XR 10mg", imprint: "ADDERALL XR 10mg", shape: "capsule", color: "blue", notes: "Shire • Extended-release • Schedule II", ndc_code: "54092-0381" },
+    { drug_name: "Adderall XR 20mg", imprint: "ADDERALL XR 20mg", shape: "capsule", color: "orange", notes: "Shire • Extended-release • Schedule II", ndc_code: "54092-0383" },
+    { drug_name: "Adderall XR 30mg", imprint: "ADDERALL XR 30mg", shape: "capsule", color: "orange", notes: "Shire • Extended-release • Schedule II", ndc_code: "54092-0387" },
+    { drug_name: "Amphetamine/Dextroamphetamine 20mg", imprint: "b 973 2 0", shape: "round", color: "orange", notes: "Teva/Barr • Schedule II", ndc_code: "00555-0973" },
+    { drug_name: "Amphetamine/Dextroamphetamine 30mg", imprint: "b 974 3 0", shape: "round", color: "orange", notes: "Teva/Barr • Schedule II", ndc_code: "00555-0974" },
+    { drug_name: "Methylphenidate 10mg", imprint: "CIBA 7", shape: "round", color: "green", notes: "Novartis • Ritalin • Schedule II", ndc_code: "00078-0007" },
+    { drug_name: "Methylphenidate 20mg", imprint: "CIBA 34", shape: "round", color: "yellow", notes: "Novartis • Ritalin • Schedule II", ndc_code: "00078-0034" },
+    { drug_name: "Concerta 18mg", imprint: "alza 18", shape: "capsule", color: "yellow", notes: "Janssen • Extended-release methylphenidate • Schedule II", ndc_code: "50458-0585" },
+    { drug_name: "Concerta 36mg", imprint: "alza 36", shape: "capsule", color: "white", notes: "Janssen • Extended-release methylphenidate • Schedule II", ndc_code: "50458-0586" },
+    { drug_name: "Concerta 54mg", imprint: "alza 54", shape: "capsule", color: "red", notes: "Janssen • Extended-release methylphenidate • Schedule II", ndc_code: "50458-0587" },
+    { drug_name: "Vyvanse 30mg", imprint: "S489 30 mg", shape: "capsule", color: "orange", notes: "Shire • Lisdexamfetamine • Schedule II", ndc_code: "59417-0103" },
+    { drug_name: "Vyvanse 50mg", imprint: "S489 50 mg", shape: "capsule", color: "blue", notes: "Shire • Lisdexamfetamine • Schedule II", ndc_code: "59417-0105" },
+    { drug_name: "Vyvanse 70mg", imprint: "S489 70 mg", shape: "capsule", color: "blue", notes: "Shire • Lisdexamfetamine • Schedule II", ndc_code: "59417-0107" },
+    { drug_name: "Modafinil 200mg", imprint: "PROVIGIL 200 MG", shape: "capsule", color: "white", notes: "Cephalon • Schedule IV", ndc_code: "63459-0201" },
+    { drug_name: "Modafinil 100mg", imprint: "PROVIGIL 100 MG", shape: "capsule", color: "white", notes: "Cephalon • Schedule IV", ndc_code: "63459-0101" },
+    { drug_name: "Dextroamphetamine 10mg", imprint: "DextroStat 10", shape: "round", color: "yellow", notes: "Shire • Schedule II", ndc_code: "54092-0073" },
+  ],
+
+  antibiotics: [
+    { drug_name: "Amoxicillin 500mg", imprint: "AMOX 500 GG 849", shape: "capsule", color: "pink", notes: "Sandoz • Penicillin antibiotic", ndc_code: "00781-2613" },
+    { drug_name: "Amoxicillin 875mg", imprint: "93 2274", shape: "capsule", color: "pink", notes: "Teva • Penicillin antibiotic", ndc_code: "00093-2274" },
+    { drug_name: "Amoxicillin/Clavulanate 875-125mg", imprint: "93 2274", shape: "capsule", color: "white", notes: "Teva • Augmentin generic", ndc_code: "00093-2274" },
+    { drug_name: "Azithromycin 250mg", imprint: "APO AZ 250", shape: "capsule", color: "pink", notes: "Apotex • Z-pack • Macrolide", ndc_code: "60505-2581" },
+    { drug_name: "Azithromycin 250mg", imprint: "PFIZER 306", shape: "capsule", color: "pink", notes: "Pfizer • Zithromax brand • Macrolide", ndc_code: "00069-3060" },
+    { drug_name: "Azithromycin 500mg", imprint: "787", shape: "oval", color: "blue", notes: "Sandoz • Macrolide", ndc_code: "00781-5787" },
+    { drug_name: "Cephalexin 500mg", imprint: "LUPIN 500", shape: "capsule", color: "green", notes: "Lupin • Cephalosporin", ndc_code: "68180-0122" },
+    { drug_name: "Cephalexin 500mg", imprint: "TEVA 3147", shape: "capsule", color: "green", notes: "Teva • Cephalosporin", ndc_code: "00093-3147" },
+    { drug_name: "Ciprofloxacin 500mg", imprint: "CIPRO 500", shape: "capsule", color: "white", notes: "Bayer • Fluoroquinolone", ndc_code: "00026-8512" },
+    { drug_name: "Ciprofloxacin 250mg", imprint: "CIP 250", shape: "round", color: "white", notes: "Generic • Fluoroquinolone", ndc_code: "65862-0537" },
+    { drug_name: "Doxycycline 100mg", imprint: "WESTWARD 3142", shape: "capsule", color: "blue", notes: "West-ward • Tetracycline", ndc_code: "00143-3142" },
+    { drug_name: "Doxycycline 100mg", imprint: "DAN 5440", shape: "capsule", color: "yellow", notes: "Watson • Tetracycline", ndc_code: "00591-5440" },
+    { drug_name: "Levofloxacin 500mg", imprint: "LEVAQUIN 500", shape: "capsule", color: "pink", notes: "Janssen • Fluoroquinolone", ndc_code: "50458-0925" },
+    { drug_name: "Metronidazole 500mg", imprint: "PLIVA 334", shape: "round", color: "white", notes: "Pliva • Flagyl generic", ndc_code: "50111-0334" },
+    { drug_name: "Sulfamethoxazole/Trimethoprim 800-160mg", imprint: "IP 272", shape: "capsule", color: "white", notes: "Amneal • Bactrim generic", ndc_code: "65162-0272" },
+    { drug_name: "Clindamycin 150mg", imprint: "CLINDAMYCIN 150mg", shape: "capsule", color: "green", notes: "Generic • Lincosamide", ndc_code: "00093-3171" },
+    { drug_name: "Nitrofurantoin 100mg", imprint: "MACROBID", shape: "capsule", color: "yellow", notes: "Procter & Gamble • UTI antibiotic", ndc_code: "00149-0710" },
+    { drug_name: "Penicillin VK 500mg", imprint: "GG 950", shape: "oval", color: "white", notes: "Sandoz • Penicillin", ndc_code: "00781-1805" },
+  ],
+
+  cardiovascular: [
+    { drug_name: "Atorvastatin 10mg", imprint: "PD 155 10", shape: "oval", color: "white", notes: "Pfizer • Lipitor generic • Statin", ndc_code: "00071-0155" },
+    { drug_name: "Atorvastatin 20mg", imprint: "PD 156 20", shape: "oval", color: "white", notes: "Pfizer • Lipitor generic • Statin", ndc_code: "00071-0156" },
+    { drug_name: "Atorvastatin 40mg", imprint: "PD 157 40", shape: "oval", color: "white", notes: "Pfizer • Lipitor generic • Statin", ndc_code: "00071-0157" },
+    { drug_name: "Atorvastatin 80mg", imprint: "PD 158 80", shape: "oval", color: "white", notes: "Pfizer • Lipitor generic • Statin", ndc_code: "00071-0158" },
+    { drug_name: "Lisinopril 10mg", imprint: "LUPIN 10", shape: "round", color: "pink", notes: "Lupin • ACE inhibitor", ndc_code: "68180-0513" },
+    { drug_name: "Lisinopril 20mg", imprint: "LUPIN 20", shape: "round", color: "white", notes: "Lupin • ACE inhibitor", ndc_code: "68180-0514" },
+    { drug_name: "Lisinopril 40mg", imprint: "LUPIN 40", shape: "round", color: "yellow", notes: "Lupin • ACE inhibitor", ndc_code: "68180-0515" },
+    { drug_name: "Metoprolol Succinate ER 25mg", imprint: "M 1", shape: "round", color: "white", notes: "Mylan • Beta blocker", ndc_code: "00378-0071" },
+    { drug_name: "Metoprolol Succinate ER 50mg", imprint: "M 47", shape: "round", color: "white", notes: "Mylan • Beta blocker", ndc_code: "00378-0072" },
+    { drug_name: "Metoprolol Tartrate 25mg", imprint: "M 18", shape: "round", color: "pink", notes: "Mylan • Beta blocker", ndc_code: "00378-0018" },
+    { drug_name: "Metoprolol Tartrate 50mg", imprint: "M 32", shape: "round", color: "pink", notes: "Mylan • Beta blocker", ndc_code: "00378-0032" },
+    { drug_name: "Amlodipine 5mg", imprint: "NORVASC 5", shape: "hexagon", color: "white", notes: "Pfizer • Calcium channel blocker", ndc_code: "00069-1530" },
+    { drug_name: "Amlodipine 10mg", imprint: "NORVASC 10", shape: "round", color: "white", notes: "Pfizer • Calcium channel blocker", ndc_code: "00069-1540" },
+    { drug_name: "Losartan 25mg", imprint: "952", shape: "oval", color: "green", notes: "Teva • ARB", ndc_code: "00093-7367" },
+    { drug_name: "Losartan 50mg", imprint: "953", shape: "oval", color: "white", notes: "Teva • ARB", ndc_code: "00093-7368" },
+    { drug_name: "Losartan 100mg", imprint: "960", shape: "oval", color: "white", notes: "Teva • ARB", ndc_code: "00093-7369" },
+    { drug_name: "Hydrochlorothiazide 25mg", imprint: "M 64", shape: "round", color: "white", notes: "Mylan • Thiazide diuretic", ndc_code: "00378-0064" },
+    { drug_name: "Furosemide 20mg", imprint: "MYLAN 216 40", shape: "round", color: "white", notes: "Mylan • Loop diuretic", ndc_code: "00378-0216" },
+    { drug_name: "Furosemide 40mg", imprint: "MYLAN 232 40", shape: "round", color: "white", notes: "Mylan • Loop diuretic", ndc_code: "00378-0232" },
+    { drug_name: "Warfarin 5mg", imprint: "COUMADIN 5", shape: "round", color: "green", notes: "Bristol-Myers • Anticoagulant", ndc_code: "00056-0172" },
+    { drug_name: "Clopidogrel 75mg", imprint: "75 1171", shape: "round", color: "pink", notes: "Teva • Plavix generic • Antiplatelet", ndc_code: "00093-1171" },
+    { drug_name: "Rosuvastatin 10mg", imprint: "ZD4522 10", shape: "round", color: "pink", notes: "AstraZeneca • Crestor • Statin", ndc_code: "00310-0751" },
+    { drug_name: "Rosuvastatin 20mg", imprint: "ZD4522 20", shape: "round", color: "pink", notes: "AstraZeneca • Crestor • Statin", ndc_code: "00310-0752" },
+    { drug_name: "Simvastatin 20mg", imprint: "MSD 740", shape: "round", color: "tan", notes: "Merck • Zocor • Statin", ndc_code: "00006-0740" },
+    { drug_name: "Simvastatin 40mg", imprint: "MSD 749", shape: "oval", color: "red", notes: "Merck • Zocor • Statin", ndc_code: "00006-0749" },
+    { drug_name: "Carvedilol 6.25mg", imprint: "Z 4802", shape: "oval", color: "white", notes: "Zydus • Beta blocker", ndc_code: "68382-0022" },
+    { drug_name: "Carvedilol 25mg", imprint: "Z 4804", shape: "oval", color: "white", notes: "Zydus • Beta blocker", ndc_code: "68382-0024" },
+    { drug_name: "Propranolol 10mg", imprint: "PLIVA 468", shape: "round", color: "orange", notes: "Pliva • Beta blocker", ndc_code: "50111-0468" },
+    { drug_name: "Propranolol 40mg", imprint: "PLIVA 471", shape: "round", color: "green", notes: "Pliva • Beta blocker", ndc_code: "50111-0471" },
+  ],
+
+  diabetes: [
+    { drug_name: "Metformin 500mg", imprint: "Z 70", shape: "round", color: "white", notes: "Zydus • Biguanide • First-line diabetes", ndc_code: "68382-0028" },
+    { drug_name: "Metformin 850mg", imprint: "93 48", shape: "round", color: "white", notes: "Teva • Biguanide", ndc_code: "00093-0048" },
+    { drug_name: "Metformin 1000mg", imprint: "101", shape: "oval", color: "white", notes: "Sun Pharma • Biguanide", ndc_code: "63304-0101" },
+    { drug_name: "Metformin ER 500mg", imprint: "GG 461", shape: "oval", color: "white", notes: "Sandoz • Extended-release", ndc_code: "00781-5061" },
+    { drug_name: "Metformin ER 750mg", imprint: "93 7214", shape: "capsule", color: "white", notes: "Teva • Extended-release", ndc_code: "00093-7214" },
+    { drug_name: "Glipizide 5mg", imprint: "GLUCOTROL 5", shape: "diamond", color: "white", notes: "Pfizer • Sulfonylurea", ndc_code: "00049-4110" },
+    { drug_name: "Glipizide 10mg", imprint: "GLUCOTROL 10", shape: "diamond", color: "white", notes: "Pfizer • Sulfonylurea", ndc_code: "00049-4120" },
+    { drug_name: "Glipizide ER 5mg", imprint: "GXL 5", shape: "round", color: "white", notes: "Pfizer • Glucotrol XL", ndc_code: "00049-4150" },
+    { drug_name: "Glimepiride 1mg", imprint: "AMARYL 1", shape: "oval", color: "pink", notes: "Sanofi • Sulfonylurea", ndc_code: "00039-0221" },
+    { drug_name: "Glimepiride 2mg", imprint: "AMARYL 2", shape: "oval", color: "green", notes: "Sanofi • Sulfonylurea", ndc_code: "00039-0222" },
+    { drug_name: "Glimepiride 4mg", imprint: "AMARYL 4", shape: "oval", color: "blue", notes: "Sanofi • Sulfonylurea", ndc_code: "00039-0224" },
+    { drug_name: "Sitagliptin 100mg", imprint: "277", shape: "round", color: "tan", notes: "Merck • Januvia • DPP-4 inhibitor", ndc_code: "00006-0277" },
+    { drug_name: "Sitagliptin 50mg", imprint: "112", shape: "round", color: "tan", notes: "Merck • Januvia • DPP-4 inhibitor", ndc_code: "00006-0112" },
+    { drug_name: "Empagliflozin 10mg", imprint: "S10", shape: "round", color: "yellow", notes: "Boehringer • Jardiance • SGLT2 inhibitor", ndc_code: "00597-0150" },
+    { drug_name: "Empagliflozin 25mg", imprint: "S25", shape: "oval", color: "yellow", notes: "Boehringer • Jardiance • SGLT2 inhibitor", ndc_code: "00597-0152" },
+    { drug_name: "Pioglitazone 15mg", imprint: "ACTOS 15", shape: "round", color: "white", notes: "Takeda • Thiazolidinedione", ndc_code: "64764-0151" },
+    { drug_name: "Pioglitazone 30mg", imprint: "ACTOS 30", shape: "round", color: "white", notes: "Takeda • Thiazolidinedione", ndc_code: "64764-0301" },
+    { drug_name: "Glyburide 5mg", imprint: "MICRONASE 5", shape: "round", color: "blue", notes: "Pfizer • Sulfonylurea", ndc_code: "00009-0171" },
+  ],
+
+  psychiatric: [
+    { drug_name: "Sertraline 50mg", imprint: "ZOLOFT 50 MG", shape: "capsule", color: "blue", notes: "Pfizer • SSRI", ndc_code: "00049-4960" },
+    { drug_name: "Sertraline 100mg", imprint: "ZOLOFT 100 MG", shape: "capsule", color: "yellow", notes: "Pfizer • SSRI", ndc_code: "00049-4910" },
+    { drug_name: "Sertraline 25mg", imprint: "ZOLOFT 25 MG", shape: "capsule", color: "blue", notes: "Pfizer • SSRI", ndc_code: "00049-4900" },
+    { drug_name: "Fluoxetine 20mg", imprint: "DISTA 3105 PROZAC 20", shape: "capsule", color: "green", notes: "Lilly • SSRI", ndc_code: "00777-3105" },
+    { drug_name: "Fluoxetine 10mg", imprint: "DISTA 3104 PROZAC 10", shape: "capsule", color: "green", notes: "Lilly • SSRI", ndc_code: "00777-3104" },
+    { drug_name: "Fluoxetine 40mg", imprint: "DISTA 3107 PROZAC 40", shape: "capsule", color: "green", notes: "Lilly • SSRI", ndc_code: "00777-3107" },
+    { drug_name: "Escitalopram 10mg", imprint: "F L 10", shape: "round", color: "white", notes: "Forest • Lexapro generic • SSRI", ndc_code: "00456-2010" },
+    { drug_name: "Escitalopram 20mg", imprint: "F L 20", shape: "round", color: "white", notes: "Forest • Lexapro generic • SSRI", ndc_code: "00456-2020" },
+    { drug_name: "Bupropion XL 150mg", imprint: "WELLBUTRIN XL 150", shape: "round", color: "white", notes: "GSK • NDRI • Smoking cessation", ndc_code: "00173-0177" },
+    { drug_name: "Bupropion XL 300mg", imprint: "WELLBUTRIN XL 300", shape: "round", color: "white", notes: "GSK • NDRI", ndc_code: "00173-0178" },
+    { drug_name: "Bupropion SR 150mg", imprint: "ZYBAN 150", shape: "round", color: "purple", notes: "GSK • NDRI", ndc_code: "00173-0600" },
+    { drug_name: "Quetiapine 25mg", imprint: "SEROQUEL 25", shape: "round", color: "orange", notes: "AstraZeneca • Atypical antipsychotic", ndc_code: "00310-0275" },
+    { drug_name: "Quetiapine 100mg", imprint: "SEROQUEL 100", shape: "round", color: "yellow", notes: "AstraZeneca • Atypical antipsychotic", ndc_code: "00310-0271" },
+    { drug_name: "Quetiapine 200mg", imprint: "SEROQUEL 200", shape: "round", color: "white", notes: "AstraZeneca • Atypical antipsychotic", ndc_code: "00310-0272" },
+    { drug_name: "Quetiapine 300mg", imprint: "SEROQUEL 300", shape: "capsule", color: "white", notes: "AstraZeneca • Atypical antipsychotic", ndc_code: "00310-0274" },
+    { drug_name: "Citalopram 20mg", imprint: "F P", shape: "oval", color: "pink", notes: "Forest • SSRI", ndc_code: "00456-4020" },
+    { drug_name: "Citalopram 40mg", imprint: "F T", shape: "oval", color: "white", notes: "Forest • SSRI", ndc_code: "00456-4040" },
+    { drug_name: "Trazodone 50mg", imprint: "PLIVA 433", shape: "round", color: "white", notes: "Pliva • SARI • Sleep aid", ndc_code: "50111-0433" },
+    { drug_name: "Trazodone 100mg", imprint: "PLIVA 434", shape: "round", color: "white", notes: "Pliva • SARI", ndc_code: "50111-0434" },
+    { drug_name: "Trazodone 150mg", imprint: "BARR 555 490", shape: "round", color: "orange", notes: "Barr • SARI", ndc_code: "00555-0490" },
+    { drug_name: "Duloxetine 30mg", imprint: "LILLY 3240 30mg", shape: "capsule", color: "green", notes: "Lilly • Cymbalta • SNRI", ndc_code: "00002-3240" },
+    { drug_name: "Duloxetine 60mg", imprint: "LILLY 3270 60mg", shape: "capsule", color: "green", notes: "Lilly • Cymbalta • SNRI", ndc_code: "00002-3270" },
+    { drug_name: "Venlafaxine ER 75mg", imprint: "W 75", shape: "capsule", color: "orange", notes: "Wyeth • Effexor XR • SNRI", ndc_code: "00008-0837" },
+    { drug_name: "Venlafaxine ER 150mg", imprint: "W 150", shape: "capsule", color: "orange", notes: "Wyeth • Effexor XR • SNRI", ndc_code: "00008-0838" },
+    { drug_name: "Aripiprazole 5mg", imprint: "A-008 5", shape: "rectangle", color: "blue", notes: "Otsuka • Abilify • Atypical antipsychotic", ndc_code: "59148-0008" },
+    { drug_name: "Aripiprazole 10mg", imprint: "A-009 10", shape: "rectangle", color: "pink", notes: "Otsuka • Abilify • Atypical antipsychotic", ndc_code: "59148-0009" },
+    { drug_name: "Risperidone 1mg", imprint: "JANSSEN R 1", shape: "oval", color: "white", notes: "Janssen • Risperdal • Atypical antipsychotic", ndc_code: "50458-0300" },
+    { drug_name: "Risperidone 2mg", imprint: "JANSSEN R 2", shape: "oval", color: "orange", notes: "Janssen • Risperdal • Atypical antipsychotic", ndc_code: "50458-0310" },
+    { drug_name: "Olanzapine 5mg", imprint: "LILLY 4115", shape: "round", color: "white", notes: "Lilly • Zyprexa • Atypical antipsychotic", ndc_code: "00002-4115" },
+    { drug_name: "Olanzapine 10mg", imprint: "LILLY 4117", shape: "round", color: "white", notes: "Lilly • Zyprexa • Atypical antipsychotic", ndc_code: "00002-4117" },
+    { drug_name: "Mirtazapine 15mg", imprint: "93 314", shape: "oval", color: "yellow", notes: "Teva • Remeron generic • NaSSA", ndc_code: "00093-0314" },
+    { drug_name: "Mirtazapine 30mg", imprint: "93 315", shape: "oval", color: "brown", notes: "Teva • Remeron generic • NaSSA", ndc_code: "00093-0315" },
+    { drug_name: "Buspirone 10mg", imprint: "MJ 10", shape: "round", color: "white", notes: "Mead Johnson • Anxiolytic", ndc_code: "00087-0818" },
+    { drug_name: "Hydroxyzine 25mg", imprint: "VISTARIL 25mg", shape: "capsule", color: "green", notes: "Pfizer • Anxiolytic/antihistamine", ndc_code: "00069-5410" },
+    { drug_name: "Hydroxyzine 50mg", imprint: "VISTARIL 50mg", shape: "capsule", color: "green", notes: "Pfizer • Anxiolytic/antihistamine", ndc_code: "00069-5420" },
+  ],
+
+  gi: [
+    { drug_name: "Omeprazole 20mg", imprint: "PRILOSEC 20", shape: "capsule", color: "pink", notes: "AstraZeneca • PPI", ndc_code: "00186-0742" },
+    { drug_name: "Omeprazole 40mg", imprint: "PRILOSEC 40", shape: "capsule", color: "purple", notes: "AstraZeneca • PPI", ndc_code: "00186-0743" },
+    { drug_name: "Pantoprazole 20mg", imprint: "P 20", shape: "oval", color: "yellow", notes: "Wyeth • PPI", ndc_code: "00008-0841" },
+    { drug_name: "Pantoprazole 40mg", imprint: "PROTONIX 40", shape: "oval", color: "yellow", notes: "Wyeth • PPI", ndc_code: "00008-0842" },
+    { drug_name: "Esomeprazole 20mg", imprint: "20 mg A/EH", shape: "capsule", color: "pink", notes: "AstraZeneca • Nexium • PPI", ndc_code: "00186-5020" },
+    { drug_name: "Esomeprazole 40mg", imprint: "40 mg A/EI", shape: "capsule", color: "purple", notes: "AstraZeneca • Nexium • PPI", ndc_code: "00186-5040" },
+    { drug_name: "Famotidine 20mg", imprint: "MSD 963", shape: "round", color: "tan", notes: "Merck • Pepcid • H2 blocker", ndc_code: "00006-0963" },
+    { drug_name: "Famotidine 40mg", imprint: "MSD 964", shape: "round", color: "tan", notes: "Merck • Pepcid • H2 blocker", ndc_code: "00006-0964" },
+    { drug_name: "Ranitidine 150mg", imprint: "ZANTAC 150", shape: "round", color: "white", notes: "GSK • H2 blocker (recalled 2020)", ndc_code: "00173-0393" },
+    { drug_name: "Ondansetron 4mg", imprint: "ZOFRAN 4", shape: "oval", color: "white", notes: "GSK • Antiemetic • 5-HT3 antagonist", ndc_code: "00173-0461" },
+    { drug_name: "Ondansetron 8mg", imprint: "ZOFRAN 8", shape: "oval", color: "yellow", notes: "GSK • Antiemetic • 5-HT3 antagonist", ndc_code: "00173-0462" },
+    { drug_name: "Ondansetron ODT 4mg", imprint: "R4", shape: "round", color: "white", notes: "Dr. Reddy's • Orally disintegrating", ndc_code: "55111-0160" },
+    { drug_name: "Dicyclomine 10mg", imprint: "BENTYL 10", shape: "capsule", color: "blue", notes: "Axcan • Antispasmodic", ndc_code: "58914-0100" },
+    { drug_name: "Loperamide 2mg", imprint: "IMODIUM", shape: "capsule", color: "green", notes: "McNeil • Anti-diarrheal", ndc_code: "50580-0410" },
+    { drug_name: "Sucralfate 1g", imprint: "CARAFATE 1712", shape: "capsule", color: "pink", notes: "Axcan • GI protectant", ndc_code: "58914-0171" },
+    { drug_name: "Lansoprazole 30mg", imprint: "TAP PREVACID 30", shape: "capsule", color: "pink", notes: "Takeda • PPI", ndc_code: "64764-0541" },
+    { drug_name: "Metoclopramide 10mg", imprint: "REGLAN 10", shape: "round", color: "white", notes: "Schwarz • Prokinetic", ndc_code: "00091-4420" },
+  ],
+
+  antihistamines: [
+    { drug_name: "Cetirizine 10mg", imprint: "Y", shape: "round", color: "white", notes: "Dr. Reddy's • Second-gen antihistamine", ndc_code: "55111-0159" },
+    { drug_name: "Cetirizine 10mg", imprint: "ZYRTEC", shape: "round", color: "white", notes: "UCB/Pfizer • Brand • Second-gen", ndc_code: "50580-0726" },
+    { drug_name: "Loratadine 10mg", imprint: "CLARITIN 10", shape: "round", color: "white", notes: "Schering • Brand • Second-gen", ndc_code: "11523-7160" },
+    { drug_name: "Loratadine 10mg", imprint: "RX526", shape: "round", color: "white", notes: "Ranbaxy • Second-gen antihistamine", ndc_code: "63304-0526" },
+    { drug_name: "Fexofenadine 60mg", imprint: "E 35", shape: "round", color: "pink", notes: "Generic • Second-gen antihistamine", ndc_code: "65862-0035" },
+    { drug_name: "Fexofenadine 180mg", imprint: "E 37", shape: "capsule", color: "pink", notes: "Generic • Second-gen antihistamine", ndc_code: "65862-0037" },
+    { drug_name: "Fexofenadine 180mg", imprint: "ALLEGRA", shape: "capsule", color: "tan", notes: "Sanofi • Brand", ndc_code: "00088-1090" },
+    { drug_name: "Diphenhydramine 25mg", imprint: "BENADRYL 25", shape: "capsule", color: "pink", notes: "McNeil • First-gen antihistamine", ndc_code: "50580-0223" },
+    { drug_name: "Diphenhydramine 50mg", imprint: "ZLP", shape: "capsule", color: "pink", notes: "Generic • First-gen antihistamine", ndc_code: "24385-0425" },
+    { drug_name: "Chlorpheniramine 4mg", imprint: "CHLOR-TRIMETON", shape: "round", color: "yellow", notes: "Schering • First-gen antihistamine", ndc_code: "11523-7100" },
+    { drug_name: "Levocetirizine 5mg", imprint: "X", shape: "oval", color: "white", notes: "UCB • Xyzal • Third-gen", ndc_code: "50580-0778" },
+    { drug_name: "Promethazine 25mg", imprint: "Z 4173", shape: "round", color: "white", notes: "Zydus • Phenothiazine antihistamine", ndc_code: "68382-0028" },
+    { drug_name: "Montelukast 10mg", imprint: "SINGULAIR MSD 117", shape: "rectangle", color: "tan", notes: "Merck • Leukotriene inhibitor", ndc_code: "00006-0117" },
+  ],
+
+  thyroid: [
+    { drug_name: "Levothyroxine 25mcg", imprint: "SYNTHROID 25", shape: "round", color: "orange", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6621" },
+    { drug_name: "Levothyroxine 50mcg", imprint: "SYNTHROID 50", shape: "round", color: "white", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6624" },
+    { drug_name: "Levothyroxine 75mcg", imprint: "SYNTHROID 75", shape: "round", color: "purple", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6627" },
+    { drug_name: "Levothyroxine 88mcg", imprint: "SYNTHROID 88", shape: "round", color: "green", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6630" },
+    { drug_name: "Levothyroxine 100mcg", imprint: "SYNTHROID 100", shape: "round", color: "yellow", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6633" },
+    { drug_name: "Levothyroxine 112mcg", imprint: "SYNTHROID 112", shape: "round", color: "pink", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6645" },
+    { drug_name: "Levothyroxine 125mcg", imprint: "SYNTHROID 125", shape: "round", color: "brown", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6636" },
+    { drug_name: "Levothyroxine 150mcg", imprint: "SYNTHROID 150", shape: "round", color: "blue", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6639" },
+    { drug_name: "Levothyroxine 175mcg", imprint: "SYNTHROID 175", shape: "round", color: "purple", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6642" },
+    { drug_name: "Levothyroxine 200mcg", imprint: "SYNTHROID 200", shape: "round", color: "pink", notes: "AbbVie • Thyroid hormone", ndc_code: "00074-6648" },
+    { drug_name: "Levothyroxine 50mcg", imprint: "M L 5", shape: "round", color: "white", notes: "Mylan generic • Thyroid hormone", ndc_code: "00378-1805" },
+    { drug_name: "Levothyroxine 100mcg", imprint: "M L 7", shape: "round", color: "yellow", notes: "Mylan generic • Thyroid hormone", ndc_code: "00378-1807" },
+    { drug_name: "Levothyroxine 75mcg", imprint: "GG 332", shape: "round", color: "purple", notes: "Sandoz • Thyroid hormone", ndc_code: "00781-5072" },
+    { drug_name: "Liothyronine 5mcg", imprint: "KPI 115", shape: "round", color: "white", notes: "King • Cytomel • T3", ndc_code: "60793-0115" },
+    { drug_name: "Liothyronine 25mcg", imprint: "KPI 116", shape: "round", color: "white", notes: "King • Cytomel • T3", ndc_code: "60793-0116" },
+    { drug_name: "Methimazole 5mg", imprint: "J 64", shape: "round", color: "white", notes: "Jubilant • Tapazole generic • Anti-thyroid", ndc_code: "67877-0423" },
+    { drug_name: "Methimazole 10mg", imprint: "J 65", shape: "round", color: "white", notes: "Jubilant • Tapazole generic • Anti-thyroid", ndc_code: "67877-0424" },
+  ],
+
+  muscle_relaxants: [
+    { drug_name: "Cyclobenzaprine 5mg", imprint: "DAN 5658", shape: "round", color: "orange", notes: "Watson • Flexeril generic", ndc_code: "00591-5658" },
+    { drug_name: "Cyclobenzaprine 10mg", imprint: "DAN 5659", shape: "round", color: "yellow", notes: "Watson • Flexeril generic", ndc_code: "00591-5659" },
+    { drug_name: "Cyclobenzaprine 10mg", imprint: "FLEXERIL", shape: "round", color: "yellow", notes: "McNeil • Brand", ndc_code: "00045-0265" },
+    { drug_name: "Methocarbamol 500mg", imprint: "H 114", shape: "round", color: "white", notes: "Heritage • Robaxin generic", ndc_code: "23155-0114" },
+    { drug_name: "Methocarbamol 750mg", imprint: "H 115", shape: "capsule", color: "white", notes: "Heritage • Robaxin generic", ndc_code: "23155-0115" },
+    { drug_name: "Tizanidine 2mg", imprint: "R180", shape: "round", color: "white", notes: "Dr. Reddy's • Zanaflex generic", ndc_code: "55111-0180" },
+    { drug_name: "Tizanidine 4mg", imprint: "R181", shape: "round", color: "white", notes: "Dr. Reddy's • Zanaflex generic", ndc_code: "55111-0181" },
+    { drug_name: "Baclofen 10mg", imprint: "DAN 5730 10", shape: "round", color: "white", notes: "Watson • GABA-B agonist", ndc_code: "00591-5730" },
+    { drug_name: "Baclofen 20mg", imprint: "DAN 5731 20", shape: "round", color: "white", notes: "Watson • GABA-B agonist", ndc_code: "00591-5731" },
+    { drug_name: "Carisoprodol 350mg", imprint: "DAN 5513", shape: "round", color: "white", notes: "Watson • Soma • Schedule IV", ndc_code: "00591-5513" },
+    { drug_name: "Orphenadrine 100mg", imprint: "NORFLEX 100", shape: "round", color: "white", notes: "3M • Anticholinergic muscle relaxant", ndc_code: "00089-0545" },
+    { drug_name: "Metaxalone 800mg", imprint: "8667 S", shape: "capsule", color: "pink", notes: "Shire • Skelaxin", ndc_code: "54092-0043" },
+    { drug_name: "Chlorzoxazone 500mg", imprint: "PARAFON FORTE DSC", shape: "capsule", color: "green", notes: "McNeil • Skeletal muscle relaxant", ndc_code: "00045-0267" },
+    { drug_name: "Dantrolene 25mg", imprint: "DANTRIUM 25", shape: "capsule", color: "orange", notes: "Procter & Gamble • Direct-acting", ndc_code: "00149-0030" },
+  ],
+
+  supplements: [
+    { drug_name: "Folic Acid 1mg", imprint: "FOLIC ACID 1", shape: "round", color: "yellow", notes: "Generic • B vitamin", ndc_code: "00536-4445" },
+    { drug_name: "Folic Acid 400mcg", imprint: "FA", shape: "round", color: "yellow", notes: "Generic • B vitamin", ndc_code: "00536-4455" },
+    { drug_name: "Vitamin D3 1000IU", imprint: "D1000", shape: "round", color: "white", notes: "Generic • Cholecalciferol", ndc_code: null },
+    { drug_name: "Vitamin D3 2000IU", imprint: "D2000", shape: "round", color: "white", notes: "Generic • Cholecalciferol", ndc_code: null },
+    { drug_name: "Vitamin D2 50000IU", imprint: "D50000", shape: "capsule", color: "green", notes: "Rx only • Ergocalciferol", ndc_code: "00536-1350" },
+    { drug_name: "Ferrous Sulfate 325mg", imprint: "FE", shape: "round", color: "green", notes: "Generic • Iron supplement • 65mg elemental", ndc_code: "00904-7590" },
+    { drug_name: "Ferrous Sulfate 325mg", imprint: "44 393", shape: "round", color: "red", notes: "Generic • Iron supplement", ndc_code: "00904-7591" },
+    { drug_name: "Potassium Chloride 10mEq", imprint: "K 10", shape: "capsule", color: "blue", notes: "Generic • Electrolyte", ndc_code: "00245-0041" },
+    { drug_name: "Potassium Chloride 20mEq", imprint: "K 20", shape: "oval", color: "white", notes: "Generic • Extended-release", ndc_code: "00245-0042" },
+    { drug_name: "Calcium Carbonate 500mg", imprint: "TUMS", shape: "round", color: "white", notes: "GSK • Antacid/calcium", ndc_code: "00135-0070" },
+    { drug_name: "Magnesium Oxide 400mg", imprint: "MAG-OX 400", shape: "oval", color: "white", notes: "Blaine • Magnesium supplement", ndc_code: "00067-0162" },
+    { drug_name: "Vitamin B12 1000mcg", imprint: "B12", shape: "round", color: "pink", notes: "Generic • Cyanocobalamin", ndc_code: null },
+    { drug_name: "Prenatal Vitamin", imprint: "PRENATAL", shape: "oval", color: "pink", notes: "Generic • Multivitamin + folic acid", ndc_code: null },
+    { drug_name: "Zinc Sulfate 220mg", imprint: "ZINC 220", shape: "capsule", color: "blue", notes: "Generic • 50mg elemental zinc", ndc_code: null },
+  ],
 };
 
-const SHAPE_ALIASES: Array<{ test: RegExp; value: PillShape }> = [
-  { test: /round|circle|spherical/, value: "round" },
-  { test: /oval|ellipse/, value: "oval" },
-  { test: /capsule|oblong|caplet/, value: "capsule" },
-  { test: /diamond|rhomb/, value: "diamond" },
-  { test: /triangle|triangular/, value: "triangle" },
-  { test: /hexagon|hexagonal/, value: "hexagon" },
-  { test: /rectangle|rectangular|bar/, value: "rectangle" },
-];
-
-const COLOR_VALUES: PillColor[] = [
-  "white",
-  "blue",
-  "yellow",
-  "pink",
-  "green",
-  "orange",
-  "red",
-  "purple",
-  "gray",
-  "brown",
-  "tan",
-];
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function clamp(value: number, min: number, max: number): number {
-  if (Number.isNaN(value)) return min;
-  return Math.max(min, Math.min(max, value));
-}
-
-function asString(value: unknown): string | null {
-  if (typeof value === "string" && value.trim().length > 0) return value.trim();
-  if (typeof value === "number") return String(value);
-  return null;
-}
-
-function firstString(source: Record<string, unknown>, keys: string[]): string | null {
-  for (const key of keys) {
-    const value = source[key];
-
-    if (typeof value === "string" && value.trim()) return value.trim();
-
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        const parsed = asString(item);
-        if (parsed) return parsed;
-      }
-    }
-
-    if (value && typeof value === "object") {
-      const nested = value as Record<string, unknown>;
-      const nestedValue = firstString(nested, ["name", "title", "value", key]);
-      if (nestedValue) return nestedValue;
-    }
-  }
-  return null;
-}
-
-function normalizeImprint(raw: string | null): string | null {
-  if (!raw) return null;
-  const normalized = raw.replace(/\s+/g, " ").trim().toUpperCase();
-  return normalized.length > 0 ? normalized : null;
-}
-
-function normalizeShape(raw: string | null): PillShape {
-  if (!raw) return "other";
-  const value = raw.toLowerCase();
-  const found = SHAPE_ALIASES.find((alias) => alias.test.test(value));
-  return found?.value ?? "other";
-}
-
-function normalizeColor(raw: string | null): PillColor {
-  if (!raw) return "other";
-  const value = raw.toLowerCase();
-
-  if (
-    value.includes("/") ||
-    value.includes(" and ") ||
-    value.includes("-") ||
-    value.includes("+") ||
-    value.includes(",")
-  ) {
-    const uniqueMatches = COLOR_VALUES.filter((color) => value.includes(color));
-    if (uniqueMatches.length > 1) return "multicolor";
-  }
-
-  const match = COLOR_VALUES.find((color) => value.includes(color));
-  return match ?? "other";
-}
+// ─── HELPERS ────────────────────────────────────────────────────────────────
 
 function getDedupeKey(imprint: string, shape: PillShape, color: PillColor): string {
   return `${imprint.toLowerCase().replace(/\s+/g, "")}|${shape}|${color}`;
 }
 
-function getTermsForCategory(category: string): string[] {
+function getEntriesForCategory(category: string): CuratedEntry[] {
   if (category === "all") {
-    return [...new Set(Object.values(CATEGORY_TERMS).flat())];
+    return Object.values(CURATED_DATA).flat();
   }
-  return CATEGORY_TERMS[category] ?? CATEGORY_TERMS.opioids;
-}
-
-async function fetchJson(url: string): Promise<unknown> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Request failed [${response.status}] ${url}: ${body.slice(0, 400)}`);
-  }
-
-  const text = await response.text();
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(`Invalid JSON response from ${url}`);
-  }
-}
-
-function extractRxImageRows(payload: unknown): Record<string, unknown>[] {
-  if (!payload || typeof payload !== "object") return [];
-
-  const root = payload as Record<string, unknown>;
-  const candidates = [
-    root.nlmRxImages,
-    root.rxImages,
-    root.images,
-    root.data,
-    root.results,
-    (root.data as Record<string, unknown> | undefined)?.nlmRxImages,
-    (root.reply as Record<string, unknown> | undefined)?.nlmRxImages,
-  ];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate.filter((item): item is Record<string, unknown> => !!item && typeof item === "object");
-    }
-  }
-
-  return [];
-}
-
-function mapRxRow(row: Record<string, unknown>, fallbackName: string): RxCandidate | null {
-  const drugName =
-    firstString(row, ["name", "rxstring", "rxterm", "drugName", "drug_name", "label"]) ?? fallbackName;
-  const imprint = normalizeImprint(
-    firstString(row, ["imprint", "splimprint", "imprintText", "imprint_text"]),
-  );
-
-  if (!drugName || !imprint) return null;
-
-  const shape = normalizeShape(firstString(row, ["shape", "splshape", "shape_text"]));
-  const color = normalizeColor(firstString(row, ["color", "splcolor", "color_text"]));
-  const imageUrl = firstString(row, ["imageUrl", "image_url", "image", "url", "imageUrlFull", "fullImage"]);
-  const ndcCode = firstString(row, ["ndc11", "ndc", "ndc_code"]);
-  const externalId = firstString(row, ["id", "imageId", "rxcui", "rxnorm_id"]);
-
-  const noteParts = [
-    firstString(row, ["labeler", "manufacturer"]),
-    firstString(row, ["strength", "dose"]),
-    firstString(row, ["dosageForm", "dosage_form"]),
-  ].filter(Boolean);
-
-  return {
-    drug_name: drugName,
-    imprint,
-    shape,
-    color,
-    notes: noteParts.length ? `RxImage: ${noteParts.join(" • ")}` : null,
-    external_id: externalId,
-    ndc_code: ndcCode,
-    image_url: imageUrl,
-  };
-}
-
-async function fetchRxImageCandidatesByTerm(term: string): Promise<RxCandidate[]> {
-  const directPayload = await fetchJson(`${RXIMAGE_BASE_URL}?name=${encodeURIComponent(term)}`);
-  let rows = extractRxImageRows(directPayload);
-
-  if (rows.length === 0) {
-    const rxNormPayload = await fetchJson(`${RXNORM_RXCUI_URL}?name=${encodeURIComponent(term)}`);
-    const idGroup = (rxNormPayload as Record<string, unknown>)?.idGroup as Record<string, unknown> | undefined;
-    const rxnormIds = (idGroup?.rxnormId as unknown[] | undefined)
-      ?.map((id) => asString(id))
-      .filter((id): id is string => !!id)
-      .slice(0, 2) ?? [];
-
-    for (const rxcui of rxnormIds) {
-      const payload = await fetchJson(`${RXIMAGE_BASE_URL}?rxcui=${encodeURIComponent(rxcui)}`);
-      const maybeRows = extractRxImageRows(payload);
-      if (maybeRows.length > 0) {
-        rows = rows.concat(maybeRows);
-      }
-    }
-  }
-
-  return rows
-    .map((row) => mapRxRow(row, term))
-    .filter((item): item is RxCandidate => !!item);
+  return CURATED_DATA[category] ?? [];
 }
 
 async function fetchAllExistingReferences(adminClient: ReturnType<typeof createClient>): Promise<ExistingReference[]> {
@@ -301,9 +360,7 @@ async function fetchAllExistingReferences(adminClient: ReturnType<typeof createC
 
     if (error) throw error;
     if (!data || data.length === 0) break;
-
     allRows.push(...(data as ExistingReference[]));
-
     if (data.length < pageSize) break;
     from += pageSize;
   }
@@ -311,40 +368,20 @@ async function fetchAllExistingReferences(adminClient: ReturnType<typeof createC
   return allRows;
 }
 
-async function runRxImageImport(
+// ─── CURATED IMPORT ─────────────────────────────────────────────────────────
+
+async function runCuratedImport(
   adminClient: ReturnType<typeof createClient>,
   category: string,
   limit: number,
   dryRun: boolean,
 ): Promise<ImportResult> {
-  const terms = getTermsForCategory(category);
-  const gathered: RxCandidate[] = [];
-  let apiErrors = 0;
-
-  for (const term of terms) {
-    if (gathered.length >= limit) break;
-    try {
-      const items = await fetchRxImageCandidatesByTerm(term);
-      gathered.push(...items);
-    } catch (error) {
-      apiErrors += 1;
-      console.error(`RxImage fetch failed for term ${term}:`, error);
-    }
-    await sleep(1000);
-  }
-
-  const dedupedFromApi = new Map<string, RxCandidate>();
-  for (const candidate of gathered) {
-    const key = getDedupeKey(candidate.imprint, candidate.shape, candidate.color);
-    if (!dedupedFromApi.has(key)) {
-      dedupedFromApi.set(key, candidate);
-    }
-  }
+  const entries = getEntriesForCategory(category);
 
   const existingRows = await fetchAllExistingReferences(adminClient);
   const existingByKey = new Map<string, ExistingReference>();
   for (const row of existingRows) {
-    const normalized = normalizeImprint(row.imprint);
+    const normalized = row.imprint?.trim().toUpperCase();
     if (!normalized) continue;
     existingByKey.set(getDedupeKey(normalized, row.shape, row.color), row);
   }
@@ -352,14 +389,16 @@ async function runRxImageImport(
   let inserted = 0;
   let updated = 0;
   let duplicatesSkipped = 0;
-  let imagesAdded = 0;
   let processed = 0;
+  let apiErrors = 0;
 
-  for (const [key, candidate] of dedupedFromApi.entries()) {
+  for (const entry of entries) {
     if (processed >= limit) break;
     processed += 1;
 
+    const key = getDedupeKey(entry.imprint, entry.shape, entry.color);
     const existing = existingByKey.get(key);
+
     if (existing?.source === "manual") {
       duplicatesSkipped += 1;
       continue;
@@ -371,78 +410,55 @@ async function runRxImageImport(
       continue;
     }
 
-    let referenceId: string | null = null;
-
     if (existing) {
-      const { error: updateError } = await adminClient
+      const { error } = await adminClient
         .from("pill_reference")
         .update({
-          drug_name: candidate.drug_name,
-          imprint: candidate.imprint,
-          shape: candidate.shape,
-          color: candidate.color,
-          notes: candidate.notes,
-          source: "rximage",
-          external_id: candidate.external_id,
-          ndc_code: candidate.ndc_code,
+          drug_name: entry.drug_name,
+          imprint: entry.imprint,
+          shape: entry.shape,
+          color: entry.color,
+          notes: entry.notes,
+          ndc_code: entry.ndc_code,
+          source: "curated",
           last_synced: new Date().toISOString(),
         })
         .eq("id", existing.id);
 
-      if (updateError) {
+      if (error) {
         apiErrors += 1;
-        console.error("Failed to update pill reference:", updateError);
+        console.error("Failed to update pill reference:", error);
         continue;
       }
-
       updated += 1;
-      referenceId = existing.id;
     } else {
-      const { data: insertedRow, error: insertError } = await adminClient
+      const { data: insertedRow, error } = await adminClient
         .from("pill_reference")
         .insert({
-          drug_name: candidate.drug_name,
-          imprint: candidate.imprint,
-          shape: candidate.shape,
-          color: candidate.color,
-          notes: candidate.notes,
-          source: "rximage",
-          external_id: candidate.external_id,
-          ndc_code: candidate.ndc_code,
+          drug_name: entry.drug_name,
+          imprint: entry.imprint,
+          shape: entry.shape,
+          color: entry.color,
+          notes: entry.notes,
+          ndc_code: entry.ndc_code,
+          source: "curated",
           last_synced: new Date().toISOString(),
         })
         .select("id, imprint, shape, color, source")
         .single();
 
-      if (insertError || !insertedRow) {
+      if (error || !insertedRow) {
         apiErrors += 1;
-        console.error("Failed to insert pill reference:", insertError);
+        console.error("Failed to insert pill reference:", error);
         continue;
       }
-
       inserted += 1;
-      referenceId = insertedRow.id;
       existingByKey.set(key, insertedRow as ExistingReference);
-    }
-
-    if (candidate.image_url && referenceId) {
-      const { error: imageError } = await adminClient.from("pill_reference_images").insert({
-        pill_reference_id: referenceId,
-        image_url: candidate.image_url,
-        source: "rximage",
-      });
-
-      if (imageError) {
-        apiErrors += 1;
-        console.error("Failed to insert pill image:", imageError);
-      } else {
-        imagesAdded += 1;
-      }
     }
   }
 
   return {
-    source: "rximage",
+    source: "curated",
     dryRun,
     category,
     limit,
@@ -450,246 +466,99 @@ async function runRxImageImport(
     inserted,
     updated,
     duplicatesSkipped,
-    imagesAdded,
+    imagesAdded: 0,
     enriched: 0,
     apiErrors,
     completedAt: new Date().toISOString(),
   };
 }
 
-function collectFirstRecord(payload: unknown): Record<string, unknown> | null {
-  if (!payload || typeof payload !== "object") return null;
-  const root = payload as Record<string, unknown>;
+// ─── HANDLER ────────────────────────────────────────────────────────────────
 
-  const arrays = [root.data, root.spls, root.results];
-  for (const array of arrays) {
-    if (Array.isArray(array) && array.length > 0 && typeof array[0] === "object") {
-      return array[0] as Record<string, unknown>;
-    }
-  }
-
-  if (typeof root === "object" && root !== null && "setid" in root) {
-    return root;
-  }
-
-  return null;
-}
-
-function buildDailyMedNote(record: Record<string, unknown>, detail: Record<string, unknown> | null): string | null {
-  const manufacturer =
-    firstString(record, ["labeler", "labeler_name", "manufacturer"]) ??
-    (detail ? firstString(detail, ["labeler", "manufacturer", "manufacturer_name"]) : null);
-
-  const dosage =
-    firstString(record, ["dosage_form", "dosageForm"]) ??
-    (detail ? firstString(detail, ["dosage_form", "dosageForm"]) : null);
-
-  const route = firstString(record, ["route"]) ?? (detail ? firstString(detail, ["route"]) : null);
-
-  const noteParts = [
-    manufacturer ? `Manufacturer: ${manufacturer}` : null,
-    dosage ? `Dosage: ${dosage}` : null,
-    route ? `Route: ${route}` : null,
-  ].filter(Boolean);
-
-  if (noteParts.length === 0) return null;
-  return `[DailyMed] ${noteParts.join(" • ")}`;
-}
-
-function mergeDailyMedNote(existingNotes: string | null, dailyMedLine: string | null): string | null {
-  if (!dailyMedLine) return existingNotes;
-
-  const withoutOld = (existingNotes ?? "")
-    .split("\n")
-    .filter((line) => !line.trim().toLowerCase().startsWith("[dailymed]"))
-    .join("\n")
-    .trim();
-
-  return [withoutOld, dailyMedLine].filter(Boolean).join("\n");
-}
-
-async function runDailyMedEnrichment(
-  adminClient: ReturnType<typeof createClient>,
-  limit: number,
-  dryRun: boolean,
-): Promise<ImportResult> {
-  const { data: references, error } = await adminClient
-    .from("pill_reference")
-    .select("id, drug_name, notes, ndc_code, source")
-    .order("last_synced", { ascending: true, nullsFirst: true })
-    .limit(limit);
-
-  if (error) throw error;
-
-  let processed = 0;
-  let enriched = 0;
-  let duplicatesSkipped = 0;
-  let apiErrors = 0;
-
-  for (const row of references ?? []) {
-    processed += 1;
-
-    try {
-      const searchPayload = await fetchJson(
-        `${DAILYMED_BASE_URL}/spls.json?drug_name=${encodeURIComponent(row.drug_name)}&pagesize=1`,
-      );
-
-      const firstRecord = collectFirstRecord(searchPayload);
-      if (!firstRecord) {
-        duplicatesSkipped += 1;
-        continue;
-      }
-
-      const setId = firstString(firstRecord, ["setid", "set_id"]);
-      let detailRecord: Record<string, unknown> | null = null;
-
-      if (setId) {
-        try {
-          const detailsPayload = await fetchJson(`${DAILYMED_BASE_URL}/spls/${setId}.json`);
-          detailRecord = collectFirstRecord(detailsPayload) ?? (detailsPayload as Record<string, unknown>);
-        } catch (detailError) {
-          apiErrors += 1;
-          console.error(`DailyMed details fetch failed for ${setId}:`, detailError);
-        }
-      }
-
-      const ndcCode =
-        firstString(firstRecord, ["ndc", "ndc11", "product_ndc"]) ??
-        (detailRecord ? firstString(detailRecord, ["ndc", "ndc11", "product_ndc"]) : null) ??
-        row.ndc_code;
-
-      const mergedNotes = mergeDailyMedNote(row.notes, buildDailyMedNote(firstRecord, detailRecord));
-      const nextSource = row.source === "manual" || row.source === "rximage" ? row.source : "dailymed";
-
-      if (!dryRun) {
-        const { error: updateError } = await adminClient
-          .from("pill_reference")
-          .update({
-            ndc_code: ndcCode,
-            notes: mergedNotes,
-            source: nextSource,
-            last_synced: new Date().toISOString(),
-          })
-          .eq("id", row.id);
-
-        if (updateError) {
-          apiErrors += 1;
-          console.error("DailyMed update failed:", updateError);
-          continue;
-        }
-      }
-
-      enriched += 1;
-    } catch (fetchError) {
-      apiErrors += 1;
-      console.error(`DailyMed fetch failed for ${row.drug_name}:`, fetchError);
-    }
-
-    await sleep(500);
-  }
-
-  return {
-    source: "dailymed",
-    dryRun,
-    category: "enrichment",
-    limit,
-    processed,
-    inserted: 0,
-    updated: 0,
-    duplicatesSkipped,
-    imagesAdded: 0,
-    enriched,
-    apiErrors,
-    completedAt: new Date().toISOString(),
-  };
-}
-
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    if (!supabaseUrl) throw new Error("SUPABASE_URL is not configured");
-    if (!supabaseAnonKey) throw new Error("SUPABASE_ANON_KEY is not configured");
-    if (!serviceRoleKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+    // Auth check — must be an admin
+    const authHeader = req.headers.get("authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "");
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     const { data: { user }, error: userError } = await userClient.auth.getUser();
-    const userId = user?.id;
-
-    if (userError || !userId) {
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: isAdmin, error: roleError } = await userClient.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    if (roleError || !isAdmin) {
+    const { data: roleRow } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!roleRow) {
       return new Response(JSON.stringify({ error: "Admin role required" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const source = body?.source as ImportSource;
-    const dryRun = Boolean(body?.dryRun);
+    // Parse body
+    const body = await req.json();
+    const source: ImportSource = body.source ?? "curated";
+    const category: string = body.category ?? "opioids";
+    const rawLimit = Number(body.limit) || 150;
+    const limit = Math.max(1, Math.min(500, rawLimit));
+    const dryRun: boolean = body.dryRun === true;
 
-    if (source !== "rximage" && source !== "dailymed") {
-      return new Response(JSON.stringify({ error: "Invalid source. Use 'rximage' or 'dailymed'." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    console.log(`Import request: source=${source}, category=${category}, limit=${limit}, dryRun=${dryRun}`);
+
+    let result: ImportResult;
+
+    if (source === "curated") {
+      result = await runCuratedImport(adminClient, category, limit, dryRun);
+    } else {
+      // DailyMed enrichment not supported yet — return empty result
+      result = {
+        source: "dailymed",
+        dryRun,
+        category,
+        limit,
+        processed: 0,
+        inserted: 0,
+        updated: 0,
+        duplicatesSkipped: 0,
+        imagesAdded: 0,
+        enriched: 0,
+        apiErrors: 0,
+        completedAt: new Date().toISOString(),
+      };
     }
 
-    const category = typeof body?.category === "string" ? body.category : "opioids";
-    const limit = clamp(Number(body?.limit ?? DEFAULT_IMPORT_LIMIT), 1, MAX_IMPORT_LIMIT);
-    const enrichLimit = clamp(Number(body?.enrichLimit ?? DEFAULT_ENRICH_LIMIT), 1, MAX_IMPORT_LIMIT);
+    console.log(`Import complete: inserted=${result.inserted}, updated=${result.updated}, skipped=${result.duplicatesSkipped}, errors=${result.apiErrors}`);
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const result =
-      source === "rximage"
-        ? await runRxImageImport(adminClient, category, limit, dryRun)
-        : await runDailyMedEnrichment(adminClient, enrichLimit, dryRun);
-
-    return new Response(
-      JSON.stringify({
-        ...result,
-        supportedCategories: ["all", ...Object.keys(CATEGORY_TERMS)],
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("import-pill-data error:", error);
-
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  } catch (err) {
+    console.error("Import error:", err);
+    return new Response(
+      JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 });

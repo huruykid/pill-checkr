@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Database, FlaskConical, Loader2 } from "lucide-react";
 
-export type ImportSource = "rximage" | "dailymed";
+export type ImportSource = "curated" | "dailymed";
 
 export interface ApiImportParams {
   source: ImportSource;
@@ -40,7 +40,7 @@ export interface ApiImportResult {
 export interface ImportStats {
   total: number;
   manual: number;
-  rximage: number;
+  curated: number;
   dailymed: number;
   lastSyncedAt: string | null;
 }
@@ -69,7 +69,7 @@ const CATEGORIES = [
 ];
 
 export function ApiImportTab({ isImporting, latestImport, stats, onImport }: ApiImportTabProps) {
-  const [source, setSource] = useState<ImportSource>("rximage");
+  const [source, setSource] = useState<ImportSource>("curated");
   const [category, setCategory] = useState("opioids");
   const [limit, setLimit] = useState("150");
 
@@ -103,10 +103,10 @@ export function ApiImportTab({ isImporting, latestImport, stats, onImport }: Api
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">RxImage</CardTitle>
+            <CardTitle className="text-sm">Curated</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{stats?.rximage ?? "—"}</p>
+            <p className="text-2xl font-bold">{stats?.curated ?? "—"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -135,15 +135,15 @@ export function ApiImportTab({ isImporting, latestImport, stats, onImport }: Api
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rximage">RxImage (Primary import)</SelectItem>
+                  <SelectItem value="curated">Curated Dataset (Primary import)</SelectItem>
                   <SelectItem value="dailymed">DailyMed (Enrichment)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>{source === "rximage" ? "Category" : "Mode"}</Label>
-              {source === "rximage" ? (
+              <Label>{source === "curated" ? "Category" : "Mode"}</Label>
+              {source === "curated" ? (
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger>
                     <SelectValue />
@@ -162,7 +162,7 @@ export function ApiImportTab({ isImporting, latestImport, stats, onImport }: Api
             </div>
 
             <div className="space-y-2">
-              <Label>{source === "rximage" ? "Import limit" : "Enrichment limit"}</Label>
+              <Label>{source === "curated" ? "Import limit" : "Enrichment limit"}</Label>
               <Input
                 type="number"
                 min={1}
