@@ -25,7 +25,7 @@ const items: ChecklistItem[] = [
     id: "test-strips",
     label: "Get fentanyl test strips",
     description: "Inexpensive strips that detect fentanyl in pills and powders.",
-    link: { url: "https://dancesafe.org/fentanyl-test-strips/", text: "Order test strips" },
+    link: { url: "https://dancesafe.org/product/fentanyl-test-strips-pack-of-10-free-shipping/", text: "Order test strips" },
   },
   {
     id: "hotline",
