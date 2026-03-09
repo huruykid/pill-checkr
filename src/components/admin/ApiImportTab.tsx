@@ -142,8 +142,8 @@ export function ApiImportTab({ isImporting, latestImport, stats, onImport }: Api
             </div>
 
             <div className="space-y-2">
-              <Label>{source === "rximage" ? "Category" : "Mode"}</Label>
-              {source === "rximage" ? (
+              <Label>{source === "curated" ? "Category" : "Mode"}</Label>
+              {source === "curated" ? (
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger>
                     <SelectValue />
