@@ -39,6 +39,44 @@ interface ResultsData {
   matches: Match[];
 }
 
+interface VisualSimilarityData {
+  hasComparison: boolean;
+  score: number | null;
+  flags: string[];
+}
+
+function parseVisualSimilarity(matchReasons: string | null): VisualSimilarityData {
+  if (!matchReasons) return { hasComparison: false, score: null, flags: [] };
+  
+  // Extract similarity score: "Visual similarity: 85%"
+  const scoreMatch = matchReasons.match(/Visual similarity:\s*(\d+)%/i);
+  const score = scoreMatch ? parseInt(scoreMatch[1], 10) : null;
+  
+  // Extract flags: "Visual flags: rough edges, off-center imprint"
+  const flagsMatch = matchReasons.match(/Visual flags?:\s*([^.]+)/i);
+  const flags = flagsMatch 
+    ? flagsMatch[1].split(',').map(f => f.trim()).filter(Boolean)
+    : [];
+  
+  return {
+    hasComparison: score !== null,
+    score,
+    flags,
+  };
+}
+
+function getVisualScoreColor(score: number): string {
+  if (score >= 70) return "bg-success";
+  if (score >= 40) return "bg-warning";
+  return "bg-danger";
+}
+
+function getVisualScoreText(score: number): string {
+  if (score >= 70) return "text-success";
+  if (score >= 40) return "text-warning";
+  return "text-danger";
+}
+
 const harmReductionSteps = [
   "Never use alone - have someone with you who can call for help",
   "Start with a small test dose and wait to feel effects",
