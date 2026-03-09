@@ -160,7 +160,6 @@ export default function CheckPill() {
           color: color || null,
           hasReferenceObject: hasReference,
           photoUrl: photoUrl || null,
-          userId: user?.id || null,
         },
       });
 
