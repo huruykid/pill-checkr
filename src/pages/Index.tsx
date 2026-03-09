@@ -112,9 +112,9 @@ const Index = () => {
               <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-sm bg-muted">
                 <Shield className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="mb-2 font-display text-xl">REFERENCE MATCHING</h3>
+              <h3 className="mb-2 font-display text-xl">VISUAL MATCHING</h3>
               <p className="text-sm text-muted-foreground font-sans">
-                We compare against known pill references to find possible matches
+                We visually compare your photo against reference images of known pills
               </p>
             </div>
 
