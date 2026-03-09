@@ -148,6 +148,7 @@ const Index = () => {
                 "Imprint text recognition (OCR)",
                 "Shape and color classification",
                 "Reference database matching",
+                "Visual image comparison",
                 "Consistency / anomaly scoring",
                 "Harm reduction guidance",
               ].map((feature) => (
