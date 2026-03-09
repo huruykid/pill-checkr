@@ -69,7 +69,7 @@ const CATEGORIES = [
 ];
 
 export function ApiImportTab({ isImporting, latestImport, stats, onImport }: ApiImportTabProps) {
-  const [source, setSource] = useState<ImportSource>("rximage");
+  const [source, setSource] = useState<ImportSource>("curated");
   const [category, setCategory] = useState("opioids");
   const [limit, setLimit] = useState("150");
 
