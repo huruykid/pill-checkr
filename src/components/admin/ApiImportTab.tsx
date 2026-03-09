@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Database, FlaskConical, Loader2 } from "lucide-react";
 
-export type ImportSource = "rximage" | "dailymed";
+export type ImportSource = "curated" | "dailymed";
 
 export interface ApiImportParams {
   source: ImportSource;
