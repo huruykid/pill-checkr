@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SafetyChecklist } from "@/components/shared/SafetyChecklist";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BookOpen, ExternalLink, Loader2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type EducationPost = Database["public"]["Tables"]["education_posts"]["Row"];
@@ -170,8 +170,34 @@ export default function Education() {
               Essential information for harm reduction and staying safe
             </p>
           </div>
+          {/* Fentanyl Test Strip Banner */}
+          <Card className="mb-6 border-warning/30 bg-warning-light">
+            <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-warning" />
+                <div>
+                  <h2 className="text-lg font-bold text-warning-foreground">
+                    Fentanyl Test Strips Save Lives
+                  </h2>
+                  <p className="mt-1 text-sm text-warning-foreground/80">
+                    Inexpensive strips that detect fentanyl in pills and powders. They cost about $1 each and take just minutes to use.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="https://dancesafe.org/product/fentanyl-test-strips-pack-of-10-free-shipping/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="warning" className="w-full shrink-0 sm:w-auto">
+                  Order Test Strips
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
 
-          {/* Safety Kit Checklist */}
+
           <SafetyChecklist />
 
           {/* Section Label */}
