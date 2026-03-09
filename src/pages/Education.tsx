@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SafetyChecklist } from "@/components/shared/SafetyChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, ArrowLeft, BookOpen, ExternalLink, Loader2 } from "lucide-react";
+import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import type { Database } from "@/integrations/supabase/types";
 
 type EducationPost = Database["public"]["Tables"]["education_posts"]["Row"];
