@@ -5,3 +5,12 @@ verify_jwt = false
 
 [functions.import-pill-data]
 verify_jwt = false
+
+[functions.enrich-drug-info]
+verify_jwt = false
+
+[functions.find-treatment]
+verify_jwt = false
+
+[functions.check-interactions]
+verify_jwt = false
