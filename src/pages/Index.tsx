@@ -19,7 +19,7 @@ const Index = () => {
             
             <p className="mb-8 text-lg text-muted-foreground md:text-xl font-sans">
               A free tool to help assess consistency with known reference pills 
-              using image analysis and matching. Not a guarantee of safety.
+              using visual comparison and image analysis. Not a guarantee of safety.
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
