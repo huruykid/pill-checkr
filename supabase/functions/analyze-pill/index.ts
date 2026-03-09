@@ -286,12 +286,28 @@ serve(async (req) => {
       );
     }
     
-    const { image, imprint, shape, color, hasReferenceObject, photoUrl, userId } = validationResult.data;
+    const { image, imprint, shape, color, hasReferenceObject, photoUrl } = validationResult.data;
     console.log("Input validated successfully");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const lovableKey = Deno.env.get("LOVABLE_API_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Derive userId from auth header instead of trusting client-supplied value
+    let userId: string | null = null;
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const userClient = createClient(supabaseUrl, anonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: { user } } = await userClient.auth.getUser();
+        userId = user?.id ?? null;
+      } catch {
+        // Anonymous usage is fine — userId stays null
+      }
+    }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
