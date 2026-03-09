@@ -40,7 +40,7 @@ export interface ApiImportResult {
 export interface ImportStats {
   total: number;
   manual: number;
-  rximage: number;
+  curated: number;
   dailymed: number;
   lastSyncedAt: string | null;
 }
