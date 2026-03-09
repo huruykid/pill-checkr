@@ -24,7 +24,11 @@ import {
   Info,
   HelpCircle,
   Gauge,
+  Eye,
+  ImageIcon,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/integrations/supabase/types";
 
 type Report = Database["public"]["Tables"]["reports"]["Row"];
@@ -33,6 +37,44 @@ type Match = Database["public"]["Tables"]["matches"]["Row"];
 interface ResultsData {
   report: Report;
   matches: Match[];
+}
+
+interface VisualSimilarityData {
+  hasComparison: boolean;
+  score: number | null;
+  flags: string[];
+}
+
+function parseVisualSimilarity(matchReasons: string | null): VisualSimilarityData {
+  if (!matchReasons) return { hasComparison: false, score: null, flags: [] };
+  
+  // Extract similarity score: "Visual similarity: 85%"
+  const scoreMatch = matchReasons.match(/Visual similarity:\s*(\d+)%/i);
+  const score = scoreMatch ? parseInt(scoreMatch[1], 10) : null;
+  
+  // Extract flags: "Visual flags: rough edges, off-center imprint"
+  const flagsMatch = matchReasons.match(/Visual flags?:\s*([^.]+)/i);
+  const flags = flagsMatch 
+    ? flagsMatch[1].split(',').map(f => f.trim()).filter(Boolean)
+    : [];
+  
+  return {
+    hasComparison: score !== null,
+    score,
+    flags,
+  };
+}
+
+function getVisualScoreColor(score: number): string {
+  if (score >= 70) return "bg-success";
+  if (score >= 40) return "bg-warning";
+  return "bg-danger";
+}
+
+function getVisualScoreText(score: number): string {
+  if (score >= 70) return "text-success";
+  if (score >= 40) return "text-warning";
+  return "text-danger";
 }
 
 const harmReductionSteps = [
@@ -242,6 +284,54 @@ export default function Results() {
                             {match.explanation && (
                               <p className="mt-2 text-sm text-muted-foreground">{match.explanation}</p>
                             )}
+                            
+                            {/* Visual Similarity Indicator */}
+                            {(() => {
+                              const visualData = parseVisualSimilarity(match.match_reasons);
+                              return (
+                                <div className="mt-3 pt-3 border-t border-border/50">
+                                  {visualData.hasComparison && visualData.score !== null ? (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-xs text-muted-foreground">Visual Comparison</span>
+                                        <div className="flex-1 max-w-[120px]">
+                                          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                                            <div 
+                                              className={`h-full transition-all ${getVisualScoreColor(visualData.score)}`}
+                                              style={{ width: `${visualData.score}%` }}
+                                            />
+                                          </div>
+                                        </div>
+                                        <span className={`text-xs font-medium ${getVisualScoreText(visualData.score)}`}>
+                                          {visualData.score}%
+                                        </span>
+                                        <CheckCircle className="h-3.5 w-3.5 text-success" />
+                                      </div>
+                                      {visualData.flags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 ml-6">
+                                          {visualData.flags.map((flag, idx) => (
+                                            <Badge 
+                                              key={idx} 
+                                              variant="warning" 
+                                              className="text-[10px] px-1.5 py-0"
+                                            >
+                                              <AlertTriangle className="h-2.5 w-2.5 mr-1" />
+                                              {flag}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <ImageIcon className="h-4 w-4" />
+                                      <span className="text-xs">No reference image — visual comparison not available</span>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
                         <ConfidenceBadge level={(match.confidence || "low") as "low" | "medium" | "high"} />
