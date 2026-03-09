@@ -2,3 +2,6 @@ project_id = "ptisltjfqomavvlnghcm"
 
 [functions.analyze-pill]
 verify_jwt = false
+
+[functions.import-pill-data]
+verify_jwt = false
