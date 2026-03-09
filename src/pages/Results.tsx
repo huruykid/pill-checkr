@@ -156,6 +156,14 @@ export default function Results() {
   const riskReasons = report.risk_reasons ?? [];
   const matchConfidence = report.match_confidence as "low" | "medium" | "high" | null;
 
+  // Check if any match has HIGH COUNTERFEIT RISK in explanation
+  const hasCounterfeitRisk = useMemo(() => {
+    return matches.some(
+      (match) =>
+        match.explanation?.toUpperCase().includes("HIGH COUNTERFEIT RISK")
+    );
+  }, [matches]);
+
   const getAnomalyDescription = (score: number) => {
     if (score >= 60) return { text: "High inconsistency", color: "text-danger" };
     if (score >= 30) return { text: "Moderate inconsistency", color: "text-warning" };
