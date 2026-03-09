@@ -24,7 +24,11 @@ import {
   Info,
   HelpCircle,
   Gauge,
+  Eye,
+  ImageIcon,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/integrations/supabase/types";
 
 type Report = Database["public"]["Tables"]["reports"]["Row"];
