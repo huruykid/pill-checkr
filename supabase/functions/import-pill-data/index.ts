@@ -423,6 +423,53 @@ async function fetchAllExistingReferences(adminClient: ReturnType<typeof createC
   return allRows;
 }
 
+// ─── RXIMAGE FETCH ──────────────────────────────────────────────────────────
+
+async function fetchRxImageUrl(ndcCode: string): Promise<string | null> {
+  try {
+    // Normalize NDC: remove dashes for the API
+    const ndcNorm = ndcCode.replace(/-/g, "");
+    const url = `https://rximage.nlm.nih.gov/api/rximage/1/rxnav?ndc=${ndcNorm}&resolution=600`;
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const images = data?.nlmRxImages;
+    if (images && images.length > 0) {
+      return images[0].imageUrl || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function storeReferenceImage(
+  adminClient: ReturnType<typeof createClient>,
+  pillReferenceId: string,
+  imageUrl: string,
+  source: string,
+): Promise<boolean> {
+  // Check if this image URL already exists for this reference
+  const { data: existing } = await adminClient
+    .from("pill_reference_images")
+    .select("id")
+    .eq("pill_reference_id", pillReferenceId)
+    .eq("image_url", imageUrl)
+    .maybeSingle();
+
+  if (existing) return false;
+
+  const { error } = await adminClient
+    .from("pill_reference_images")
+    .insert({
+      pill_reference_id: pillReferenceId,
+      image_url: imageUrl,
+      source,
+    });
+
+  return !error;
+}
+
 // ─── CURATED IMPORT ─────────────────────────────────────────────────────────
 
 async function runCuratedImport(
@@ -446,6 +493,7 @@ async function runCuratedImport(
   let duplicatesSkipped = 0;
   let processed = 0;
   let apiErrors = 0;
+  let imagesAdded = 0;
 
   for (const entry of entries) {
     if (processed >= limit) break;
@@ -464,6 +512,8 @@ async function runCuratedImport(
       else inserted += 1;
       continue;
     }
+
+    let pillRefId: string | null = null;
 
     if (existing) {
       const { error } = await adminClient
@@ -486,6 +536,7 @@ async function runCuratedImport(
         continue;
       }
       updated += 1;
+      pillRefId = existing.id;
     } else {
       const { data: insertedRow, error } = await adminClient
         .from("pill_reference")
@@ -508,7 +559,21 @@ async function runCuratedImport(
         continue;
       }
       inserted += 1;
+      pillRefId = insertedRow.id;
       existingByKey.set(key, insertedRow as ExistingReference);
+    }
+
+    // Fetch and store reference image from RxImage API (only for pills with NDC codes)
+    if (pillRefId && entry.ndc_code) {
+      try {
+        const imageUrl = await fetchRxImageUrl(entry.ndc_code);
+        if (imageUrl) {
+          const added = await storeReferenceImage(adminClient, pillRefId, imageUrl, "rximage");
+          if (added) imagesAdded += 1;
+        }
+      } catch (e) {
+        console.error(`RxImage fetch failed for NDC ${entry.ndc_code}:`, e);
+      }
     }
   }
 
@@ -521,7 +586,7 @@ async function runCuratedImport(
     inserted,
     updated,
     duplicatesSkipped,
-    imagesAdded: 0,
+    imagesAdded,
     enriched: 0,
     apiErrors,
     completedAt: new Date().toISOString(),
