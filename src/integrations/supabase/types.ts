@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      drug_info_cache: {
+        Row: {
+          adverse_events_data: Json | null
+          created_at: string
+          drug_name: string
+          fetched_at: string
+          id: string
+          label_data: Json | null
+        }
+        Insert: {
+          adverse_events_data?: Json | null
+          created_at?: string
+          drug_name: string
+          fetched_at?: string
+          id?: string
+          label_data?: Json | null
+        }
+        Update: {
+          adverse_events_data?: Json | null
+          created_at?: string
+          drug_name?: string
+          fetched_at?: string
+          id?: string
+          label_data?: Json | null
+        }
+        Relationships: []
+      }
       education_posts: {
         Row: {
           body: string
