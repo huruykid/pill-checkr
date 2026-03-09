@@ -454,8 +454,21 @@ export default function Results() {
             </CardContent>
           </Card>
 
+          {/* Official FDA Drug Information */}
+          {matches.length > 0 && (
+            <DrugInfoCard drugName={matches[0].drug_name} className="mb-6" />
+          )}
+
+          {/* Drug Interaction Checker */}
+          {matches.length > 0 && (
+            <InteractionChecker drugName={matches[0].drug_name} className="mb-6" />
+          )}
+
           {/* Harm Reduction Resources */}
           <HarmReductionResources className="mb-8" />
+
+          {/* Find Help Nearby */}
+          <NearbyHelp className="mb-8" />
 
           <Disclaimer className="mb-8" />
 

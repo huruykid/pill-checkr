@@ -201,6 +201,9 @@ export default function Education() {
 
           <SafetyChecklist />
 
+          {/* Find Help Nearby */}
+          <NearbyHelp className="mb-6" />
+
           {/* Section Label */}
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-foreground">Articles</h2>
