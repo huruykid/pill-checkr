@@ -6,6 +6,9 @@ import { RiskBadge } from "@/components/shared/RiskBadge";
 import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
 import { CounterfeitWarning } from "@/components/shared/CounterfeitWarning";
 import { HarmReductionResources } from "@/components/shared/HarmReductionResources";
+import { DrugInfoCard } from "@/components/results/DrugInfoCard";
+import { InteractionChecker } from "@/components/results/InteractionChecker";
+import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -451,8 +454,21 @@ export default function Results() {
             </CardContent>
           </Card>
 
+          {/* Official FDA Drug Information */}
+          {matches.length > 0 && (
+            <DrugInfoCard drugName={matches[0].drug_name} className="mb-6" />
+          )}
+
+          {/* Drug Interaction Checker */}
+          {matches.length > 0 && (
+            <InteractionChecker drugName={matches[0].drug_name} className="mb-6" />
+          )}
+
           {/* Harm Reduction Resources */}
           <HarmReductionResources className="mb-8" />
+
+          {/* Find Help Nearby */}
+          <NearbyHelp className="mb-8" />
 
           <Disclaimer className="mb-8" />
 

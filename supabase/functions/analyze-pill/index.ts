@@ -493,6 +493,47 @@ Respond with JSON only:
     // Final top 3
     scoredMatches = scoredMatches.slice(0, 3);
 
+    // ─── Step 3.5: FDA NDC Directory cross-reference verification ───────────
+    for (const match of scoredMatches) {
+      if (!match.ndc_code) continue;
+      try {
+        const ndcResp = await fetch(
+          `https://api.fda.gov/drug/ndc.json?search=product_ndc:"${match.ndc_code}"&limit=1`
+        );
+        if (ndcResp.ok) {
+          const ndcData = await ndcResp.json();
+          const result = ndcData.results?.[0];
+          if (result) {
+            const fdaColor = (result.active_ingredients?.[0] || result).color?.[0]?.toLowerCase() || "";
+            const fdaShape = (result.active_ingredients?.[0] || result).shape?.[0]?.toLowerCase() || "";
+            const fdaImprint = (result.packaging?.[0]?.description || "").toLowerCase();
+
+            let verified = true;
+            const mismatches: string[] = [];
+
+            if (fdaColor && match.color && !fdaColor.includes(match.color)) {
+              verified = false;
+              mismatches.push(`color (FDA: ${fdaColor}, ref: ${match.color})`);
+            }
+            if (fdaShape && match.shape && !fdaShape.includes(match.shape)) {
+              verified = false;
+              mismatches.push(`shape (FDA: ${fdaShape}, ref: ${match.shape})`);
+            }
+
+            if (verified) {
+              match.matchReasons.push("✓ Verified against FDA NDC Directory");
+            } else {
+              match.matchReasons.push(`⚠ Details differ from FDA record: ${mismatches.join(", ")}`);
+            }
+          }
+        } else {
+          await ndcResp.text(); // consume body
+        }
+      } catch (e) {
+        console.error(`NDC verification failed for ${match.ndc_code}:`, e);
+      }
+    }
+
     // ─── Step 4: Scoring and risk assessment ────────────────────────────────
     const topMatch = scoredMatches.length > 0 ? scoredMatches[0] : null;
     let matchConfidence: "low" | "medium" | "high" = "low";
