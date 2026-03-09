@@ -171,6 +171,14 @@ export default function Education() {
             </p>
           </div>
 
+          {/* Safety Kit Checklist */}
+          <SafetyChecklist />
+
+          {/* Section Label */}
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-foreground">Articles</h2>
+          </div>
+
           {/* Article Grid */}
           <div className="grid gap-4">
             {posts.map((post) => (

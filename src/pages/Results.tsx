@@ -361,6 +361,9 @@ export default function Results() {
             </CardContent>
           </Card>
 
+          {/* Harm Reduction Resources */}
+          <HarmReductionResources className="mb-8" />
+
           <Disclaimer className="mb-8" />
 
           {/* Actions */}
