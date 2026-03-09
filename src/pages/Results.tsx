@@ -52,6 +52,14 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Check if any match has HIGH COUNTERFEIT RISK - must be before early returns
+  const hasCounterfeitRisk = useMemo(() => {
+    return data?.matches.some(
+      (match) =>
+        match.explanation?.toUpperCase().includes("HIGH COUNTERFEIT RISK")
+    ) ?? false;
+  }, [data?.matches]);
+
   useEffect(() => {
     if (reportId) fetchResults();
   }, [reportId]);
