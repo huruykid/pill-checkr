@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Disclaimer } from "@/components/shared/Disclaimer";
 import { RiskBadge } from "@/components/shared/RiskBadge";
 import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
+import { CounterfeitWarning } from "@/components/shared/CounterfeitWarning";
+import { HarmReductionResources } from "@/components/shared/HarmReductionResources";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +51,14 @@ export default function Results() {
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Check if any match has HIGH COUNTERFEIT RISK - must be before early returns
+  const hasCounterfeitRisk = useMemo(() => {
+    return data?.matches.some(
+      (match) =>
+        match.explanation?.toUpperCase().includes("HIGH COUNTERFEIT RISK")
+    ) ?? false;
+  }, [data?.matches]);
 
   useEffect(() => {
     if (reportId) fetchResults();
@@ -243,6 +253,9 @@ export default function Results() {
             </CardContent>
           </Card>
 
+          {/* Counterfeit Warning - shown if any match has high counterfeit risk */}
+          {hasCounterfeitRisk && <CounterfeitWarning className="mb-6" />}
+
           {/* Section B: Uncertainty & Consistency Check */}
           <Card className="mb-6">
             <CardHeader>
@@ -347,6 +360,9 @@ export default function Results() {
               </ul>
             </CardContent>
           </Card>
+
+          {/* Harm Reduction Resources */}
+          <HarmReductionResources className="mb-8" />
 
           <Disclaimer className="mb-8" />
 

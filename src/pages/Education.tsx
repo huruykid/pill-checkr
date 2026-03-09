@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SafetyChecklist } from "@/components/shared/SafetyChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
@@ -168,6 +169,14 @@ export default function Education() {
             <p className="text-muted-foreground">
               Essential information for harm reduction and staying safe
             </p>
+          </div>
+
+          {/* Safety Kit Checklist */}
+          <SafetyChecklist />
+
+          {/* Section Label */}
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-foreground">Articles</h2>
           </div>
 
           {/* Article Grid */}
