@@ -162,7 +162,7 @@ export function ApiImportTab({ isImporting, latestImport, stats, onImport }: Api
             </div>
 
             <div className="space-y-2">
-              <Label>{source === "rximage" ? "Import limit" : "Enrichment limit"}</Label>
+              <Label>{source === "curated" ? "Import limit" : "Enrichment limit"}</Label>
               <Input
                 type="number"
                 min={1}
