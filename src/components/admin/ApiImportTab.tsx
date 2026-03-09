@@ -103,10 +103,10 @@ export function ApiImportTab({ isImporting, latestImport, stats, onImport }: Api
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">RxImage</CardTitle>
+            <CardTitle className="text-sm">Curated</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{stats?.rximage ?? "—"}</p>
+            <p className="text-2xl font-bold">{stats?.curated ?? "—"}</p>
           </CardContent>
         </Card>
         <Card>
