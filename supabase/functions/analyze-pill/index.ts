@@ -22,13 +22,14 @@ const InputSchema = z.object({
 
 // Match scoring weights
 const MATCH_WEIGHTS = {
-  imprintExact: 60,
-  imprintPartial: 30,
-  shape: 20,
-  color: 20,
+  imprintExact: 50,
+  imprintPartial: 25,
+  shape: 15,
+  color: 15,
+  visualSimilarity: 30, // max bonus from visual comparison
 };
 
-// Thresholds for confidence levels
+// Thresholds for confidence levels (adjusted for new max score of ~110)
 const CONFIDENCE_THRESHOLDS = {
   high: 80,
   medium: 50,
@@ -48,7 +49,6 @@ function calculateMatchScore(
   let score = 0;
   const reasons: string[] = [];
 
-  // Imprint matching (most important)
   if (extracted.imprint && reference.imprint) {
     const extractedNorm = extracted.imprint.toLowerCase().replace(/\s+/g, "");
     const refNorm = reference.imprint.toLowerCase().replace(/\s+/g, "");
@@ -62,13 +62,11 @@ function calculateMatchScore(
     }
   }
 
-  // Shape matching
   if (extracted.shape && reference.shape && extracted.shape === reference.shape) {
     score += MATCH_WEIGHTS.shape;
     reasons.push("Shape matches");
   }
 
-  // Color matching
   if (extracted.color && reference.color && extracted.color === reference.color) {
     score += MATCH_WEIGHTS.color;
     reasons.push("Color matches");
@@ -81,12 +79,12 @@ function calculateMatchScore(
 function calculateAnomalyScore(
   extracted: { imprint: string | null; shape: string | null; color: string | null; imprintConfidence: string },
   topMatch: { imprint: string; shape: string; color: string } | null,
-  imageQuality: string
+  imageQuality: string,
+  visualMismatch: boolean,
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
 
-  // OCR/imprint issues
   if (!extracted.imprint) {
     score += 25;
     reasons.push("Imprint could not be read or detected");
@@ -95,7 +93,6 @@ function calculateAnomalyScore(
     reasons.push("Imprint text recognition was uncertain");
   }
 
-  // Image quality issues
   if (imageQuality === "poor") {
     score += 30;
     reasons.push("Image quality is poor, affecting analysis accuracy");
@@ -104,7 +101,6 @@ function calculateAnomalyScore(
     reasons.push("Image quality is fair, some details may be unclear");
   }
 
-  // Inconsistencies with top match
   if (topMatch && extracted.imprint) {
     const extractedNorm = extracted.imprint.toLowerCase().replace(/\s+/g, "");
     const refNorm = topMatch.imprint.toLowerCase().replace(/\s+/g, "");
@@ -125,7 +121,12 @@ function calculateAnomalyScore(
     reasons.push("Color doesn't match typical reference for this pill");
   }
 
-  // No matches at all
+  // Visual mismatch is a strong counterfeit signal
+  if (visualMismatch) {
+    score += 25;
+    reasons.push("Visual appearance differs significantly from legitimate reference images — possible counterfeit indicator");
+  }
+
   if (!topMatch) {
     score += 25;
     reasons.push("No matching pill found in reference database");
@@ -141,8 +142,6 @@ function deriveRiskLevel(
   imageQuality: string
 ): { level: "low" | "medium" | "high"; reasons: string[] } {
   const reasons: string[] = [];
-  
-  // Start with baseline from match confidence
   let riskPoints = 0;
   
   if (matchConfidence === "low") {
@@ -155,7 +154,6 @@ function deriveRiskLevel(
     reasons.push("Pill closely matches a known reference");
   }
 
-  // Add anomaly contribution
   if (anomalyScore >= 50) {
     riskPoints += 40;
     reasons.push("High inconsistency detected between pill features");
@@ -164,13 +162,11 @@ function deriveRiskLevel(
     reasons.push("Some inconsistencies noted in pill features");
   }
 
-  // Image quality impact
   if (imageQuality === "poor") {
     riskPoints += 20;
     reasons.push("Poor image quality limits analysis accuracy");
   }
 
-  // Determine final risk level
   let level: "low" | "medium" | "high" = "low";
   if (riskPoints >= 50) {
     level = "high";
@@ -181,13 +177,102 @@ function deriveRiskLevel(
   return { level, reasons };
 }
 
+// ─── Visual comparison with reference images ────────────────────────────────
+async function runVisualComparison(
+  userImage: string,
+  matchesWithImages: Array<{ id: string; drug_name: string }>,
+  referenceImages: Record<string, string[]>,
+  lovableKey: string,
+): Promise<Record<string, { similarity: number; redFlags: string[]; assessment: string }>> {
+  const results: Record<string, { similarity: number; redFlags: string[]; assessment: string }> = {};
+
+  // Build image content array: user photo first, then reference images with labels
+  const imageContent: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
+    { type: "text", text: "USER'S PILL PHOTO:" },
+    { type: "image_url", image_url: { url: userImage } },
+  ];
+
+  for (const match of matchesWithImages) {
+    const urls = (referenceImages[match.id] || []).slice(0, 2);
+    imageContent.push({ type: "text", text: `REFERENCE — ${match.drug_name} (id: ${match.id}):` });
+    for (const url of urls) {
+      imageContent.push({ type: "image_url", image_url: { url } });
+    }
+  }
+
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `You are a pill visual comparison expert for harm reduction. Compare a user's pill photo against reference images of known legitimate pills.
+
+For each reference pill provided, assess visual similarity on a 0–100 scale considering:
+- Font style, spacing, depth, and quality of imprint text (counterfeits often use wrong fonts or shallow stamps)
+- Color shade accuracy (counterfeits may be slightly off-shade)
+- Shape proportions and edge quality (counterfeits often have rough or uneven edges)
+- Scoring/break line patterns
+- Surface texture and finish (glossy vs matte, smooth vs rough)
+- Any visual red flags (off-center imprint, uneven coloring, speckled texture, wrong size)
+
+Respond with JSON only:
+{
+  "comparisons": [
+    {
+      "reference_id": "uuid",
+      "visual_similarity": 0-100,
+      "red_flags": ["list of specific visual concerns"],
+      "assessment": "one sentence summary"
+    }
+  ]
+}`
+          },
+          {
+            role: "user",
+            content: imageContent,
+          },
+        ],
+      }),
+    });
+
+    if (!resp.ok) {
+      console.error("Visual comparison AI error:", resp.status, await resp.text());
+      return results;
+    }
+
+    const data = await resp.json();
+    const content = data.choices?.[0]?.message?.content || "{}";
+    const parsed = JSON.parse(content.replace(/```json\n?|\n?```/g, ""));
+
+    for (const comp of parsed.comparisons || []) {
+      if (comp.reference_id) {
+        results[comp.reference_id] = {
+          similarity: Math.max(0, Math.min(100, comp.visual_similarity ?? 50)),
+          redFlags: comp.red_flags || [],
+          assessment: comp.assessment || "",
+        };
+      }
+    }
+  } catch (e) {
+    console.error("Visual comparison failed:", e);
+  }
+
+  return results;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Parse and validate input
     const rawInput = await req.json();
     const validationResult = InputSchema.safeParse(rawInput);
     
@@ -198,10 +283,7 @@ serve(async (req) => {
           error: "Invalid input", 
           details: validationResult.error.errors.map(e => e.message).join(", ")
         }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
     
@@ -214,7 +296,7 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Analyze image with AI
+    // ─── Step 1: AI feature extraction ──────────────────────────────────────
     console.log("Analyzing pill image with AI...");
     
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -303,20 +385,17 @@ Respond with JSON only:
     const finalColor = color || analysis.extracted_color;
     const imprintConfidence = analysis.imprint_confidence || "low";
 
-    // Search reference database
+    // ─── Step 2: Text-based reference matching ──────────────────────────────
     let query = supabase.from("pill_reference").select("*");
-    
-    // Broader search to get more candidates for scoring
     if (finalImprint) {
       query = query.ilike("imprint", `%${finalImprint}%`);
     }
 
     const { data: references } = await query.limit(20);
 
-    // Score and rank matches using deterministic algorithm
     const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence };
     
-    const scoredMatches = (references || []).map((ref) => {
+    let scoredMatches = (references || []).map((ref) => {
       const { score, reasons } = calculateMatchScore(
         { imprint: finalImprint, shape: finalShape, color: finalColor },
         { imprint: ref.imprint, shape: ref.shape, color: ref.color }
@@ -331,9 +410,75 @@ Respond with JSON only:
       const sourceB = SOURCE_PRIORITY[b.source || ""] || 0;
       return sourceB - sourceA;
     })
-    .slice(0, 3);
+    .slice(0, 5); // Keep top 5 for visual comparison, will trim to 3 after
 
-    // Determine match confidence from top match
+    // ─── Step 3: Visual comparison with reference images ────────────────────
+    const topMatchIds = scoredMatches.map(m => m.id);
+    let referenceImages: Record<string, string[]> = {};
+    let visualResults: Record<string, { similarity: number; redFlags: string[]; assessment: string }> = {};
+    let visualMismatchDetected = false;
+
+    if (topMatchIds.length > 0) {
+      const { data: imgRows } = await supabase
+        .from("pill_reference_images")
+        .select("pill_reference_id, image_url")
+        .in("pill_reference_id", topMatchIds);
+
+      if (imgRows && imgRows.length > 0) {
+        for (const row of imgRows) {
+          if (!referenceImages[row.pill_reference_id]) {
+            referenceImages[row.pill_reference_id] = [];
+          }
+          referenceImages[row.pill_reference_id].push(row.image_url);
+        }
+        console.log(`Found reference images for ${Object.keys(referenceImages).length} matches`);
+
+        // Run visual comparison for matches that have images
+        const matchesWithImages = scoredMatches.filter(m => referenceImages[m.id]?.length > 0).slice(0, 3);
+        
+        if (matchesWithImages.length > 0) {
+          console.log(`Running visual comparison for ${matchesWithImages.length} matches...`);
+          visualResults = await runVisualComparison(image, matchesWithImages, referenceImages, lovableKey);
+          console.log("Visual comparison results:", JSON.stringify(visualResults));
+
+          // Apply visual similarity scores to matches
+          for (const match of scoredMatches) {
+            const vr = visualResults[match.id];
+            if (vr) {
+              // Add visual similarity bonus (0-30 points scaled from 0-100 similarity)
+              const visualBonus = Math.round((vr.similarity / 100) * MATCH_WEIGHTS.visualSimilarity);
+              match.score += visualBonus;
+              match.matchReasons.push(`Visual similarity: ${vr.similarity}%`);
+
+              if (vr.redFlags.length > 0) {
+                match.matchReasons.push(`Visual flags: ${vr.redFlags.join(", ")}`);
+              }
+
+              // Detect visual mismatch: text match is strong but visual similarity is low
+              if (match.score - visualBonus >= CONFIDENCE_THRESHOLDS.medium && vr.similarity < 40) {
+                visualMismatchDetected = true;
+              }
+            }
+          }
+
+          // Re-sort after visual scoring
+          scoredMatches.sort((a, b) => {
+            const scoreDelta = b.score - a.score;
+            if (scoreDelta !== 0) return scoreDelta;
+            const sourceA = SOURCE_PRIORITY[a.source || ""] || 0;
+            const sourceB = SOURCE_PRIORITY[b.source || ""] || 0;
+            return sourceB - sourceA;
+          });
+        }
+      } else {
+        console.log("No reference images found for top matches");
+      }
+    }
+
+    // Final top 3
+    scoredMatches = scoredMatches.slice(0, 3);
+
+    // ─── Step 4: Scoring and risk assessment ────────────────────────────────
     const topMatch = scoredMatches.length > 0 ? scoredMatches[0] : null;
     let matchConfidence: "low" | "medium" | "high" = "low";
     if (topMatch) {
@@ -344,23 +489,22 @@ Respond with JSON only:
       }
     }
 
-    // Calculate anomaly score
     const { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
       extracted,
       topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color } : null,
-      analysis.image_quality
+      analysis.image_quality,
+      visualMismatchDetected,
     );
 
-    // Derive risk level
     const { level: riskLevel, reasons: riskReasons } = deriveRiskLevel(
       matchConfidence,
       anomalyScore,
       analysis.image_quality
     );
 
-    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}`);
+    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}, Visual mismatch: ${visualMismatchDetected}`);
 
-    // Create report with new fields
+    // ─── Step 5: Persist report and matches ─────────────────────────────────
     const { data: report, error: reportError } = await supabase
       .from("reports")
       .insert({
@@ -382,20 +526,30 @@ Respond with JSON only:
 
     if (reportError) throw reportError;
 
-    // Insert matches with match_reasons
     if (scoredMatches.length > 0) {
-      const matchInserts = scoredMatches.map((m, i) => ({
-        report_id: report.id,
-        rank: i + 1,
-        drug_name: m.drug_name,
-        matched_imprint: m.imprint,
-        matched_shape: m.shape,
-        matched_color: m.color,
-        confidence: m.score >= CONFIDENCE_THRESHOLDS.high ? "high" : 
-                   m.score >= CONFIDENCE_THRESHOLDS.medium ? "medium" : "low",
-        explanation: m.notes,
-        match_reasons: m.matchReasons.join("; "),
-      }));
+      const matchInserts = scoredMatches.map((m, i) => {
+        const vr = visualResults[m.id];
+        let explanation = m.notes || "";
+        if (vr?.assessment) {
+          explanation += (explanation ? " • " : "") + `Visual: ${vr.assessment}`;
+        }
+        if (vr?.redFlags?.length) {
+          explanation += ` [Flags: ${vr.redFlags.join(", ")}]`;
+        }
+
+        return {
+          report_id: report.id,
+          rank: i + 1,
+          drug_name: m.drug_name,
+          matched_imprint: m.imprint,
+          matched_shape: m.shape,
+          matched_color: m.color,
+          confidence: m.score >= CONFIDENCE_THRESHOLDS.high ? "high" : 
+                     m.score >= CONFIDENCE_THRESHOLDS.medium ? "medium" : "low",
+          explanation,
+          match_reasons: m.matchReasons.join("; "),
+        };
+      });
 
       await supabase.from("matches").insert(matchInserts);
     }
