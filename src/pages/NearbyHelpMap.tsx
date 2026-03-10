@@ -270,16 +270,26 @@ export default function NearbyHelpMap() {
 
         {/* Map / List area */}
         <div className="flex-1 relative overflow-hidden">
-          {/* Map container — always rendered for Leaflet */}
-          <div
-            ref={mapRef}
-            className={`absolute inset-0 ${showList ? "hidden sm:block sm:w-1/2" : "w-full"}`}
-          />
+          {/* Map container — always visible */}
+          <div ref={mapRef} className="absolute inset-0 w-full" />
 
-          {/* List view */}
+          {/* List overlay panel */}
           {showList && (
-            <div className={`absolute inset-0 overflow-auto bg-background sm:left-1/2 sm:w-1/2`}>
-              <div className="p-4 space-y-3">
+            <div className="absolute bottom-0 left-0 right-0 h-[60vh] sm:top-0 sm:right-0 sm:left-auto sm:bottom-0 sm:w-[380px] sm:h-auto bg-background/95 backdrop-blur-sm shadow-xl rounded-t-xl sm:rounded-t-none sm:rounded-l-xl overflow-hidden flex flex-col z-[1000]">
+              {/* Panel header */}
+              <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border shrink-0">
+                <span className="text-sm font-semibold text-foreground">
+                  {filteredFacilities.length} result{filteredFacilities.length !== 1 ? "s" : ""}
+                </span>
+                <Button variant="ghost" size="sm" onClick={() => setShowList(false)} className="h-7 w-7 p-0">
+                  ✕
+                </Button>
+              </div>
+              {/* Drag handle (mobile) */}
+              <div className="sm:hidden flex justify-center py-1">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+              </div>
+              <div className="flex-1 overflow-auto p-4 space-y-3">
                 {!searched && (
                   <p className="text-sm text-muted-foreground text-center py-8">
                     Search by location to find nearby facilities.
