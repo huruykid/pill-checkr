@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      buddy_alerts: {
+        Row: {
+          contacts_notified: Json
+          id: string
+          message: string
+          report_id: string | null
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          contacts_notified?: Json
+          id?: string
+          message: string
+          report_id?: string | null
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          contacts_notified?: Json
+          id?: string
+          message?: string
+          report_id?: string | null
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buddy_alerts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       counterfeit_reports: {
         Row: {
           city: string | null

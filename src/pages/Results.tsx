@@ -459,6 +459,7 @@ export default function Results() {
 
           {/* Buddy Alert System */}
           <BuddyAlert
+            reportId={report.id}
             drugName={matches.length > 0 ? matches[0].drug_name : undefined}
             riskLevel={riskLevel}
             className="mb-6"
