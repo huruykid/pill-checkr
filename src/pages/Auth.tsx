@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Loader2, Shield, Mail, Lock, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import { lovable } from "@/integrations/lovable/index";
+import { Separator } from "@/components/ui/separator";
 
 export default function Auth() {
   const navigate = useNavigate();
