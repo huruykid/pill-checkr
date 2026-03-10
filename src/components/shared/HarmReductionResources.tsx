@@ -115,15 +115,12 @@ export function HarmReductionResources({ className, showFindHelp }: HarmReductio
                       Free by Mail (NEXT Distro) <ExternalLink className="h-3.5 w-3.5" />
                     </Button>
                   </a>
-                  <a
-                    href="https://www.naloxonelocator.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button variant="outline" size="sm" className="gap-2">
-                      Find Near You <ExternalLink className="h-3.5 w-3.5" />
+                  <Link to="/nearby-help?filter=naloxone">
+                    <Button variant="default" size="sm" className="gap-2">
+                      <MapPin className="h-3.5 w-3.5" />
+                      Find Naloxone Near Me
                     </Button>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
