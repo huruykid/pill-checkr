@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SafetyChecklist } from "@/components/shared/SafetyChecklist";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, ArrowLeft, BookOpen, ExternalLink, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BookOpen, ExternalLink, Loader2, MapPin } from "lucide-react";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
+import { CounterfeitHotspots } from "@/components/results/CounterfeitHotspots";
 import type { Database } from "@/integrations/supabase/types";
 
 type EducationPost = Database["public"]["Tables"]["education_posts"]["Row"];
@@ -46,7 +47,6 @@ export default function Education() {
     }
   };
 
-  // Simple markdown-like rendering
   const renderContent = (body: string) => {
     const lines = body.split("\n");
     const elements: JSX.Element[] = [];
@@ -70,7 +70,6 @@ export default function Education() {
     };
 
     const renderInline = (text: string) => {
-      // Bold
       const parts = text.split(/\*\*(.*?)\*\*/g);
       return parts.map((part, i) =>
         i % 2 === 1 ? <strong key={i}>{part}</strong> : part
@@ -121,7 +120,6 @@ export default function Education() {
     );
   }
 
-  // Single article view
   if (selectedPost) {
     return (
       <Layout>
@@ -155,7 +153,6 @@ export default function Education() {
     );
   }
 
-  // Article list view
   return (
     <Layout>
       <div className="container py-8 md:py-12">
@@ -171,6 +168,7 @@ export default function Education() {
               Essential information for harm reduction and staying safe
             </p>
           </div>
+
           {/* Fentanyl Test Strip Banner */}
           <Card className="mb-6 border-warning/30 bg-warning-light">
             <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -198,11 +196,21 @@ export default function Education() {
             </CardContent>
           </Card>
 
-
           <SafetyChecklist />
 
           {/* Find Help Nearby */}
           <NearbyHelp className="mb-6" />
+
+          {/* Link to full map */}
+          <Link to="/nearby-help" className="mb-6 block">
+            <Button variant="outline" className="w-full gap-2">
+              <MapPin className="h-4 w-4" />
+              Open Full Map — Find Treatment Centers Near You
+            </Button>
+          </Link>
+
+          {/* Counterfeit Hotspots */}
+          <CounterfeitHotspots className="mb-6" />
 
           {/* Section Label */}
           <div className="mb-4">

@@ -8,6 +8,9 @@ import { CounterfeitWarning } from "@/components/shared/CounterfeitWarning";
 import { HarmReductionResources } from "@/components/shared/HarmReductionResources";
 import { DrugInfoCard } from "@/components/results/DrugInfoCard";
 import { InteractionChecker } from "@/components/results/InteractionChecker";
+import { EmergencyBar } from "@/components/results/EmergencyBar";
+import { BuddyAlert } from "@/components/results/BuddyAlert";
+import { ReportPill } from "@/components/results/ReportPill";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +32,7 @@ import {
   Gauge,
   Eye,
   ImageIcon,
+  MapPin,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -50,22 +54,13 @@ interface VisualSimilarityData {
 
 function parseVisualSimilarity(matchReasons: string | null): VisualSimilarityData {
   if (!matchReasons) return { hasComparison: false, score: null, flags: [] };
-  
-  // Extract similarity score: "Visual similarity: 85%"
   const scoreMatch = matchReasons.match(/Visual similarity:\s*(\d+)%/i);
   const score = scoreMatch ? parseInt(scoreMatch[1], 10) : null;
-  
-  // Extract flags: "Visual flags: rough edges, off-center imprint"
   const flagsMatch = matchReasons.match(/Visual flags?:\s*([^.]+)/i);
   const flags = flagsMatch 
     ? flagsMatch[1].split(',').map(f => f.trim()).filter(Boolean)
     : [];
-  
-  return {
-    hasComparison: score !== null,
-    score,
-    flags,
-  };
+  return { hasComparison: score !== null, score, flags };
 }
 
 function getVisualScoreColor(score: number): string {
@@ -97,11 +92,9 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Check if any match has HIGH COUNTERFEIT RISK - must be before early returns
   const hasCounterfeitRisk = useMemo(() => {
     return data?.matches.some(
-      (match) =>
-        match.explanation?.toUpperCase().includes("HIGH COUNTERFEIT RISK")
+      (match) => match.explanation?.toUpperCase().includes("HIGH COUNTERFEIT RISK")
     ) ?? false;
   }, [data?.matches]);
 
@@ -142,18 +135,15 @@ export default function Results() {
 
   const handleSaveToHistory = async () => {
     if (!data?.report) return;
-    
     setSaving(true);
     try {
       if (user) {
-        // Authenticated: update report with user_id
         await supabase
           .from("reports")
           .update({ user_id: user.id })
           .eq("id", data.report.id);
         toast.success("Saved to your account history");
       } else {
-        // Anonymous: save to localStorage
         const history = JSON.parse(localStorage.getItem("pillCheckHistory") || "[]");
         history.unshift({
           id: data.report.id,
@@ -230,6 +220,9 @@ export default function Results() {
             <h1 className="mb-4 text-3xl font-bold md:text-4xl">Analysis Results</h1>
             <RiskBadge level={riskLevel} size="lg" />
           </div>
+
+          {/* Emergency Bar for high-risk results */}
+          {riskLevel === "high" && <EmergencyBar className="mb-6" />}
 
           {/* Show pill photo if available */}
           {report.photo_url && (
@@ -346,7 +339,7 @@ export default function Results() {
             </CardContent>
           </Card>
 
-          {/* Counterfeit Warning - shown if any match has high counterfeit risk */}
+          {/* Counterfeit Warning */}
           {hasCounterfeitRisk && <CounterfeitWarning className="mb-6" />}
 
           {/* Section B: Uncertainty & Consistency Check */}
@@ -464,11 +457,35 @@ export default function Results() {
             <InteractionChecker drugName={matches[0].drug_name} className="mb-6" />
           )}
 
+          {/* Buddy Alert System */}
+          <BuddyAlert
+            drugName={matches.length > 0 ? matches[0].drug_name : undefined}
+            riskLevel={riskLevel}
+            className="mb-6"
+          />
+
+          {/* Report This Pill */}
+          <ReportPill
+            reportId={report.id}
+            drugName={matches.length > 0 ? matches[0].drug_name : undefined}
+            riskLevel={riskLevel}
+            photoUrl={report.photo_url}
+            className="mb-6"
+          />
+
           {/* Harm Reduction Resources */}
           <HarmReductionResources className="mb-8" />
 
           {/* Find Help Nearby */}
-          <NearbyHelp className="mb-8" />
+          <NearbyHelp className="mb-4" />
+
+          {/* Link to full map page */}
+          <Link to="/nearby-help" className="mb-8 block">
+            <Button variant="outline" className="w-full gap-2">
+              <MapPin className="h-4 w-4" />
+              Open Full Map — Find Treatment Centers & Naloxone Near You
+            </Button>
+          </Link>
 
           <Disclaimer className="mb-8" />
 

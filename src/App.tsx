@@ -12,6 +12,7 @@ import Education from "./pages/Education";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
+import NearbyHelpMap from "./pages/NearbyHelpMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/nearby-help" element={<NearbyHelpMap />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
