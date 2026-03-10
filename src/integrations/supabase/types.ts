@@ -55,6 +55,9 @@ export type Database = {
           created_at: string
           drug_name: string | null
           id: string
+          is_anonymous: boolean
+          location_lat: number | null
+          location_lng: number | null
           notes: string | null
           photo_url: string | null
           report_id: string | null
@@ -66,6 +69,9 @@ export type Database = {
           created_at?: string
           drug_name?: string | null
           id?: string
+          is_anonymous?: boolean
+          location_lat?: number | null
+          location_lng?: number | null
           notes?: string | null
           photo_url?: string | null
           report_id?: string | null
@@ -77,6 +83,9 @@ export type Database = {
           created_at?: string
           drug_name?: string | null
           id?: string
+          is_anonymous?: boolean
+          location_lat?: number | null
+          location_lng?: number | null
           notes?: string | null
           photo_url?: string | null
           report_id?: string | null
