@@ -43,6 +43,8 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
     setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        setLat(pos.coords.latitude);
+        setLng(pos.coords.longitude);
         try {
           const resp = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`,
