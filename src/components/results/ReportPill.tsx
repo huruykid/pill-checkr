@@ -32,6 +32,8 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
 
   const useApproximateLocation = () => {
     if (!navigator.geolocation) {
@@ -41,6 +43,8 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
     setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        setLat(pos.coords.latitude);
+        setLng(pos.coords.longitude);
         try {
           const resp = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`,
@@ -78,6 +82,9 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
         state: state.trim() || null,
         notes: notes.trim() || null,
         photo_url: photoUrl || null,
+        location_lat: lat,
+        location_lng: lng,
+        is_anonymous: true,
       });
       if (error) throw error;
       setSubmitted(true);
