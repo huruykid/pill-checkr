@@ -53,17 +53,26 @@ serve(async (req) => {
         const data = JSON.parse(text);
         const rows = data.rows || data.results || data || [];
         
-        facilities = (Array.isArray(rows) ? rows : []).slice(0, 10).map((f: Record<string, unknown>) => ({
-          name: f.name1 || f.name2 || f.name || "Treatment Center",
-          address: [f.street1 || f.street, f.city, f.state, f.zip].filter(Boolean).join(", "),
-          phone: f.phone || null,
-          distance: f.miles ? `${Number(f.miles).toFixed(1)} mi` : null,
-          website: f.website || null,
-          services: Array.isArray(f.services) ? f.services : [],
-          type: f.type_facility || f.category || null,
-          lat: f.latitude ? Number(f.latitude) : null,
-          lng: f.longitude ? Number(f.longitude) : null,
-        }));
+        facilities = (Array.isArray(rows) ? rows : []).slice(0, 10).map((f: Record<string, unknown>) => {
+          // Services come as [{f1: "category", f3: "description"}, ...]
+          const rawServices = Array.isArray(f.services) ? f.services : [];
+          const serviceLabels = rawServices
+            .filter((s: Record<string, string>) => s.f1 && s.f1 !== "Facility Operation (e.g., Private, Public)" && s.f1 !== "License/Certification/Accreditation" && s.f1 !== "Payment/Insurance/Funding Accepted" && s.f1 !== "Payment Assistance Available")
+            .map((s: Record<string, string>) => s.f1)
+            .slice(0, 4);
+          
+          return {
+            name: f.name1 || f.name2 || f.name || "Treatment Center",
+            address: [f.street1 || f.street, f.city, f.state, f.zip].filter(Boolean).join(", "),
+            phone: f.phone || null,
+            distance: f.miles ? `${Number(f.miles).toFixed(1)} mi` : null,
+            website: f.website || null,
+            services: serviceLabels,
+            type: f.type_facility || f.category || null,
+            lat: f.latitude ? Number(f.latitude) : null,
+            lng: f.longitude ? Number(f.longitude) : null,
+          };
+        });
       } catch (parseErr) {
         console.error("Parse error from SAMHSA:", parseErr);
         // Log first 500 chars to debug the response format
