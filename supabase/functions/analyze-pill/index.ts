@@ -545,6 +545,11 @@ Respond with JSON only:
       }
     }
 
+    // Auto-flag Schedule II substances as high counterfeit risk
+    const isScheduleII = scoredMatches.some(m => 
+      m.notes?.includes("Schedule II") || m.notes?.includes("CII")
+    );
+
     const { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
       extracted,
       topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color } : null,
@@ -558,7 +563,12 @@ Respond with JSON only:
       analysis.image_quality
     );
 
-    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}, Visual mismatch: ${visualMismatchDetected}`);
+    // Elevate risk for Schedule II substances
+    if (isScheduleII && riskLevel === "low") {
+      riskReasons.push("Matched to a Schedule II controlled substance — higher counterfeit risk");
+    }
+
+    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}, Visual mismatch: ${visualMismatchDetected}, Schedule II: ${isScheduleII}`);
 
     // ─── Step 5: Persist report and matches ─────────────────────────────────
     const { data: report, error: reportError } = await supabase
