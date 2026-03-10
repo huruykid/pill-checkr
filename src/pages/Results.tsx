@@ -475,7 +475,7 @@ export default function Results() {
           />
 
           {/* Harm Reduction Resources */}
-          <HarmReductionResources className="mb-8" />
+          <HarmReductionResources className="mb-8" showFindHelp={riskLevel === "high"} />
 
           {/* Find Help Nearby — only for medium/high risk */}
           {(riskLevel === "medium" || riskLevel === "high") && (
