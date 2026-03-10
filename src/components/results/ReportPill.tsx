@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,6 +129,21 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            {/* Risk level auto-filled */}
+            {riskLevel && (
+              <div className="space-y-1">
+                <Label className="text-sm font-medium">Risk Level</Label>
+                <div className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium capitalize",
+                  riskLevel === "high" && "bg-destructive/10 text-destructive",
+                  riskLevel === "medium" && "bg-warning/10 text-warning",
+                  riskLevel === "low" && "bg-success/10 text-success",
+                )}>
+                  {riskLevel} risk (auto-filled from analysis)
+                </div>
+              </div>
+            )}
+
             {/* Location section */}
             <div className="space-y-3">
               <Label className="text-sm font-medium">Location (optional)</Label>
@@ -182,11 +198,11 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
               )}
             </div>
 
-            {/* Notes */}
+            {/* Suspicious details */}
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Notes (optional)</Label>
+              <Label className="text-sm font-medium">What seemed suspicious? (optional)</Label>
               <Textarea
-                placeholder="Anything else you'd like to share about this pill..."
+                placeholder="e.g. Unusual taste, wrong color, unexpected effects, crumbled easily..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 maxLength={500}
