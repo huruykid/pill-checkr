@@ -82,6 +82,9 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
         state: state.trim() || null,
         notes: notes.trim() || null,
         photo_url: photoUrl || null,
+        location_lat: lat,
+        location_lng: lng,
+        is_anonymous: true,
       });
       if (error) throw error;
       setSubmitted(true);
