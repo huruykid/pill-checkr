@@ -113,9 +113,10 @@ export default function NearbyHelpMap() {
     if (center) bounds.extend([center.lat, center.lng]);
 
     facs.forEach((f) => {
-      if (center) {
-        const lat = center.lat + (Math.random() - 0.5) * 0.1;
-        const lng = center.lng + (Math.random() - 0.5) * 0.1;
+      // Use actual facility coordinates if available, otherwise offset from center
+      const lat = f.lat ?? (center ? center.lat + (Math.random() - 0.5) * 0.1 : null);
+      const lng = f.lng ?? (center ? center.lng + (Math.random() - 0.5) * 0.1 : null);
+      if (lat != null && lng != null) {
 
         const facilityIcon = L.divIcon({
           className: "custom-marker",

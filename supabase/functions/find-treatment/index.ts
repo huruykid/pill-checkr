@@ -20,11 +20,23 @@ serve(async (req) => {
       });
     }
 
-    // Use SAMHSA Treatment Locator API
+    // Build address param for SAMHSA API
     const sAddr = zipcode || `${latitude},${longitude}`;
-    const url = `https://findtreatment.gov/locator/listing?sAddr=${encodeURIComponent(sAddr)}&pageSize=5&sort=0&sType=SA`;
+    
+    // Use the correct SAMHSA exportsAsJson/v2 endpoint
+    const params = new URLSearchParams({
+      sAddr,
+      pageSize: "10",
+      page: "1",
+      sort: "0",
+      sType: "SA",
+      limitType: "2",       // distance-based
+      limitValue: "80467",  // ~50 miles in meters
+    });
+    
+    const url = `https://findtreatment.gov/locator/exportsAsJson/v2?${params.toString()}`;
 
-    console.log(`Fetching treatment facilities near: ${sAddr}`);
+    console.log(`Fetching treatment facilities from: ${url}`);
 
     const resp = await fetch(url, {
       headers: {
@@ -36,56 +48,94 @@ serve(async (req) => {
     let facilities: Array<Record<string, unknown>> = [];
 
     if (resp.ok) {
+      const text = await resp.text();
       try {
-        const data = await resp.json();
+        const data = JSON.parse(text);
         const rows = data.rows || data.results || data || [];
         
-        facilities = (Array.isArray(rows) ? rows : []).slice(0, 5).map((f: Record<string, unknown>) => ({
-          name: f.name1 || f.name || "Treatment Center",
-          address: [f.street1 || f.street, f.city, f.state, f.zip].filter(Boolean).join(", "),
-          phone: f.phone || null,
-          distance: f.miles ? `${Number(f.miles).toFixed(1)} mi` : null,
-          website: f.website || null,
-          services: (f.services as string[]) || [],
-          type: f.type_facility || f.category || null,
-        }));
-      } catch (parseErr) {
-        console.error("Parse error from SAMHSA:", parseErr);
-        await resp.text(); // consume body
-      }
-    } else {
-      const errText = await resp.text();
-      console.log(`SAMHSA API returned ${resp.status}: ${errText}`);
-    }
-
-    // Fallback: also try SAMHSA's alternate API format
-    if (facilities.length === 0) {
-      try {
-        const altUrl = `https://findtreatment.gov/locator/ExportResults?sAddr=${encodeURIComponent(sAddr)}&pageSize=5&sort=0&sType=SA&output=json`;
-        const altResp = await fetch(altUrl, {
-          headers: { "User-Agent": "PillCheckr-HarmReduction/1.0" },
-        });
-        if (altResp.ok) {
-          const altData = await altResp.json();
-          const rows = altData.rows || altData.results || [];
-          facilities = (Array.isArray(rows) ? rows : []).slice(0, 5).map((f: Record<string, unknown>) => ({
-            name: f.name1 || f.name || "Treatment Center",
-            address: [f.street1, f.city, f.state, f.zip].filter(Boolean).join(", "),
+        facilities = (Array.isArray(rows) ? rows : []).slice(0, 10).map((f: Record<string, unknown>) => {
+          // Services come as [{f1: "category", f3: "description"}, ...]
+          const rawServices = Array.isArray(f.services) ? f.services : [];
+          const serviceLabels = rawServices
+            .filter((s: Record<string, string>) => s.f1 && !["Facility Operation (e.g., Private, Public)", "License/Certification/Accreditation", "Payment/Insurance/Funding Accepted", "Payment Assistance Available", "External Opioid Medications Source", " External Source of Medications Used for Alcohol Use Disorder Treatment"].includes(s.f1))
+            .map((s: Record<string, string>) => {
+              // Use the f3 description but truncate to first item for brevity
+              const desc = s.f3 || s.f1;
+              return desc.split(";")[0].trim();
+            })
+            .slice(0, 3);
+          
+          return {
+            name: f.name1 || f.name2 || f.name || "Treatment Center",
+            address: [f.street1 || f.street, f.city, f.state, f.zip].filter(Boolean).join(", "),
             phone: f.phone || null,
             distance: f.miles ? `${Number(f.miles).toFixed(1)} mi` : null,
             website: f.website || null,
-            services: [],
-            type: f.type_facility || null,
-          }));
+            services: serviceLabels,
+            type: f.type_facility || f.category || null,
+            lat: f.latitude ? Number(f.latitude) : null,
+            lng: f.longitude ? Number(f.longitude) : null,
+          };
+        });
+      } catch (parseErr) {
+        console.error("Parse error from SAMHSA:", parseErr);
+        // Log first 500 chars to debug the response format
+        console.log("Response preview:", text.substring(0, 500));
+      }
+    } else {
+      const errText = await resp.text();
+      console.log(`SAMHSA API returned ${resp.status}: ${errText.substring(0, 300)}`);
+    }
+
+    // Fallback: try the non-v2 endpoint
+    if (facilities.length === 0) {
+      try {
+        const altParams = new URLSearchParams({
+          sAddr,
+          pageSize: "10",
+          page: "1",
+          sort: "0",
+          sType: "SA",
+        });
+        const altUrl = `https://findtreatment.gov/locator/exportsAsJson?${altParams.toString()}`;
+        console.log(`Trying fallback: ${altUrl}`);
+        
+        const altResp = await fetch(altUrl, {
+          headers: { 
+            "Accept": "application/json",
+            "User-Agent": "PillCheckr-HarmReduction/1.0" 
+          },
+        });
+        
+        const altText = await altResp.text();
+        
+        if (altResp.ok) {
+          try {
+            const altData = JSON.parse(altText);
+            const rows = altData.rows || altData.results || [];
+            facilities = (Array.isArray(rows) ? rows : []).slice(0, 10).map((f: Record<string, unknown>) => ({
+              name: f.name1 || f.name2 || f.name || "Treatment Center",
+              address: [f.street1, f.city, f.state, f.zip].filter(Boolean).join(", "),
+              phone: f.phone || null,
+              distance: f.miles ? `${Number(f.miles).toFixed(1)} mi` : null,
+              website: f.website || null,
+              services: [],
+              type: f.type_facility || null,
+              lat: f.latitude ? Number(f.latitude) : null,
+              lng: f.longitude ? Number(f.longitude) : null,
+            }));
+          } catch {
+            console.log("Fallback parse failed, response preview:", altText.substring(0, 500));
+          }
         } else {
-          await altResp.text();
+          console.log(`Fallback returned ${altResp.status}`);
         }
-      } catch {
-        // Fallback failed, return empty
+      } catch (e) {
+        console.error("Fallback fetch error:", e);
       }
     }
 
-    // Always include national helpline as last resort
+    // Always include national helpline
     const helpline = {
       name: "SAMHSA National Helpline",
       address: "Available nationwide",
@@ -118,7 +168,7 @@ serve(async (req) => {
         type: "Helpline",
       },
     }), {
-      status: 200, // Return 200 even on error so helpline shows
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
