@@ -12,6 +12,7 @@ import Education from "./pages/Education";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
+import Settings from "./pages/Settings";
 import NearbyHelpMap from "./pages/NearbyHelpMap";
 import NotFound from "./pages/NotFound";
 
