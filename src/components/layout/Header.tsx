@@ -127,14 +127,27 @@ export function Header() {
               </Link>
             ))}
             {user ? (
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10"
-                onClick={() => { signOut(); setMobileMenuOpen(false); }}
-              >
-                <LogOut className="h-5 w-5" />
-                Sign Out
-              </Button>
+              <>
+                <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10 ${
+                      isActive("/settings") ? "text-secondary" : ""
+                    }`}
+                  >
+                    <Settings className="h-5 w-5" />
+                    Settings
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10"
+                  onClick={() => { signOut(); setMobileMenuOpen(false); }}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Sign Out
+                </Button>
+              </>
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button
