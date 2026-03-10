@@ -1,10 +1,18 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Flag, Loader2, CheckCircle } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Flag, Loader2, CheckCircle, MapPin, Navigation } from "lucide-react";
 import { toast } from "sonner";
 
 interface ReportPillProps {
@@ -16,11 +24,47 @@ interface ReportPillProps {
 }
 
 export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className }: ReportPillProps) {
+  const [open, setOpen] = useState(false);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
+
+  const useApproximateLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported by your browser");
+      return;
+    }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const resp = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`,
+            { headers: { "User-Agent": "FentFinder-HarmReduction/1.0" } }
+          );
+          if (resp.ok) {
+            const data = await resp.json();
+            const addr = data.address || {};
+            setCity(addr.city || addr.town || addr.village || addr.county || "");
+            setState(addr.state || "");
+            toast.success("Approximate location detected (city-level only)");
+          }
+        } catch {
+          toast.error("Could not determine location");
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      () => {
+        setGeoLoading(false);
+        toast.error("Location access denied");
+      },
+      { timeout: 10000 }
+    );
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -36,6 +80,7 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
       });
       if (error) throw error;
       setSubmitted(true);
+      setOpen(false);
       toast.success("Report submitted anonymously. Thank you for helping keep others safe.");
     } catch (e) {
       console.error("Error submitting report:", e);
@@ -59,52 +104,126 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
   }
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Flag className="h-5 w-5 text-warning" />
-          Report This Pill
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Help warn others anonymously. Your location data is optional and city-level only.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            placeholder="City (optional)"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            maxLength={100}
-          />
-          <Input
-            placeholder="State (optional)"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-            maxLength={50}
-          />
-        </div>
-        <Textarea
-          placeholder="Any additional notes... (optional)"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          maxLength={500}
-          rows={2}
-        />
-        <Button
-          onClick={handleSubmit}
-          disabled={submitting}
-          variant="warning"
-          className="w-full gap-2"
-        >
-          {submitting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Flag className="h-4 w-4" />
-          )}
-          Submit Anonymous Report
-        </Button>
-      </CardContent>
-    </Card>
+    <>
+      <Button
+        variant="warning"
+        size="lg"
+        className={`w-full gap-2 font-semibold ${className || ""}`}
+        onClick={() => setOpen(true)}
+      >
+        <Flag className="h-5 w-5" />
+        ⚠️ Report This Pill
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5 text-warning" />
+              Report This Pill
+            </DialogTitle>
+            <DialogDescription>
+              Help warn others anonymously. Location is optional and city-level only — we never store exact coordinates.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Location section */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Location (optional)</Label>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-2"
+                onClick={useApproximateLocation}
+                disabled={geoLoading}
+              >
+                {geoLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Navigation className="h-4 w-4" />
+                )}
+                {geoLoading ? "Detecting..." : "Use my approximate location"}
+              </Button>
+
+              <div className="flex items-center gap-2">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">or enter manually</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Input
+                    placeholder="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    maxLength={100}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    placeholder="State"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    maxLength={50}
+                  />
+                </div>
+              </div>
+
+              {city && state && (
+                <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-muted-foreground">
+                    {city}, {state}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Notes (optional)</Label>
+              <Textarea
+                placeholder="Anything else you'd like to share about this pill..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                maxLength={500}
+                rows={3}
+              />
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              This report is completely anonymous. No account information is attached.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting}
+              variant="warning"
+              className="w-full gap-2 font-semibold"
+            >
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Flag className="h-4 w-4" />
+              )}
+              Submit Anonymous Report
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setOpen(false)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
