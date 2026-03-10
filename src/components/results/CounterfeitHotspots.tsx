@@ -6,8 +6,8 @@ import { MapPin, AlertTriangle, Loader2 } from "lucide-react";
 
 interface HotspotData {
   state: string;
-  city: string;
   count: number;
+  cities: string[];
   latest_drug: string | null;
   latest_risk: string | null;
 }
@@ -37,22 +37,26 @@ export function CounterfeitHotspots({ className }: CounterfeitHotspotsProps) {
 
       setTotalReports(data?.length || 0);
 
-      // Aggregate by state+city
-      const grouped: Record<string, { count: number; latest_drug: string | null; latest_risk: string | null }> = {};
+      // Aggregate by state
+      const grouped: Record<string, { count: number; cities: Set<string>; latest_drug: string | null; latest_risk: string | null }> = {};
       for (const r of data || []) {
         if (!r.state) continue;
-        const key = `${r.state}|${r.city || "Unknown"}`;
+        const key = r.state;
         if (!grouped[key]) {
-          grouped[key] = { count: 0, latest_drug: r.drug_name, latest_risk: r.risk_level };
+          grouped[key] = { count: 0, cities: new Set(), latest_drug: r.drug_name, latest_risk: r.risk_level };
         }
         grouped[key].count++;
+        if (r.city) grouped[key].cities.add(r.city);
       }
 
       const sorted = Object.entries(grouped)
-        .map(([key, val]) => {
-          const [state, city] = key.split("|");
-          return { state, city, ...val };
-        })
+        .map(([state, val]) => ({
+          state,
+          count: val.count,
+          cities: Array.from(val.cities).slice(0, 3),
+          latest_drug: val.latest_drug,
+          latest_risk: val.latest_risk,
+        }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
@@ -104,13 +108,12 @@ export function CounterfeitHotspots({ className }: CounterfeitHotspotsProps) {
                   }`} />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
-                      {h.city}, {h.state}
+                      {h.state}
                     </p>
-                    {h.latest_drug && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        Latest: {h.latest_drug}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground truncate">
+                      {h.cities.length > 0 ? h.cities.join(", ") : "Location not specified"}
+                      {h.latest_drug && ` · Latest: ${h.latest_drug}`}
+                    </p>
                   </div>
                 </div>
                 <Badge variant={h.count >= 5 ? "destructive" : "secondary"} className="shrink-0">
