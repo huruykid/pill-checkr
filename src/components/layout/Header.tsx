@@ -13,6 +13,7 @@ export function Header() {
     { to: "/check", label: "Check a Pill", icon: Search },
     { to: "/history", label: "History", icon: History },
     { to: "/education", label: "Learn", icon: BookOpen },
+    { to: "/nearby-help", label: "Find Help", icon: MapPin },
   ];
 
   const isActive = (path: string) => location.pathname === path;
