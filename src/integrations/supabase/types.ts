@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      counterfeit_reports: {
+        Row: {
+          city: string | null
+          created_at: string
+          drug_name: string | null
+          id: string
+          notes: string | null
+          photo_url: string | null
+          report_id: string | null
+          risk_level: string | null
+          state: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          drug_name?: string | null
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          report_id?: string | null
+          risk_level?: string | null
+          state?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          drug_name?: string | null
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          report_id?: string | null
+          risk_level?: string | null
+          state?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "counterfeit_reports_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drug_info_cache: {
         Row: {
           adverse_events_data: Json | null
@@ -68,6 +112,33 @@ export type Database = {
           summary?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      emergency_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          user_id?: string
         }
         Relationships: []
       }
