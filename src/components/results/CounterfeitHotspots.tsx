@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, AlertTriangle, Loader2 } from "lucide-react";
+import { MapPin, AlertTriangle, Loader2, TrendingUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface HotspotData {
   state: string;
   count: number;
   cities: string[];
+  highRiskCount: number;
   latest_drug: string | null;
-  latest_risk: string | null;
 }
 
 interface CounterfeitHotspotsProps {
@@ -31,21 +32,21 @@ export function CounterfeitHotspots({ className }: CounterfeitHotspotsProps) {
         .from("counterfeit_reports")
         .select("city, state, drug_name, risk_level, created_at")
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(500);
 
       if (error) throw error;
 
       setTotalReports(data?.length || 0);
 
-      // Aggregate by state
-      const grouped: Record<string, { count: number; cities: Set<string>; latest_drug: string | null; latest_risk: string | null }> = {};
+      const grouped: Record<string, { count: number; highRiskCount: number; cities: Set<string>; latest_drug: string | null }> = {};
       for (const r of data || []) {
         if (!r.state) continue;
         const key = r.state;
         if (!grouped[key]) {
-          grouped[key] = { count: 0, cities: new Set(), latest_drug: r.drug_name, latest_risk: r.risk_level };
+          grouped[key] = { count: 0, highRiskCount: 0, cities: new Set(), latest_drug: r.drug_name };
         }
         grouped[key].count++;
+        if (r.risk_level === "high") grouped[key].highRiskCount++;
         if (r.city) grouped[key].cities.add(r.city);
       }
 
@@ -53,9 +54,9 @@ export function CounterfeitHotspots({ className }: CounterfeitHotspotsProps) {
         .map(([state, val]) => ({
           state,
           count: val.count,
+          highRiskCount: val.highRiskCount,
           cities: Array.from(val.cities).slice(0, 3),
           latest_drug: val.latest_drug,
-          latest_risk: val.latest_risk,
         }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
@@ -79,15 +80,17 @@ export function CounterfeitHotspots({ className }: CounterfeitHotspotsProps) {
     );
   }
 
+  const maxCount = hotspots.length > 0 ? hotspots[0].count : 1;
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-warning" />
-          Counterfeit Report Hotspots
+          <TrendingUp className="h-5 w-5 text-warning" />
+          Counterfeit Hotspots
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          {totalReports} anonymous reports submitted by users to help warn others.
+          {totalReports} anonymous reports — ranked by frequency.
         </p>
       </CardHeader>
       <CardContent>
@@ -96,31 +99,64 @@ export function CounterfeitHotspots({ className }: CounterfeitHotspotsProps) {
             No reports yet. Be the first to help warn others by reporting a suspicious pill.
           </p>
         ) : (
-          <div className="space-y-2">
-            {hotspots.map((h, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <AlertTriangle className={`h-4 w-4 shrink-0 ${
-                    h.count >= 5 ? "text-destructive" : h.count >= 2 ? "text-warning" : "text-muted-foreground"
-                  }`} />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {h.state}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {h.cities.length > 0 ? h.cities.join(", ") : "Location not specified"}
-                      {h.latest_drug && ` · Latest: ${h.latest_drug}`}
-                    </p>
+          <div className="space-y-3">
+            {hotspots.map((h, i) => {
+              const pct = Math.round((h.count / maxCount) * 100);
+              const isHighRiskArea = h.highRiskCount >= 2 || h.highRiskCount / h.count >= 0.5;
+
+              return (
+                <div key={i} className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xs font-bold text-muted-foreground w-5 text-right shrink-0">
+                        {i + 1}
+                      </span>
+                      <AlertTriangle className={cn(
+                        "h-4 w-4 shrink-0",
+                        isHighRiskArea ? "text-destructive" : h.count >= 3 ? "text-warning" : "text-muted-foreground"
+                      )} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">
+                          {h.state}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {isHighRiskArea && (
+                        <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                          HIGH RISK
+                        </Badge>
+                      )}
+                      <Badge variant="secondary" className="text-xs tabular-nums">
+                        {h.count}
+                      </Badge>
+                    </div>
                   </div>
+
+                  {/* Progress bar */}
+                  <div className="ml-7 flex items-center gap-2">
+                    <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          isHighRiskArea
+                            ? "bg-destructive"
+                            : h.count >= 3
+                              ? "bg-warning"
+                              : "bg-primary/50"
+                        )}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <p className="ml-7 text-[11px] text-muted-foreground truncate">
+                    {h.cities.length > 0 ? h.cities.join(", ") : "Location not specified"}
+                    {h.latest_drug && ` · Latest: ${h.latest_drug}`}
+                  </p>
                 </div>
-                <Badge variant={h.count >= 5 ? "destructive" : "secondary"} className="shrink-0">
-                  {h.count} {h.count === 1 ? "report" : "reports"}
-                </Badge>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>
