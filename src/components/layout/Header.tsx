@@ -50,15 +50,29 @@ export function Header() {
             </Link>
           ))}
           {user ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 text-background/80 hover:text-background hover:bg-background/10"
-              onClick={() => signOut()}
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
+            <>
+              <Link to="/settings">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`gap-2 text-background/80 hover:text-background hover:bg-background/10 ${
+                    isActive("/settings") ? "text-secondary bg-background/10" : ""
+                  }`}
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-background/80 hover:text-background hover:bg-background/10"
+                onClick={() => signOut()}
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </>
           ) : (
             <Link to="/auth">
               <Button
