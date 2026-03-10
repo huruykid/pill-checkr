@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin } from "lucide-react";
+import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -50,15 +50,29 @@ export function Header() {
             </Link>
           ))}
           {user ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 text-background/80 hover:text-background hover:bg-background/10"
-              onClick={() => signOut()}
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
+            <>
+              <Link to="/settings">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`gap-2 text-background/80 hover:text-background hover:bg-background/10 ${
+                    isActive("/settings") ? "text-secondary bg-background/10" : ""
+                  }`}
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-background/80 hover:text-background hover:bg-background/10"
+                onClick={() => signOut()}
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </>
           ) : (
             <Link to="/auth">
               <Button
@@ -113,14 +127,27 @@ export function Header() {
               </Link>
             ))}
             {user ? (
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10"
-                onClick={() => { signOut(); setMobileMenuOpen(false); }}
-              >
-                <LogOut className="h-5 w-5" />
-                Sign Out
-              </Button>
+              <>
+                <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10 ${
+                      isActive("/settings") ? "text-secondary" : ""
+                    }`}
+                  >
+                    <Settings className="h-5 w-5" />
+                    Settings
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10"
+                  onClick={() => { signOut(); setMobileMenuOpen(false); }}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Sign Out
+                </Button>
+              </>
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button
