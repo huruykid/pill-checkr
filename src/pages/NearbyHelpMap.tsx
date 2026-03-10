@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,8 @@ import {
   Loader2,
   Phone,
   ExternalLink,
-  Filter,
+  List,
+  Map,
 } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -29,6 +30,24 @@ interface Facility {
   lng?: number;
 }
 
+type FilterType = "all" | "treatment" | "naloxone" | "harm-reduction";
+
+const filterConfig: { value: FilterType; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "treatment", label: "Treatment Centers" },
+  { value: "naloxone", label: "Naloxone Access" },
+  { value: "harm-reduction", label: "Harm Reduction" },
+];
+
+function matchesFilter(facility: Facility, filter: FilterType): boolean {
+  if (filter === "all") return true;
+  const name = (facility.name + " " + facility.services.join(" ") + " " + (facility.type || "")).toLowerCase();
+  if (filter === "treatment") return name.includes("treatment") || name.includes("rehab") || name.includes("detox") || name.includes("recovery");
+  if (filter === "naloxone") return name.includes("naloxone") || name.includes("narcan") || name.includes("overdose prevention");
+  if (filter === "harm-reduction") return name.includes("harm reduction") || name.includes("syringe") || name.includes("needle") || name.includes("safe");
+  return true;
+}
+
 export default function NearbyHelpMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -38,6 +57,10 @@ export default function NearbyHelpMap() {
   const [zipcode, setZipcode] = useState("");
   const [locationError, setLocationError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [showList, setShowList] = useState(false);
+
+  const filteredFacilities = facilities.filter((f) => matchesFilter(f, filter));
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -56,16 +79,21 @@ export default function NearbyHelpMap() {
     };
   }, []);
 
+  // Re-render markers when filter changes
+  useEffect(() => {
+    if (searched && facilities.length > 0) {
+      addMarkersToMap(filteredFacilities, userLocation || undefined);
+    }
+  }, [filter]);
+
   const addMarkersToMap = (facs: Facility[], center?: { lat: number; lng: number }) => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Clear existing markers
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker) map.removeLayer(layer);
     });
 
-    // Add user location marker
     if (center) {
       const userIcon = L.divIcon({
         className: "custom-marker",
@@ -78,12 +106,10 @@ export default function NearbyHelpMap() {
         .bindPopup("Your location");
     }
 
-    // Geocode facilities (approximate from address) and add markers
     const bounds = L.latLngBounds([]);
     if (center) bounds.extend([center.lat, center.lng]);
 
-    facs.forEach((f, i) => {
-      // Use offset from center for demo (real geocoding would use proper API)
+    facs.forEach((f) => {
       if (center) {
         const lat = center.lat + (Math.random() - 0.5) * 0.1;
         const lng = center.lng + (Math.random() - 0.5) * 0.1;
@@ -95,12 +121,18 @@ export default function NearbyHelpMap() {
           iconAnchor: [5, 5],
         });
 
+        const popupContent = `
+          <div style="min-width:200px">
+            <strong>${f.name}</strong><br/>
+            <span style="font-size:12px;color:#666">${f.address}</span><br/>
+            ${f.phone ? `<a href="tel:${f.phone}" style="font-size:12px">📞 ${f.phone}</a><br/>` : ""}
+            ${f.services.length > 0 ? `<span style="font-size:11px;color:#888">${f.services.slice(0, 2).join(", ")}</span><br/>` : ""}
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.address)}" target="_blank" rel="noopener noreferrer" style="font-size:12px">Get Directions →</a>
+          </div>
+        `;
+
         const marker = L.marker([lat, lng], { icon: facilityIcon }).addTo(map);
-        marker.bindPopup(`
-          <strong>${f.name}</strong><br/>
-          ${f.address}<br/>
-          ${f.phone ? `<a href="tel:${f.phone}">${f.phone}</a>` : ""}
-        `);
+        marker.bindPopup(popupContent);
         bounds.extend([lat, lng]);
       }
     });
@@ -126,7 +158,7 @@ export default function NearbyHelpMap() {
         ? { lat: params.latitude, lng: params.longitude }
         : userLocation;
 
-      if (center) addMarkersToMap(facs, center);
+      if (center) addMarkersToMap(facs.filter((f: Facility) => matchesFilter(f, filter)), center);
     } catch (e) {
       console.error("Error finding treatment:", e);
       setLocationError("Unable to find facilities. Try a different ZIP code.");
@@ -165,143 +197,159 @@ export default function NearbyHelpMap() {
 
   return (
     <Layout>
-      <div className="container py-8 md:py-12">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
-              <MapPin className="h-4 w-4" />
-              Nearby Help
-            </div>
-            <h1 className="mb-4 text-3xl font-bold md:text-4xl">
-              Find Help Near You
-            </h1>
-            <p className="text-muted-foreground">
-              Treatment centers, naloxone access, and harm reduction services in your area
-            </p>
+      <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
+        {/* Top bar: search + filters */}
+        <div className="border-b border-border bg-card px-4 py-3 space-y-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center max-w-5xl mx-auto w-full">
+            <Button
+              variant="default"
+              onClick={useGeolocation}
+              disabled={loading}
+              className="gap-2 shrink-0"
+              size="sm"
+            >
+              <Navigation className="h-4 w-4" />
+              Use My Location
+            </Button>
+
+            <form onSubmit={handleZipSearch} className="flex gap-2 flex-1 max-w-xs">
+              <Input
+                placeholder="ZIP code"
+                value={zipcode}
+                onChange={(e) => setZipcode(e.target.value)}
+                maxLength={10}
+                className="h-9"
+              />
+              <Button type="submit" variant="outline" size="sm" disabled={zipcode.trim().length < 5 || loading}>
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+
+            {loading && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+
+            {/* List/Map toggle for mobile */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 sm:ml-auto"
+              onClick={() => setShowList(!showList)}
+            >
+              {showList ? <Map className="h-4 w-4" /> : <List className="h-4 w-4" />}
+              {showList ? "Map View" : "List View"}
+            </Button>
           </div>
 
-          {/* Search controls */}
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  variant="default"
-                  onClick={useGeolocation}
-                  disabled={loading}
-                  className="gap-2"
-                >
-                  <Navigation className="h-4 w-4" />
-                  Use My Location
-                </Button>
+          {/* Filter toggles */}
+          <div className="flex gap-2 flex-wrap max-w-5xl mx-auto w-full">
+            {filterConfig.map((f) => (
+              <Button
+                key={f.value}
+                variant={filter === f.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilter(f.value)}
+                className="text-xs h-7 px-3"
+              >
+                {f.label}
+              </Button>
+            ))}
+            {searched && (
+              <span className="text-xs text-muted-foreground self-center ml-2">
+                {filteredFacilities.length} result{filteredFacilities.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
 
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="h-px w-6 bg-border" />
-                  or
-                  <div className="h-px w-6 bg-border" />
-                </div>
+          {locationError && (
+            <p className="text-sm text-destructive max-w-5xl mx-auto w-full">{locationError}</p>
+          )}
+        </div>
 
-                <form onSubmit={handleZipSearch} className="flex gap-2 flex-1">
-                  <Input
-                    placeholder="Enter ZIP code"
-                    value={zipcode}
-                    onChange={(e) => setZipcode(e.target.value)}
-                    maxLength={10}
-                    className="flex-1 max-w-[200px]"
-                  />
-                  <Button type="submit" variant="outline" disabled={zipcode.trim().length < 5 || loading}>
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </form>
+        {/* Map / List area */}
+        <div className="flex-1 relative overflow-hidden">
+          {/* Map container — always rendered for Leaflet */}
+          <div
+            ref={mapRef}
+            className={`absolute inset-0 ${showList ? "hidden sm:block sm:w-1/2" : "w-full"}`}
+          />
 
-                {loading && <Loader2 className="h-5 w-5 animate-spin text-primary self-center" />}
-              </div>
-              {locationError && (
-                <p className="text-sm text-destructive mt-2">{locationError}</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Map */}
-          <Card className="mb-6 overflow-hidden">
-            <div ref={mapRef} className="h-[400px] md:h-[500px] w-full" />
-          </Card>
-
-          {/* Facility list */}
-          {searched && facilities.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2">
-              {facilities.map((f, i) => (
-                <Card key={i}>
-                  <CardContent className="p-4 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-sm text-foreground">{f.name}</h3>
-                      {f.distance && (
-                        <Badge variant="secondary" className="shrink-0 text-xs">
-                          {f.distance}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{f.address}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {f.phone && (
-                        <a href={`tel:${f.phone}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                          <Phone className="h-3 w-3" />
-                          {f.phone}
-                        </a>
-                      )}
-                      {f.website && (
-                        <a href={f.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                          <ExternalLink className="h-3 w-3" />
-                          Website
-                        </a>
-                      )}
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                      >
-                        <Navigation className="h-3 w-3" />
-                        Get Directions
-                      </a>
-                    </div>
-                    {f.services.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {f.services.slice(0, 4).map((s, j) => (
-                          <Badge key={j} variant="outline" className="text-[10px]">{s}</Badge>
-                        ))}
+          {/* List view */}
+          {showList && (
+            <div className={`absolute inset-0 overflow-auto bg-background sm:left-1/2 sm:w-1/2`}>
+              <div className="p-4 space-y-3">
+                {!searched && (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Search by location to find nearby facilities.
+                  </p>
+                )}
+                {searched && filteredFacilities.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    No facilities found matching this filter.
+                  </p>
+                )}
+                {filteredFacilities.map((f, i) => (
+                  <Card key={i}>
+                    <CardContent className="p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold text-sm text-foreground">{f.name}</h3>
+                        {f.distance && (
+                          <Badge variant="secondary" className="shrink-0 text-xs">
+                            {f.distance}
+                          </Badge>
+                        )}
                       </div>
-                    )}
+                      <p className="text-xs text-muted-foreground">{f.address}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {f.phone && (
+                          <a href={`tel:${f.phone}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <Phone className="h-3 w-3" />
+                            {f.phone}
+                          </a>
+                        )}
+                        {f.website && (
+                          <a href={f.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <ExternalLink className="h-3 w-3" />
+                            Website
+                          </a>
+                        )}
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                        >
+                          <Navigation className="h-3 w-3" />
+                          Get Directions
+                        </a>
+                      </div>
+                      {f.services.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {f.services.slice(0, 4).map((s, j) => (
+                            <Badge key={j} variant="outline" className="text-[10px]">{s}</Badge>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* SAMHSA Helpline */}
+                <Card className="border-primary/20">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-sm text-foreground">SAMHSA Helpline</h3>
+                      <p className="text-xs text-muted-foreground">Free, 24/7 referral service</p>
+                    </div>
+                    <a href="tel:18006624357">
+                      <Button variant="default" size="sm" className="gap-1.5">
+                        <Phone className="h-3.5 w-3.5" />
+                        Call
+                      </Button>
+                    </a>
                   </CardContent>
                 </Card>
-              ))}
+              </div>
             </div>
           )}
-
-          {searched && facilities.length === 0 && !loading && (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">No facilities found in this area. Try a different location.</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* SAMHSA Helpline always shown */}
-          <Card className="mt-6 border-primary/20">
-            <CardContent className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex-1">
-                <h3 className="font-bold text-foreground">SAMHSA National Helpline</h3>
-                <p className="text-sm text-muted-foreground">
-                  Free, confidential, 24/7, 365-day-a-year treatment referral and information service.
-                </p>
-              </div>
-              <a href="tel:18006624357">
-                <Button variant="default" className="gap-2 w-full sm:w-auto">
-                  <Phone className="h-4 w-4" />
-                  1-800-662-4357
-                </Button>
-              </a>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </Layout>

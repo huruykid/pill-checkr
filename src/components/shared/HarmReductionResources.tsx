@@ -1,12 +1,14 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Phone, ExternalLink, Heart, TestTube, Package } from "lucide-react";
+import { Phone, ExternalLink, Heart, TestTube, Package, MapPin } from "lucide-react";
 
 interface HarmReductionResourcesProps {
   className?: string;
+  showFindHelp?: boolean;
 }
 
-export function HarmReductionResources({ className }: HarmReductionResourcesProps) {
+export function HarmReductionResources({ className, showFindHelp }: HarmReductionResourcesProps) {
   return (
     <Card className={className}>
       <CardHeader>
@@ -16,6 +18,16 @@ export function HarmReductionResources({ className }: HarmReductionResourcesProp
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Find Help CTA */}
+        {showFindHelp && (
+          <Link to="/nearby-help">
+            <Button variant="default" className="w-full gap-2 font-semibold" size="lg">
+              <MapPin className="h-5 w-5" />
+              Find help near you →
+            </Button>
+          </Link>
+        )}
+
         {/* Hotlines */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
