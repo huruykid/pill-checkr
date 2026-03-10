@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,9 @@ export default function NearbyHelpMap() {
   const [zipcode, setZipcode] = useState("");
   const [locationError, setLocationError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [searchParams] = useSearchParams();
+  const initialFilter = (searchParams.get("filter") as FilterType) || "all";
+  const [filter, setFilter] = useState<FilterType>(initialFilter);
   const [showList, setShowList] = useState(false);
 
   const filteredFacilities = facilities.filter((f) => matchesFilter(f, filter));
