@@ -55,13 +55,23 @@ serve(async (req) => {
         
         facilities = (Array.isArray(rows) ? rows : []).slice(0, 10).map((f: Record<string, unknown>) => {
           // Services come as [{f1: "category", f3: "description"}, ...]
-          const rawServices = Array.isArray(f.services) ? f.services : [];
+          const skipCategories = new Set([
+            "Facility Operation (e.g., Private, Public)",
+            "License/Certification/Accreditation",
+            "Payment/Insurance/Funding Accepted",
+            "Payment Assistance Available",
+            "External Opioid Medications Source",
+            " External Source of Medications Used for Alcohol Use Disorder Treatment",
+            "Pharmacotherapies",
+            "Treatment Approaches",
+          ]);
           const serviceLabels = rawServices
-            .filter((s: Record<string, string>) => s.f1 && !["Facility Operation (e.g., Private, Public)", "License/Certification/Accreditation", "Payment/Insurance/Funding Accepted", "Payment Assistance Available", "External Opioid Medications Source", " External Source of Medications Used for Alcohol Use Disorder Treatment"].includes(s.f1))
-            .map((s: Record<string, string>) => {
-              // Use the f3 description but truncate to first item for brevity
+            .filter((s: Record<string, string>) => s.f1 && !skipCategories.has(s.f1))
+            .flatMap((s: Record<string, string>) => {
               const desc = s.f3 || s.f1;
-              return desc.split(";")[0].trim();
+              // Take first item only, and cap at 40 chars
+              const label = desc.split(";")[0].trim();
+              return label.length > 40 ? [label.substring(0, 37) + "…"] : [label];
             })
             .slice(0, 3);
           
