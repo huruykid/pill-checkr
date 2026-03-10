@@ -55,6 +55,7 @@ serve(async (req) => {
         
         facilities = (Array.isArray(rows) ? rows : []).slice(0, 10).map((f: Record<string, unknown>) => {
           // Services come as [{f1: "category", f3: "description"}, ...]
+          const rawServices = Array.isArray(f.services) ? f.services : [];
           const skipCategories = new Set([
             "Facility Operation (e.g., Private, Public)",
             "License/Certification/Accreditation",
