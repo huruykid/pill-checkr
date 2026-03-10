@@ -163,6 +163,15 @@ export function NearbyHelp({ className }: NearbyHelpProps) {
                           Website
                         </a>
                       )}
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        <Navigation className="h-3 w-3" />
+                        Get Directions
+                      </a>
                     </div>
                     {f.services.length > 0 && (
                       <div className="flex flex-wrap gap-1">

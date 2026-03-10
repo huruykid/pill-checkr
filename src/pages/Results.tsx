@@ -476,16 +476,18 @@ export default function Results() {
           {/* Harm Reduction Resources */}
           <HarmReductionResources className="mb-8" />
 
-          {/* Find Help Nearby */}
-          <NearbyHelp className="mb-4" />
-
-          {/* Link to full map page */}
-          <Link to="/nearby-help" className="mb-8 block">
-            <Button variant="outline" className="w-full gap-2">
-              <MapPin className="h-4 w-4" />
-              Open Full Map — Find Treatment Centers & Naloxone Near You
-            </Button>
-          </Link>
+          {/* Find Help Nearby — only for medium/high risk */}
+          {(riskLevel === "medium" || riskLevel === "high") && (
+            <>
+              <NearbyHelp className="mb-4" />
+              <Link to="/nearby-help" className="mb-8 block">
+                <Button variant="outline" className="w-full gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Open Full Map — Find Treatment Centers & Naloxone Near You
+                </Button>
+              </Link>
+            </>
+          )}
 
           <Disclaimer className="mb-8" />
 
