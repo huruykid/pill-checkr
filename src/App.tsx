@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
 import NearbyHelpMap from "./pages/NearbyHelpMap";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
