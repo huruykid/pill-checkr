@@ -190,6 +190,12 @@ export default function CheckPill() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Check a Pill | Fent Finder"
+        description="Upload a photo of your pill to visually compare it against known reference images. Free, anonymous, and instant results."
+        path="/check"
+        jsonLd={jsonLdWebApp}
+      />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 text-center">

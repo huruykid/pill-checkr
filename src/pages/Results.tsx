@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Disclaimer } from "@/components/shared/Disclaimer";
 import { RiskBadge } from "@/components/shared/RiskBadge";
 import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
