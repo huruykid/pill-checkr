@@ -130,6 +130,7 @@ export default function Education() {
           path={`/education/${selectedPost.slug}`}
           jsonLd={makeArticle(selectedPost.title, selectedPost.slug, selectedPost.summary || selectedPost.title, selectedPost.created_at)}
         />
+        <article className="container py-8 md:py-12">
           <div className="mx-auto max-w-2xl">
             <Link 
               to="/education" 
