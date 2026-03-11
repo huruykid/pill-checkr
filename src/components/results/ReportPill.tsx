@@ -32,8 +32,6 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
-  const [lat, setLat] = useState<number | null>(null);
-  const [lng, setLng] = useState<number | null>(null);
 
   const useApproximateLocation = () => {
     if (!navigator.geolocation) {
