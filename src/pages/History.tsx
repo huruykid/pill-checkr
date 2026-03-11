@@ -148,9 +148,9 @@ export default function History() {
                 <Card key={report.id} className="overflow-hidden transition-all hover:shadow-md">
                   <CardContent className="p-4">
                     <Link to={`/results/${report.id}`} className="flex items-center gap-4">
-                      {report.photo_url && (
+                      {signedUrls[report.id] && (
                         <img
-                          src={report.photo_url}
+                          src={signedUrls[report.id]}
                           alt="Pill"
                           className="h-14 w-14 rounded-lg object-cover bg-muted/30 shrink-0"
                         />
