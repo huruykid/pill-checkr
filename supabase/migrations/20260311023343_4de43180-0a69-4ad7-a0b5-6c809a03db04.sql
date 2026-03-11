@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can read pill images" ON storage.objects;
