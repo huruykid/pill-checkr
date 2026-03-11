@@ -91,6 +91,7 @@ export default function Results() {
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
 
   const hasCounterfeitRisk = useMemo(() => {
     return data?.matches.some(
