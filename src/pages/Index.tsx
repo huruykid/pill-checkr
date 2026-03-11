@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Disclaimer } from "@/components/shared/Disclaimer";
+import { SEOHead, jsonLdWebSite } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Shield, Search, BookOpen, ArrowRight, Heart, CheckCircle, ArrowDown } from "lucide-react";
 
