@@ -29,6 +29,7 @@ export default function History() {
   const [localHistory, setLocalHistory] = useState<LocalHistoryItem[]>([]);
   const [dbReports, setDbReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadHistory();
@@ -52,7 +53,24 @@ export default function History() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(50);
-        setDbReports(data || []);
+        const reports = data || [];
+        setDbReports(reports);
+
+        // Generate signed URLs for pill photos
+        const urlMap: Record<string, string> = {};
+        await Promise.all(
+          reports.filter(r => r.photo_url).map(async (r) => {
+            if (r.photo_url!.startsWith("http")) {
+              urlMap[r.id] = r.photo_url!;
+            } else {
+              const { data: signed } = await supabase.storage
+                .from("pill-images")
+                .createSignedUrl(r.photo_url!, 3600);
+              if (signed?.signedUrl) urlMap[r.id] = signed.signedUrl;
+            }
+          })
+        );
+        setSignedUrls(urlMap);
       } catch {}
     }
 
@@ -130,9 +148,9 @@ export default function History() {
                 <Card key={report.id} className="overflow-hidden transition-all hover:shadow-md">
                   <CardContent className="p-4">
                     <Link to={`/results/${report.id}`} className="flex items-center gap-4">
-                      {report.photo_url && (
+                      {signedUrls[report.id] && (
                         <img
-                          src={report.photo_url}
+                          src={signedUrls[report.id]}
                           alt="Pill"
                           className="h-14 w-14 rounded-lg object-cover bg-muted/30 shrink-0"
                         />

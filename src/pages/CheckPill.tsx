@@ -129,10 +129,8 @@ export default function CheckPill() {
         .from("pill-images")
         .upload(fileName, file, { contentType: file.type });
       if (error) throw error;
-      const { data: urlData } = supabase.storage
-        .from("pill-images")
-        .getPublicUrl(fileName);
-      return urlData.publicUrl;
+      // Store just the file name — bucket is private, signed URLs generated on display
+      return fileName;
     } catch (err) {
       console.error("Image upload failed:", err);
       return null;

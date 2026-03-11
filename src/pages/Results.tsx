@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Disclaimer } from "@/components/shared/Disclaimer";
@@ -91,6 +91,7 @@ export default function Results() {
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
 
   const hasCounterfeitRisk = useMemo(() => {
     return data?.matches.some(
@@ -125,6 +126,19 @@ export default function Results() {
 
       if (matchesError) throw matchesError;
       setData({ report, matches: matches || [] });
+
+      // Generate signed URL for pill photo if stored as a file path
+      if (report.photo_url) {
+        if (report.photo_url.startsWith("http")) {
+          // Legacy public URL — use as-is
+          setSignedPhotoUrl(report.photo_url);
+        } else {
+          const { data: signedData } = await supabase.storage
+            .from("pill-images")
+            .createSignedUrl(report.photo_url, 3600);
+          setSignedPhotoUrl(signedData?.signedUrl || null);
+        }
+      }
     } catch (error) {
       console.error("Error fetching results:", error);
       toast.error("Failed to load results");
@@ -225,11 +239,11 @@ export default function Results() {
           {riskLevel === "high" && <EmergencyBar className="mb-6" />}
 
           {/* Show pill photo if available */}
-          {report.photo_url && (
+          {signedPhotoUrl && (
             <Card className="mb-6 overflow-hidden">
               <CardContent className="p-0">
                 <img
-                  src={report.photo_url}
+                  src={signedPhotoUrl}
                   alt="Uploaded pill"
                   className="w-full max-h-[250px] object-contain bg-muted/30"
                 />
