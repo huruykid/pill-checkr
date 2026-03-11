@@ -124,7 +124,12 @@ export default function Education() {
   if (selectedPost) {
     return (
       <Layout>
-        <article className="container py-8 md:py-12">
+        <SEOHead
+          title={`${selectedPost.title} | Fent Finder`}
+          description={selectedPost.summary || selectedPost.title}
+          path={`/education/${selectedPost.slug}`}
+          jsonLd={makeArticle(selectedPost.title, selectedPost.slug, selectedPost.summary || selectedPost.title, selectedPost.created_at)}
+        />
           <div className="mx-auto max-w-2xl">
             <Link 
               to="/education" 
