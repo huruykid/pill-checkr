@@ -126,6 +126,19 @@ export default function Results() {
 
       if (matchesError) throw matchesError;
       setData({ report, matches: matches || [] });
+
+      // Generate signed URL for pill photo if stored as a file path
+      if (report.photo_url) {
+        if (report.photo_url.startsWith("http")) {
+          // Legacy public URL — use as-is
+          setSignedPhotoUrl(report.photo_url);
+        } else {
+          const { data: signedData } = await supabase.storage
+            .from("pill-images")
+            .createSignedUrl(report.photo_url, 3600);
+          setSignedPhotoUrl(signedData?.signedUrl || null);
+        }
+      }
     } catch (error) {
       console.error("Error fetching results:", error);
       toast.error("Failed to load results");
