@@ -161,6 +161,12 @@ export default function Education() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Drug Safety Education | Fent Finder"
+        description="Learn about counterfeit pills, fentanyl risks, harm reduction strategies, and how to stay safer. Evidence-based drug safety information."
+        path="/education"
+        jsonLd={makeWebPage("Drug Safety Education", "/education", "Evidence-based drug safety education and harm reduction resources.")}
+      />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-3xl">
           {/* Header */}
