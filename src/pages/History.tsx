@@ -29,6 +29,7 @@ export default function History() {
   const [localHistory, setLocalHistory] = useState<LocalHistoryItem[]>([]);
   const [dbReports, setDbReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadHistory();
