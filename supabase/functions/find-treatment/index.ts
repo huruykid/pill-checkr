@@ -13,6 +13,28 @@ serve(async (req) => {
   try {
     const { zipcode, latitude, longitude } = await req.json();
 
+    // Validate zipcode format if provided
+    if (zipcode && (typeof zipcode !== "string" || zipcode.length > 10 || !/^\d{5}(-\d{4})?$/.test(zipcode))) {
+      return new Response(JSON.stringify({ error: "Invalid zipcode format. Use 5-digit or ZIP+4 format." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate coordinates if provided
+    if (latitude !== undefined && (typeof latitude !== "number" || latitude < -90 || latitude > 90)) {
+      return new Response(JSON.stringify({ error: "Invalid latitude" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (longitude !== undefined && (typeof longitude !== "number" || longitude < -180 || longitude > 180)) {
+      return new Response(JSON.stringify({ error: "Invalid longitude" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (!zipcode && (!latitude || !longitude)) {
       return new Response(JSON.stringify({ error: "zipcode or latitude/longitude required" }), {
         status: 400,

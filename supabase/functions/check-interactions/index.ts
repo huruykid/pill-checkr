@@ -75,8 +75,23 @@ serve(async (req) => {
   try {
     const { drug_name, other_drugs } = await req.json();
 
-    if (!drug_name || !Array.isArray(other_drugs) || other_drugs.length === 0) {
-      return new Response(JSON.stringify({ error: "drug_name and other_drugs[] required" }), {
+    if (!drug_name || typeof drug_name !== "string" || drug_name.length > 100) {
+      return new Response(JSON.stringify({ error: "drug_name must be a string of 100 characters or less" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!Array.isArray(other_drugs) || other_drugs.length === 0) {
+      return new Response(JSON.stringify({ error: "other_drugs[] required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const invalidDrug = other_drugs.find(d => typeof d !== "string" || d.length > 100);
+    if (invalidDrug !== undefined) {
+      return new Response(JSON.stringify({ error: "Each drug name must be a string of 100 characters or less" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
