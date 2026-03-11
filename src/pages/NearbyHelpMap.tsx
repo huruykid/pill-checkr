@@ -43,10 +43,10 @@ const filterConfig: { value: FilterType; label: string }[] = [
 
 function matchesFilter(facility: Facility, filter: FilterType): boolean {
   if (filter === "all") return true;
-  const name = (facility.name + " " + facility.services.join(" ") + " " + (facility.type || "")).toLowerCase();
-  if (filter === "treatment") return name.includes("treatment") || name.includes("rehab") || name.includes("detox") || name.includes("recovery");
-  if (filter === "naloxone") return name.includes("naloxone") || name.includes("narcan") || name.includes("overdose prevention");
-  if (filter === "harm-reduction") return name.includes("harm reduction") || name.includes("syringe") || name.includes("needle") || name.includes("safe");
+  const text = (facility.name + " " + facility.services.join(" ") + " " + (facility.type || "")).toLowerCase();
+  if (filter === "treatment") return text.includes("treatment") || text.includes("rehab") || text.includes("detox") || text.includes("recovery") || text.includes("residential") || text.includes("inpatient") || text.includes("outpatient");
+  if (filter === "naloxone") return text.includes("naloxone") || text.includes("narcan") || text.includes("overdose prevention") || text.includes("opioid reversal") || text.includes("nalmefene");
+  if (filter === "harm-reduction") return text.includes("harm reduction") || text.includes("syringe") || text.includes("needle") || text.includes("safe") || text.includes("opioid treatment") || text.includes("medication-assisted") || text.includes("mat ") || text.includes("buprenorphine") || text.includes("methadone") || text.includes("suboxone") || text.includes("outreach") || text.includes("opioid") || text.includes("substance use") || text.includes("substance abuse") || text.includes("prevention") || text.includes("counseling") || text.includes("mental health");
   return true;
 }
 
