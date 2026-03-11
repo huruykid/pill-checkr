@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -201,6 +202,12 @@ export default function NearbyHelpMap() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Find Help Near You | Fent Finder"
+        description="Find naloxone, fentanyl test strips, treatment centers, and harm reduction services near your location."
+        path="/nearby-help"
+        jsonLd={makeWebPage("Find Help Near You", "/nearby-help", "Locate naloxone, testing services, and treatment centers nearby.")}
+      />
       <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
         {/* Top bar: search + filters */}
         <div className="border-b border-border bg-card px-4 py-3 space-y-3">

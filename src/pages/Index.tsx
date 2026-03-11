@@ -1,13 +1,19 @@
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Disclaimer } from "@/components/shared/Disclaimer";
+import { SEOHead, jsonLdWebSite } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Shield, Search, BookOpen, ArrowRight, Heart, CheckCircle, ArrowDown } from "lucide-react";
 
 const Index = () => {
   return (
     <Layout>
-      {/* Hero Section - Light with bold typography */}
+      <SEOHead
+        title="Fent Finder — Free Pill Safety Check Tool"
+        description="Free harm reduction tool to visually compare pills against known references. Upload a photo, get guidance, and find help near you."
+        path="/"
+        jsonLd={jsonLdWebSite}
+      />
       <section className="relative overflow-hidden bg-background py-16 md:py-24">
         <div className="container relative">
           <div className="mx-auto max-w-3xl text-center">

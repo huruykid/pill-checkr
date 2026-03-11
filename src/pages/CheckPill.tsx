@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { SEOHead, jsonLdWebApp } from "@/components/shared/SEOHead";
 import { Disclaimer } from "@/components/shared/Disclaimer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,6 +190,12 @@ export default function CheckPill() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Check a Pill | Fent Finder"
+        description="Upload a photo of your pill to visually compare it against known reference images. Free, anonymous, and instant results."
+        path="/check"
+        jsonLd={jsonLdWebApp}
+      />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 text-center">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { SEOHead, makeWebPage, makeArticle } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SafetyChecklist } from "@/components/shared/SafetyChecklist";
@@ -123,6 +124,12 @@ export default function Education() {
   if (selectedPost) {
     return (
       <Layout>
+        <SEOHead
+          title={`${selectedPost.title} | Fent Finder`}
+          description={selectedPost.summary || selectedPost.title}
+          path={`/education/${selectedPost.slug}`}
+          jsonLd={makeArticle(selectedPost.title, selectedPost.slug, selectedPost.summary || selectedPost.title, selectedPost.created_at)}
+        />
         <article className="container py-8 md:py-12">
           <div className="mx-auto max-w-2xl">
             <Link 
@@ -155,6 +162,12 @@ export default function Education() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Drug Safety Education | Fent Finder"
+        description="Learn about counterfeit pills, fentanyl risks, harm reduction strategies, and how to stay safer. Evidence-based drug safety information."
+        path="/education"
+        jsonLd={makeWebPage("Drug Safety Education", "/education", "Evidence-based drug safety education and harm reduction resources.")}
+      />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-3xl">
           {/* Header */}

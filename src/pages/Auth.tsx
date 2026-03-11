@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,6 +94,12 @@ export default function Auth() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Sign In | Fent Finder"
+        description="Create an account or sign in to save your pill check history and manage emergency contacts."
+        path="/auth"
+        jsonLd={makeWebPage("Sign In", "/auth", "Create an account or sign in to Fent Finder.")}
+      />
       <div className="container flex min-h-[60vh] items-center justify-center py-12">
         <Card className="w-full max-w-md border-2 border-border">
           <CardHeader className="text-center">

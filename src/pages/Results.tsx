@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Disclaimer } from "@/components/shared/Disclaimer";
 import { RiskBadge } from "@/components/shared/RiskBadge";
 import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
@@ -223,6 +224,12 @@ export default function Results() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Pill Analysis Results | Fent Finder"
+        description="View your pill analysis results including visual matching, consistency scoring, and harm reduction guidance."
+        path={`/results/${reportId}`}
+        jsonLd={makeWebPage("Pill Analysis Results", `/results/${reportId}`, "Pill analysis results with visual matching and safety guidance.")}
+      />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-3xl">
           <Link to="/check" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
