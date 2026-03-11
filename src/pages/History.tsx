@@ -53,7 +53,24 @@ export default function History() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(50);
-        setDbReports(data || []);
+        const reports = data || [];
+        setDbReports(reports);
+
+        // Generate signed URLs for pill photos
+        const urlMap: Record<string, string> = {};
+        await Promise.all(
+          reports.filter(r => r.photo_url).map(async (r) => {
+            if (r.photo_url!.startsWith("http")) {
+              urlMap[r.id] = r.photo_url!;
+            } else {
+              const { data: signed } = await supabase.storage
+                .from("pill-images")
+                .createSignedUrl(r.photo_url!, 3600);
+              if (signed?.signedUrl) urlMap[r.id] = signed.signedUrl;
+            }
+          })
+        );
+        setSignedUrls(urlMap);
       } catch {}
     }
 
