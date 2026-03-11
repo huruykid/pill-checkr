@@ -239,11 +239,11 @@ export default function Results() {
           {riskLevel === "high" && <EmergencyBar className="mb-6" />}
 
           {/* Show pill photo if available */}
-          {report.photo_url && (
+          {signedPhotoUrl && (
             <Card className="mb-6 overflow-hidden">
               <CardContent className="p-0">
                 <img
-                  src={report.photo_url}
+                  src={signedPhotoUrl}
                   alt="Uploaded pill"
                   className="w-full max-h-[250px] object-contain bg-muted/30"
                 />
