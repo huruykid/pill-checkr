@@ -95,6 +95,12 @@ export default function History() {
 
   return (
     <Layout>
+      <SEOHead
+        title="Your Check History | Fent Finder"
+        description="View your past pill safety checks and analysis results. Track your history and revisit previous reports."
+        path="/history"
+        jsonLd={makeWebPage("Check History", "/history", "View past pill safety checks and analysis results.")}
+      />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
