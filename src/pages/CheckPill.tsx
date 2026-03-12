@@ -121,13 +121,19 @@ export default function CheckPill() {
     e.preventDefault();
   }, []);
 
-  const clearImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    setImageError(null);
-    setQualityFeedback(null);
-    setShowRetakePrompt(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const clearImage = (side: "front" | "back" = "front") => {
+    if (side === "back") {
+      setBackImageFile(null);
+      setBackImagePreview(null);
+      if (backFileInputRef.current) backFileInputRef.current.value = "";
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
+      setImageError(null);
+      setQualityFeedback(null);
+      setShowRetakePrompt(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
