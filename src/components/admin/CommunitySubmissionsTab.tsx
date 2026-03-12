@@ -26,6 +26,7 @@ interface Submission {
   shape: PillShape;
   color: PillColor;
   photo_url: string | null;
+  back_photo_url: string | null;
   notes: string | null;
   status: string;
   reviewer_notes: string | null;
