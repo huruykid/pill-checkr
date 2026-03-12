@@ -403,13 +403,36 @@ Respond with JSON only:
     const finalColor = color || analysis.extracted_color;
     const imprintConfidence = analysis.imprint_confidence || "low";
 
-    // ─── Step 2: Text-based reference matching ──────────────────────────────
-    let query = supabase.from("pill_reference").select("*");
+    // ─── Step 2: Text-based reference matching (two-pass) ──────────────────
+    // Pass 1: Search by imprint text
+    let references: any[] = [];
     if (finalImprint) {
-      query = query.ilike("imprint", `%${finalImprint}%`);
+      const { data: imprintMatches } = await supabase
+        .from("pill_reference")
+        .select("*")
+        .ilike("imprint", `%${finalImprint}%`)
+        .limit(20);
+      references = imprintMatches || [];
     }
 
-    const { data: references } = await query.limit(20);
+    // Pass 2: If imprint search returned < 3 results, broaden with shape+color fallback
+    if (references.length < 3 && finalShape && finalColor) {
+      console.log(`Imprint search returned ${references.length} results — running shape+color fallback`);
+      const existingIds = new Set(references.map((r: any) => r.id));
+      let fallbackQuery = supabase.from("pill_reference").select("*");
+      if (finalShape !== "other") fallbackQuery = fallbackQuery.eq("shape", finalShape);
+      if (finalColor !== "other") fallbackQuery = fallbackQuery.eq("color", finalColor);
+      const { data: fallbackMatches } = await fallbackQuery.limit(20);
+      if (fallbackMatches) {
+        for (const m of fallbackMatches) {
+          if (!existingIds.has(m.id)) {
+            references.push(m);
+            existingIds.add(m.id);
+          }
+        }
+      }
+      console.log(`Total references after fallback: ${references.length}`);
+    }
 
     const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence };
     
