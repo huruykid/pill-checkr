@@ -58,6 +58,8 @@ export default function Contribute() {
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [backPhotoFile, setBackPhotoFile] = useState<File | null>(null);
+  const [backPhotoPreview, setBackPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
