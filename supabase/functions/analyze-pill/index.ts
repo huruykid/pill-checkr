@@ -364,8 +364,9 @@ Respond with JSON only:
           {
             role: "user",
             content: [
-              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}` },
-              { type: "image_url", image_url: { url: image } }
+              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}${backImage ? ". A back-side photo is also provided — use both sides for more accurate imprint extraction and analysis." : ""}` },
+              { type: "image_url", image_url: { url: image } },
+              ...(backImage ? [{ type: "image_url" as const, image_url: { url: backImage } }] : []),
             ]
           }
         ],
