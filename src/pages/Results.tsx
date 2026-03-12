@@ -83,6 +83,7 @@ export default function Results() {
   const { reportId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
