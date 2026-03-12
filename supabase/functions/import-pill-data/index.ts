@@ -775,6 +775,20 @@ const CURATED_DATA: Record<string, CuratedEntry[]> = {
     { drug_name: "Vitamin B12 1000mcg", imprint: "B12", shape: "round", color: "pink", notes: "Generic • Cyanocobalamin", ndc_code: null },
     { drug_name: "Prenatal Vitamin", imprint: "PRENATAL", shape: "oval", color: "pink", notes: "Generic • Multivitamin + folic acid", ndc_code: null },
     { drug_name: "Zinc Sulfate 220mg", imprint: "ZINC 220", shape: "capsule", color: "blue", notes: "Generic • 50mg elemental zinc", ndc_code: null },
+    // ── More variants ──
+    { drug_name: "Ferrous Gluconate 324mg", imprint: "FG 324", shape: "round", color: "green", notes: "Generic • Fergon • 36mg elemental iron", ndc_code: "00536-3885" },
+    { drug_name: "Iron Polysaccharide 150mg", imprint: "NIFEREX 150", shape: "capsule", color: "brown", notes: "Ther-Rx • Prescription iron", ndc_code: "51991-0776" },
+    { drug_name: "Calcium Citrate 315mg", imprint: "CITRACAL", shape: "capsule", color: "white", notes: "Bayer • Better absorbed calcium", ndc_code: "16500-0020" },
+    { drug_name: "Vitamin B6 50mg", imprint: "B6", shape: "round", color: "white", notes: "Generic • Pyridoxine", ndc_code: null },
+    { drug_name: "Vitamin B1 100mg", imprint: "B1", shape: "round", color: "white", notes: "Generic • Thiamine", ndc_code: null },
+    { drug_name: "Biotin 5mg", imprint: "BIOTIN 5", shape: "round", color: "white", notes: "Generic • Vitamin H", ndc_code: null },
+    { drug_name: "Chromium Picolinate 200mcg", imprint: "CR 200", shape: "round", color: "white", notes: "Generic • Blood sugar support", ndc_code: null },
+    { drug_name: "Coenzyme Q10 100mg", imprint: "COQ10", shape: "capsule", color: "orange", notes: "Generic • Antioxidant", ndc_code: null },
+    { drug_name: "Fish Oil 1000mg", imprint: "OMEGA 3", shape: "capsule", color: "yellow", notes: "Generic • EPA/DHA", ndc_code: null },
+    { drug_name: "Vitamin C 500mg", imprint: "VC 500", shape: "round", color: "orange", notes: "Generic • Ascorbic acid", ndc_code: null },
+    { drug_name: "Vitamin C 1000mg", imprint: "VC 1000", shape: "oval", color: "orange", notes: "Generic • Ascorbic acid", ndc_code: null },
+    { drug_name: "Multivitamin", imprint: "CENTRUM", shape: "oval", color: "yellow", notes: "Pfizer • Adult multivitamin", ndc_code: null },
+    { drug_name: "Multivitamin", imprint: "ONE A DAY", shape: "oval", color: "yellow", notes: "Bayer • Adult multivitamin", ndc_code: null },
   ],
 };
 
