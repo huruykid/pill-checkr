@@ -15,6 +15,7 @@ export function Header() {
     { to: "/education", label: "Learn", icon: BookOpen },
     { to: "/nearby-help", label: "Find Help", icon: MapPin },
     { to: "/contribute", label: "Contribute", icon: Users },
+    { to: "/api-docs", label: "API", icon: Code },
   ];
 
   const isActive = (path: string) => location.pathname === path;
