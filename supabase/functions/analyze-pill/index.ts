@@ -431,7 +431,37 @@ Respond with JSON only:
           }
         }
       }
-      console.log(`Total references after fallback: ${references.length}`);
+      console.log(`Total references after shape+color fallback: ${references.length}`);
+    }
+
+    // Pass 3: If still < 3 results, try drug name keyword search using AI-extracted context
+    if (references.length < 3 && finalImprint) {
+      console.log(`Still only ${references.length} results — running drug name keyword fallback`);
+      const existingIds = new Set(references.map((r: any) => r.id));
+      // Extract potential drug name keywords from imprint (common patterns: letters before numbers)
+      const keywords = finalImprint
+        .replace(/[^a-zA-Z\s]/g, " ")
+        .split(/\s+/)
+        .filter((w: string) => w.length >= 2)
+        .slice(0, 3);
+      
+      for (const keyword of keywords) {
+        const { data: nameMatches } = await supabase
+          .from("pill_reference")
+          .select("*")
+          .ilike("drug_name", `%${keyword}%`)
+          .limit(10);
+        if (nameMatches) {
+          for (const m of nameMatches) {
+            if (!existingIds.has(m.id)) {
+              references.push(m);
+              existingIds.add(m.id);
+            }
+          }
+        }
+        if (references.length >= 10) break;
+      }
+      console.log(`Total references after drug name fallback: ${references.length}`);
     }
 
     const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence };
