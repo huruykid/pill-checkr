@@ -140,6 +140,14 @@ export function Header() {
                 </Button>
               </Link>
             ))}
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10 font-mono"
+              onClick={() => { setLang(lang === "en" ? "es" : "en"); }}
+            >
+              <Globe className="h-5 w-5" />
+              {lang === "en" ? "Español" : "English"}
+            </Button>
             {user ? (
               <>
                 <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
