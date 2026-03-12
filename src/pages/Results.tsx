@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useI18n } from "@/hooks/useI18n";
 import { Layout } from "@/components/layout/Layout";
 import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Disclaimer } from "@/components/shared/Disclaimer";
