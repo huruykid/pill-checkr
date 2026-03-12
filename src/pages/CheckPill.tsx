@@ -74,9 +74,12 @@ export default function CheckPill() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backFileInputRef = useRef<HTMLInputElement>(null);
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [backImageFile, setBackImageFile] = useState<File | null>(null);
+  const [backImagePreview, setBackImagePreview] = useState<string | null>(null);
   const [imprint, setImprint] = useState("");
   const [shape, setShape] = useState("");
   const [color, setColor] = useState("");
@@ -87,7 +90,7 @@ export default function CheckPill() {
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<string | null>(null);
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFileSelect = useCallback((file: File, side: "front" | "back" = "front") => {
     if (!file.type.startsWith("image/")) {
       setImageError("Please select an image file");
       return;
