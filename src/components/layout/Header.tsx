@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp } from "lucide-react";
+import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp, Globe } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
