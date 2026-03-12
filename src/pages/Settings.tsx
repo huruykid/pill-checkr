@@ -289,6 +289,9 @@ export default function Settings() {
 
           {/* API Key Management */}
           <ApiKeyManager />
+
+          {/* Webhook Configuration */}
+          <WebhookManager />
         </div>
       </div>
     </Layout>
