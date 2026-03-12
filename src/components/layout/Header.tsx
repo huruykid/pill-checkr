@@ -54,6 +54,15 @@ export function Header() {
               </Button>
             </Link>
           ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-background/80 hover:text-background hover:bg-background/10 font-mono text-xs"
+            onClick={() => setLang(lang === "en" ? "es" : "en")}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {lang === "en" ? "ES" : "EN"}
+          </Button>
           {user ? (
             <>
               <Link to="/settings">
