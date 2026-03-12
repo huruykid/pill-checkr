@@ -16,7 +16,7 @@ const InputSchema = z.object({
   shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
   color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
   hasReferenceObject: z.boolean().default(false),
-  photoUrl: z.string().url().optional().nullable(),
+  photoUrl: z.string().optional().nullable(),
 });
 
 // Match scoring weights
