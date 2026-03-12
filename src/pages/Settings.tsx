@@ -20,6 +20,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
+import { WebhookManager } from "@/components/settings/WebhookManager";
 
 interface Contact {
   id: string;
@@ -288,6 +289,9 @@ export default function Settings() {
 
           {/* API Key Management */}
           <ApiKeyManager />
+
+          {/* Webhook Configuration */}
+          <WebhookManager />
         </div>
       </div>
     </Layout>
