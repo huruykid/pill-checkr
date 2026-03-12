@@ -16,6 +16,7 @@ import Settings from "./pages/Settings";
 import NearbyHelpMap from "./pages/NearbyHelpMap";
 import Contribute from "./pages/Contribute";
 import ApiDocs from "./pages/ApiDocs";
+import Trends from "./pages/Trends";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/nearby-help" element={<NearbyHelpMap />} />
             <Route path="/contribute" element={<Contribute />} />
             <Route path="/api-docs" element={<ApiDocs />} />
+            <Route path="/trends" element={<Trends />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
