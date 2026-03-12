@@ -588,6 +588,7 @@ Respond with JSON only:
         anomaly_reasons: anomalyReasons,
         risk_reasons: riskReasons,
         photo_url: photoUrl || null,
+        back_photo_url: backPhotoUrl || null,
         user_id: userId || null,
       })
       .select()

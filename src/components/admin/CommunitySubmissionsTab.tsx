@@ -204,8 +204,13 @@ export function CommunitySubmissionsTab() {
                   </div>
                   <div className="flex items-center gap-2">
                     {sub.photo_url && (
-                      <Button variant="ghost" size="icon" onClick={() => viewPhoto(sub.photo_url!)}>
+                      <Button variant="ghost" size="icon" title="View front" onClick={() => viewPhoto(sub.photo_url!)}>
                         <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {(sub as any).back_photo_url && (
+                      <Button variant="ghost" size="icon" title="View back" onClick={() => viewPhoto((sub as any).back_photo_url!)}>
+                        <Eye className="h-4 w-4 rotate-180" />
                       </Button>
                     )}
                     {sub.status === "pending" && (
