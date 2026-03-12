@@ -25,7 +25,8 @@ import { ApiImportTab, type ApiImportParams, type ApiImportResult, type ImportSt
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Pill, BookOpen, ShieldCheck, Database as DatabaseIcon } from "lucide-react";
+import { Loader2, Plus, Trash2, Pill, BookOpen, ShieldCheck, Database as DatabaseIcon, Users } from "lucide-react";
+import { CommunitySubmissionsTab } from "@/components/admin/CommunitySubmissionsTab";
 import type { Database } from "@/integrations/supabase/types";
 
 type PillReference = Database["public"]["Tables"]["pill_reference"]["Row"];
