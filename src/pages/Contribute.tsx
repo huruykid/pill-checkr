@@ -111,6 +111,7 @@ export default function Contribute() {
 
     setSubmitting(true);
     let photoUrl: string | null = null;
+    let backPhotoUrl: string | null = null;
 
     if (photoFile) {
       setUploading(true);
@@ -127,8 +128,25 @@ export default function Contribute() {
         return;
       }
       photoUrl = path;
-      setUploading(false);
     }
+
+    if (backPhotoFile) {
+      setUploading(true);
+      const ext = backPhotoFile.name.split(".").pop() || "jpg";
+      const path = `community/${user.id}/${Date.now()}_back.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("pill-images")
+        .upload(path, backPhotoFile, { contentType: backPhotoFile.type });
+
+      if (uploadError) {
+        toast.error("Back photo upload failed");
+        setSubmitting(false);
+        setUploading(false);
+        return;
+      }
+      backPhotoUrl = path;
+    }
+    setUploading(false);
 
     const { error } = await supabase.from("community_submissions").insert({
       user_id: user.id,
@@ -138,7 +156,8 @@ export default function Contribute() {
       color: form.color,
       notes: form.notes.trim() || null,
       photo_url: photoUrl,
-    });
+      back_photo_url: backPhotoUrl,
+    } as any);
 
     if (error) {
       toast.error("Submission failed. Please try again.");
