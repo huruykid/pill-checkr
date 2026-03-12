@@ -136,15 +136,15 @@ export default function CheckPill() {
     }
   };
 
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadImage = async (file: File, suffix?: string): Promise<string | null> => {
     try {
       const ext = file.name.split(".").pop() || "jpg";
-      const fileName = `${crypto.randomUUID()}.${ext}`;
+      const base = crypto.randomUUID();
+      const fileName = suffix ? `${base}_${suffix}.${ext}` : `${base}.${ext}`;
       const { error } = await supabase.storage
         .from("pill-images")
         .upload(fileName, file, { contentType: file.type });
       if (error) throw error;
-      // Store just the file name — bucket is private, signed URLs generated on display
       return fileName;
     } catch (err) {
       console.error("Image upload failed:", err);
