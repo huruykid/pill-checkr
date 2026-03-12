@@ -161,18 +161,24 @@ export default function CheckPill() {
     setIsAnalyzing(true);
 
     try {
-      // Upload image to storage
+      // Upload images to storage
       const photoUrl = await uploadImage(imageFile);
+      let backPhotoUrl: string | null = null;
+      if (backImageFile && backImagePreview) {
+        backPhotoUrl = await uploadImage(backImageFile, "back");
+      }
 
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
         body: {
           image: imagePreview,
+          backImage: backImagePreview || null,
           imprint: imprint || null,
           shape: shape || null,
           color: color || null,
           hasReferenceObject: hasReference,
           photoUrl: photoUrl || null,
+          backPhotoUrl: backPhotoUrl || null,
         },
       });
 
