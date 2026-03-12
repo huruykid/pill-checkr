@@ -51,6 +51,7 @@ export type Database = {
       }
       community_submissions: {
         Row: {
+          back_photo_url: string | null
           color: Database["public"]["Enums"]["pill_color"]
           created_at: string
           drug_name: string
@@ -66,6 +67,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"]
           created_at?: string
           drug_name: string
@@ -81,6 +83,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"]
           created_at?: string
           drug_name?: string
@@ -383,6 +386,7 @@ export type Database = {
         Row: {
           anomaly_reasons: string[] | null
           anomaly_score: number | null
+          back_photo_url: string | null
           color: Database["public"]["Enums"]["pill_color"] | null
           created_at: string
           has_reference_object: boolean | null
@@ -402,6 +406,7 @@ export type Database = {
         Insert: {
           anomaly_reasons?: string[] | null
           anomaly_score?: number | null
+          back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
           has_reference_object?: boolean | null
@@ -421,6 +426,7 @@ export type Database = {
         Update: {
           anomaly_reasons?: string[] | null
           anomaly_score?: number | null
+          back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
           has_reference_object?: boolean | null
