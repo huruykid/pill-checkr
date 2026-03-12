@@ -117,6 +117,35 @@ const CURATED_DATA: Record<string, CuratedEntry[]> = {
     // ── Other opioids ──
     { drug_name: "Methadone 10mg", imprint: "54 549", shape: "round", color: "white", notes: "Roxane • Schedule II", ndc_code: "00054-0549" },
     { drug_name: "Fentanyl 100mcg patch", imprint: "fentanyl 100 mcg/h", shape: "rectangle", color: "tan", notes: "Mylan • Transdermal • Schedule II", ndc_code: "00378-9012" },
+    // ── Oxycodone IR — additional dosages & manufacturers ──
+    { drug_name: "Oxycodone 5mg", imprint: "RP 5", shape: "round", color: "white", notes: "Rhodes • Schedule II", ndc_code: "12634-0281" },
+    { drug_name: "Oxycodone 5mg", imprint: "48 12 V", shape: "round", color: "white", notes: "Qualitest • Schedule II", ndc_code: "00603-4992" },
+    { drug_name: "Oxycodone 5mg", imprint: "M 05 52", shape: "round", color: "white", notes: "Mallinckrodt • Schedule II", ndc_code: "00406-0552" },
+    { drug_name: "Oxycodone 10mg", imprint: "RP 10", shape: "round", color: "white", notes: "Rhodes • Schedule II", ndc_code: "12634-0282" },
+    { drug_name: "Oxycodone 10mg", imprint: "48 11 V", shape: "round", color: "white", notes: "Qualitest • Schedule II", ndc_code: "00603-4991" },
+    { drug_name: "Oxycodone 15mg", imprint: "RP 15", shape: "round", color: "green", notes: "Rhodes • Schedule II", ndc_code: "12634-0570" },
+    { drug_name: "Oxycodone 15mg", imprint: "T 188", shape: "round", color: "green", notes: "Camber • Schedule II", ndc_code: "31722-0188" },
+    { drug_name: "Oxycodone 20mg", imprint: "RP 20", shape: "round", color: "gray", notes: "Rhodes • Schedule II", ndc_code: "12634-0571" },
+    { drug_name: "Oxycodone 20mg", imprint: "T 191", shape: "round", color: "gray", notes: "Camber • Schedule II", ndc_code: "31722-0191" },
+    // ── Hydrocodone/APAP — additional manufacturers ──
+    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "G 035", shape: "capsule", color: "white", notes: "Qualitest • Schedule II", ndc_code: "00603-3889" },
+    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "V 3604", shape: "capsule", color: "white", notes: "Qualitest • Schedule II", ndc_code: "00603-3604" },
+    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "T 258", shape: "capsule", color: "white", notes: "Camber • Schedule II", ndc_code: "31722-0258" },
+    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "T 259", shape: "capsule", color: "white", notes: "Camber • Schedule II", ndc_code: "31722-0259" },
+    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "Watson 385", shape: "capsule", color: "yellow", notes: "Watson Labs • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00591-0385" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "T 260", shape: "capsule", color: "white", notes: "Camber • Schedule II", ndc_code: "31722-0260" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "RP 10-325", shape: "capsule", color: "white", notes: "Rhodes • Schedule II", ndc_code: "12634-0553" },
+    // ── Tramadol — additional manufacturers ──
+    { drug_name: "Tramadol 50mg", imprint: "319", shape: "round", color: "white", notes: "Caraco • Schedule IV", ndc_code: "57664-0319" },
+    { drug_name: "Tramadol 50mg", imprint: "MYLAN 5050", shape: "round", color: "white", notes: "Mylan • Schedule IV", ndc_code: "00378-5050" },
+    { drug_name: "Tramadol 50mg", imprint: "HH 224", shape: "round", color: "white", notes: "Sun Pharma • Schedule IV", ndc_code: "43547-0224" },
+    // ── Morphine — additional manufacturers ──
+    { drug_name: "Morphine Sulfate 15mg", imprint: "E 15", shape: "round", color: "blue", notes: "Endo • Immediate-release • Schedule II", ndc_code: "60951-0773" },
+    { drug_name: "Morphine Sulfate 30mg", imprint: "E 30", shape: "round", color: "purple", notes: "Endo • Immediate-release • Schedule II", ndc_code: "60951-0774" },
+    // ── Fentanyl pressed pill warnings (educational/counterfeit) ──
+    { drug_name: "⚠️ COUNTERFEIT — Fake 'M 30'", imprint: "M 30", shape: "round", color: "blue", notes: "⚠️ EXTREME DANGER — Most commonly counterfeited pill in US. Often contains illicit fentanyl/carfentanil. Legitimate M 30 is Oxycodone 30mg by Mallinckrodt. If obtained outside pharmacy, assume counterfeit.", ndc_code: null },
+    { drug_name: "⚠️ COUNTERFEIT — Fake 'A 215'", imprint: "A 215", shape: "round", color: "blue", notes: "⚠️ EXTREME DANGER — Commonly counterfeited. Often contains illicit fentanyl. Legitimate A 215 is Oxycodone 30mg by Actavis. If obtained outside pharmacy, assume counterfeit.", ndc_code: null },
+    { drug_name: "⚠️ COUNTERFEIT — Fake 'K 9'", imprint: "K 9", shape: "round", color: "blue", notes: "⚠️ EXTREME DANGER — Commonly counterfeited. Often contains illicit fentanyl. Legitimate K 9 is Oxycodone 30mg by KVK Tech. If obtained outside pharmacy, assume counterfeit.", ndc_code: null },
   ],
 
   benzos: [
