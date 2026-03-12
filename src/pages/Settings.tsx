@@ -285,6 +285,9 @@ export default function Settings() {
               )}
             </CardContent>
           </Card>
+
+          {/* API Key Management */}
+          <ApiKeyManager />
         </div>
       </div>
     </Layout>
