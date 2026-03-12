@@ -19,6 +19,7 @@ import {
   Mail,
   UserPlus,
 } from "lucide-react";
+import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
 
 interface Contact {
   id: string;
@@ -284,6 +285,9 @@ export default function Settings() {
               )}
             </CardContent>
           </Card>
+
+          {/* API Key Management */}
+          <ApiKeyManager />
         </div>
       </div>
     </Layout>
