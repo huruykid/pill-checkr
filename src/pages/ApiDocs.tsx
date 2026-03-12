@@ -290,6 +290,7 @@ export default function ApiDocs() {
       <SEOHead
         title="API Documentation — Fent Finder"
         description="Integrate pill identification, drug interaction checks, and harm reduction tools into your platform with the Fent Finder API."
+        path="/api-docs"
       />
 
       {/* Hero */}
