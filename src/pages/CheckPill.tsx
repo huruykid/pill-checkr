@@ -99,10 +99,15 @@ export default function CheckPill() {
       setImageError("Image must be less than 10MB");
       return;
     }
-    setImageFile(file);
     setImageError(null);
     const reader = new FileReader();
-    reader.onload = (e) => setImagePreview(e.target?.result as string);
+    if (side === "back") {
+      setBackImageFile(file);
+      reader.onload = (e) => setBackImagePreview(e.target?.result as string);
+    } else {
+      setImageFile(file);
+      reader.onload = (e) => setImagePreview(e.target?.result as string);
+    }
     reader.readAsDataURL(file);
   }, []);
 
