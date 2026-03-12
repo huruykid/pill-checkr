@@ -652,6 +652,23 @@ const CURATED_DATA: Record<string, CuratedEntry[]> = {
     { drug_name: "Levocetirizine 5mg", imprint: "X", shape: "oval", color: "white", notes: "UCB • Xyzal • Third-gen", ndc_code: "50580-0778" },
     { drug_name: "Promethazine 25mg", imprint: "Z 4173", shape: "round", color: "white", notes: "Zydus • Phenothiazine antihistamine", ndc_code: "68382-0028" },
     { drug_name: "Montelukast 10mg", imprint: "SINGULAIR MSD 117", shape: "rectangle", color: "tan", notes: "Merck • Leukotriene inhibitor", ndc_code: "00006-0117" },
+    // ── Generic manufacturer variants ──
+    { drug_name: "Cetirizine 10mg", imprint: "93 44", shape: "round", color: "white", notes: "Teva • Generic second-gen antihistamine", ndc_code: "00093-0044" },
+    { drug_name: "Cetirizine 10mg", imprint: "MYLAN 117", shape: "round", color: "white", notes: "Mylan • Generic second-gen antihistamine", ndc_code: "00378-0117" },
+    { drug_name: "Cetirizine 10mg", imprint: "L612", shape: "round", color: "white", notes: "Perrigo • OTC generic", ndc_code: "45802-0868" },
+    { drug_name: "Loratadine 10mg", imprint: "93 88", shape: "round", color: "white", notes: "Teva • Generic second-gen antihistamine", ndc_code: "00093-0088" },
+    { drug_name: "Loratadine 10mg", imprint: "L 10", shape: "round", color: "white", notes: "Perrigo • OTC generic", ndc_code: "45802-0650" },
+    { drug_name: "Fexofenadine 60mg", imprint: "93 7377", shape: "round", color: "pink", notes: "Teva • Generic second-gen", ndc_code: "00093-7377" },
+    { drug_name: "Fexofenadine 180mg", imprint: "93 7378", shape: "capsule", color: "pink", notes: "Teva • Generic second-gen", ndc_code: "00093-7378" },
+    { drug_name: "Fexofenadine 180mg", imprint: "MYLAN FE 180", shape: "capsule", color: "tan", notes: "Mylan • Generic second-gen", ndc_code: "00378-5189" },
+    { drug_name: "Diphenhydramine 25mg", imprint: "44 107", shape: "capsule", color: "pink", notes: "LNK International • OTC generic", ndc_code: "11673-0107" },
+    { drug_name: "Diphenhydramine 25mg", imprint: "L 479", shape: "capsule", color: "pink", notes: "Perrigo • OTC generic", ndc_code: "45802-0479" },
+    { drug_name: "Promethazine 25mg", imprint: "G 51", shape: "round", color: "white", notes: "Glenmark • Generic phenothiazine", ndc_code: "68462-0310" },
+    { drug_name: "Promethazine 12.5mg", imprint: "G 50", shape: "round", color: "white", notes: "Glenmark • Generic phenothiazine", ndc_code: "68462-0309" },
+    { drug_name: "Montelukast 10mg", imprint: "93 7426", shape: "rectangle", color: "tan", notes: "Teva • Generic leukotriene inhibitor", ndc_code: "00093-7426" },
+    { drug_name: "Montelukast 10mg", imprint: "M ML 10", shape: "rectangle", color: "tan", notes: "Mylan • Generic leukotriene inhibitor", ndc_code: "00378-5210" },
+    { drug_name: "Montelukast 5mg", imprint: "93 7391", shape: "round", color: "pink", notes: "Teva • Generic chewable", ndc_code: "00093-7391" },
+    { drug_name: "Levocetirizine 5mg", imprint: "93 7245", shape: "oval", color: "white", notes: "Teva • Generic third-gen", ndc_code: "00093-7245" },
   ],
 
   thyroid: [
