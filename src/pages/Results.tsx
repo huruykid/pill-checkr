@@ -502,15 +502,15 @@ export default function Results() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Info className="h-5 w-5 text-primary" />
-                What To Do Next
+                {t("results.whatToDoNext")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
-                {harmReductionSteps.map((step, i) => (
+                {harmReductionStepKeys.map((key, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm">
                     <CheckCircle className="h-4 w-4 text-success shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">{step}</span>
+                    <span className="text-muted-foreground">{t(key)}</span>
                   </li>
                 ))}
               </ul>
