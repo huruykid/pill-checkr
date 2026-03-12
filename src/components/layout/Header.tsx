@@ -9,6 +9,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { lang, setLang } = useI18n();
 
   const navLinks = [
     { to: "/check", label: "Check a Pill", icon: Search },
