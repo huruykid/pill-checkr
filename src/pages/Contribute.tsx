@@ -273,6 +273,25 @@ export default function Contribute() {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <Label>Back Photo <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-sm border-2 border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground">
+                      <Upload className="h-4 w-4" />
+                      {backPhotoFile ? backPhotoFile.name : "Choose file"}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) { toast.error("Photo must be under 5MB"); return; }
+                        setBackPhotoFile(file);
+                        setBackPhotoPreview(URL.createObjectURL(file));
+                      }} />
+                    </label>
+                    {backPhotoPreview && (
+                      <img src={backPhotoPreview} alt="Back preview" className="h-16 w-16 rounded-sm border border-border object-cover" />
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label>Notes (optional)</Label>
                   <Textarea
                     value={form.notes}
