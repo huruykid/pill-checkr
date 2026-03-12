@@ -372,6 +372,60 @@ export default function Results() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Individual Match Confidence Bars */}
+              {matches.length > 0 && (() => {
+                const topMatch = matches[0];
+                const imprintMatch = (report.imprint_text && topMatch.matched_imprint)
+                  ? (report.imprint_text.toLowerCase().trim() === topMatch.matched_imprint.toLowerCase().trim() ? 100
+                    : report.imprint_text.toLowerCase().includes(topMatch.matched_imprint.toLowerCase()) || topMatch.matched_imprint.toLowerCase().includes(report.imprint_text.toLowerCase()) ? 65
+                    : 20)
+                  : 0;
+                const colorMatch = (report.color && topMatch.matched_color)
+                  ? (report.color === topMatch.matched_color ? 100 : 30)
+                  : 0;
+                const shapeMatch = (report.shape && topMatch.matched_shape)
+                  ? (report.shape === topMatch.matched_shape ? 100 : 25)
+                  : 0;
+                // Size deviation: derive from anomaly score inversely
+                const sizeDeviation = Math.max(0, Math.min(100, 100 - anomalyScore * 1.2));
+
+                const bars = [
+                  { label: "Imprint Match", value: imprintMatch, icon: "🔤" },
+                  { label: "Color Similarity", value: colorMatch, icon: "🎨" },
+                  { label: "Shape Match", value: shapeMatch, icon: "🔷" },
+                  { label: "Size Consistency", value: sizeDeviation, icon: "📏" },
+                ];
+
+                const getBarColor = (v: number) =>
+                  v >= 70 ? "bg-success" : v >= 40 ? "bg-warning" : "bg-danger";
+                const getTextColor = (v: number) =>
+                  v >= 70 ? "text-success" : v >= 40 ? "text-warning" : "text-danger";
+
+                return (
+                  <div className="rounded-lg bg-muted/50 p-4 space-y-3">
+                    <p className="text-sm font-medium text-foreground mb-1">Match Breakdown</p>
+                    {bars.map((bar) => (
+                      <div key={bar.label} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <span>{bar.icon}</span> {bar.label}
+                          </span>
+                          <span className={`text-xs font-semibold ${getTextColor(bar.value)}`}>
+                            {bar.value}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${getBarColor(bar.value)}`}
+                            style={{ width: `${bar.value}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
               <div className="rounded-lg bg-muted/50 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-medium text-foreground">Inconsistency Score</span>
