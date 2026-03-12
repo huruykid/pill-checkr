@@ -296,7 +296,7 @@ export default function CheckPill() {
                   />
                   <button
                     type="button"
-                    onClick={clearImage}
+                    onClick={() => clearImage("front")}
                     className="absolute right-2 top-2 rounded-full bg-foreground/80 p-2 text-background transition-colors hover:bg-foreground"
                   >
                     <X className="h-4 w-4" />
