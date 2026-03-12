@@ -291,6 +291,10 @@ export default function Admin() {
                 <DatabaseIcon className="h-4 w-4" />
                 API Import
               </TabsTrigger>
+              <TabsTrigger value="community" className="gap-2">
+                <Users className="h-4 w-4" />
+                Community
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="pills">
