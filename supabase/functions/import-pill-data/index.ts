@@ -545,6 +545,60 @@ const CURATED_DATA: Record<string, CuratedEntry[]> = {
     { drug_name: "Pregabalin 300mg", imprint: "LYRICA 300 mg", shape: "capsule", color: "white", notes: "Pfizer • Schedule V • Pain/anxiety", ndc_code: "00071-1018" },
   ],
 
+  diabetes: [
+    // ── Metformin ──
+    { drug_name: "Metformin 500mg", imprint: "GLUCOPHAGE 500", shape: "round", color: "white", notes: "Bristol-Myers Squibb • Brand • Biguanide", ndc_code: "00087-6060" },
+    { drug_name: "Metformin 850mg", imprint: "GLUCOPHAGE 850", shape: "round", color: "white", notes: "Bristol-Myers Squibb • Brand • Biguanide", ndc_code: "00087-6070" },
+    { drug_name: "Metformin 1000mg", imprint: "GLUCOPHAGE 1000", shape: "oval", color: "white", notes: "Bristol-Myers Squibb • Brand • Biguanide", ndc_code: "00087-6071" },
+    { drug_name: "Metformin 500mg", imprint: "Z 70", shape: "round", color: "white", notes: "Zydus • Generic biguanide", ndc_code: "68382-0028" },
+    { drug_name: "Metformin 500mg", imprint: "IP 218", shape: "round", color: "white", notes: "Amneal • Generic biguanide", ndc_code: "53746-0218" },
+    { drug_name: "Metformin 500mg", imprint: "93 48", shape: "round", color: "white", notes: "Teva • Generic biguanide", ndc_code: "00093-1048" },
+    { drug_name: "Metformin 850mg", imprint: "93 49", shape: "round", color: "white", notes: "Teva • Generic biguanide", ndc_code: "00093-1049" },
+    { drug_name: "Metformin 1000mg", imprint: "93 7214", shape: "oval", color: "white", notes: "Teva • Generic biguanide", ndc_code: "00093-7214" },
+    { drug_name: "Metformin 1000mg", imprint: "IP 218 1000", shape: "oval", color: "white", notes: "Amneal • Generic biguanide", ndc_code: "53746-0219" },
+    { drug_name: "Metformin 500mg", imprint: "G 45", shape: "round", color: "white", notes: "Glenmark • Generic biguanide", ndc_code: "68462-0190" },
+    { drug_name: "Metformin 1000mg", imprint: "G 12", shape: "oval", color: "white", notes: "Glenmark • Generic biguanide", ndc_code: "68462-0192" },
+    { drug_name: "Metformin ER 500mg", imprint: "ER 500", shape: "oval", color: "white", notes: "Generic • Extended-release", ndc_code: null },
+    { drug_name: "Metformin ER 750mg", imprint: "ER 750", shape: "oval", color: "white", notes: "Generic • Extended-release", ndc_code: null },
+    // ── Glipizide ──
+    { drug_name: "Glipizide 5mg", imprint: "GLUCOTROL 5", shape: "diamond", color: "white", notes: "Pfizer • Brand • Sulfonylurea", ndc_code: "00049-4110" },
+    { drug_name: "Glipizide 10mg", imprint: "GLUCOTROL 10", shape: "diamond", color: "white", notes: "Pfizer • Brand • Sulfonylurea", ndc_code: "00049-4120" },
+    { drug_name: "Glipizide 5mg", imprint: "M 74", shape: "round", color: "white", notes: "Mylan • Generic sulfonylurea", ndc_code: "00378-0074" },
+    { drug_name: "Glipizide 10mg", imprint: "M 75", shape: "round", color: "white", notes: "Mylan • Generic sulfonylurea", ndc_code: "00378-0075" },
+    { drug_name: "Glipizide 5mg", imprint: "93 7456", shape: "round", color: "white", notes: "Teva • Generic sulfonylurea", ndc_code: "00093-7456" },
+    { drug_name: "Glipizide ER 5mg", imprint: "GLUCOTROL XL 5", shape: "round", color: "white", notes: "Pfizer • Extended-release", ndc_code: "00049-4150" },
+    { drug_name: "Glipizide ER 10mg", imprint: "GLUCOTROL XL 10", shape: "round", color: "white", notes: "Pfizer • Extended-release", ndc_code: "00049-4160" },
+    // ── Glyburide ──
+    { drug_name: "Glyburide 2.5mg", imprint: "MICRONASE 2.5", shape: "oval", color: "white", notes: "Upjohn • Brand • Sulfonylurea", ndc_code: "00009-0141" },
+    { drug_name: "Glyburide 5mg", imprint: "MICRONASE 5", shape: "oval", color: "blue", notes: "Upjohn • Brand • Sulfonylurea", ndc_code: "00009-0171" },
+    { drug_name: "Glyburide 5mg", imprint: "DAN 5440 5", shape: "oval", color: "green", notes: "Watson • Generic sulfonylurea", ndc_code: "00591-5440" },
+    { drug_name: "Glyburide 5mg", imprint: "G 5", shape: "oval", color: "green", notes: "Greenstone • Generic sulfonylurea", ndc_code: "59762-0005" },
+    { drug_name: "Glyburide 1.25mg", imprint: "DIABETA 1.25", shape: "oval", color: "white", notes: "Sanofi • Brand • Sulfonylurea", ndc_code: "00039-0061" },
+    // ── Pioglitazone ──
+    { drug_name: "Pioglitazone 15mg", imprint: "ACTOS 15", shape: "round", color: "white", notes: "Takeda • Brand • Thiazolidinedione", ndc_code: "64764-0151" },
+    { drug_name: "Pioglitazone 30mg", imprint: "ACTOS 30", shape: "round", color: "white", notes: "Takeda • Brand • Thiazolidinedione", ndc_code: "64764-0301" },
+    { drug_name: "Pioglitazone 45mg", imprint: "ACTOS 45", shape: "round", color: "white", notes: "Takeda • Brand • Thiazolidinedione", ndc_code: "64764-0451" },
+    { drug_name: "Pioglitazone 15mg", imprint: "93 7189", shape: "round", color: "white", notes: "Teva • Generic thiazolidinedione", ndc_code: "00093-7189" },
+    { drug_name: "Pioglitazone 30mg", imprint: "93 7190", shape: "round", color: "white", notes: "Teva • Generic thiazolidinedione", ndc_code: "00093-7190" },
+    // ── Sitagliptin ──
+    { drug_name: "Sitagliptin 25mg", imprint: "221", shape: "round", color: "pink", notes: "Merck • Januvia • DPP-4 inhibitor", ndc_code: "00006-0221" },
+    { drug_name: "Sitagliptin 50mg", imprint: "112", shape: "round", color: "tan", notes: "Merck • Januvia • DPP-4 inhibitor", ndc_code: "00006-0112" },
+    { drug_name: "Sitagliptin 100mg", imprint: "277", shape: "round", color: "tan", notes: "Merck • Januvia • DPP-4 inhibitor", ndc_code: "00006-0277" },
+    // ── SGLT2 inhibitors ──
+    { drug_name: "Empagliflozin 10mg", imprint: "S10", shape: "round", color: "yellow", notes: "Boehringer • Jardiance • SGLT2 inhibitor", ndc_code: "00597-0151" },
+    { drug_name: "Empagliflozin 25mg", imprint: "S25", shape: "oval", color: "yellow", notes: "Boehringer • Jardiance • SGLT2 inhibitor", ndc_code: "00597-0152" },
+    { drug_name: "Dapagliflozin 5mg", imprint: "5 1427", shape: "round", color: "yellow", notes: "AstraZeneca • Farxiga • SGLT2 inhibitor", ndc_code: "00310-6205" },
+    { drug_name: "Dapagliflozin 10mg", imprint: "10 1428", shape: "diamond", color: "yellow", notes: "AstraZeneca • Farxiga • SGLT2 inhibitor", ndc_code: "00310-6210" },
+    { drug_name: "Canagliflozin 100mg", imprint: "CFZ 100", shape: "capsule", color: "yellow", notes: "Janssen • Invokana • SGLT2 inhibitor", ndc_code: "50458-0140" },
+    { drug_name: "Canagliflozin 300mg", imprint: "CFZ 300", shape: "capsule", color: "white", notes: "Janssen • Invokana • SGLT2 inhibitor", ndc_code: "50458-0141" },
+    // ── Repaglinide / Nateglinide ──
+    { drug_name: "Repaglinide 0.5mg", imprint: "PRANDIN 0.5", shape: "round", color: "white", notes: "Novo Nordisk • Meglitinide", ndc_code: "00169-0081" },
+    { drug_name: "Repaglinide 1mg", imprint: "PRANDIN 1", shape: "round", color: "yellow", notes: "Novo Nordisk • Meglitinide", ndc_code: "00169-0082" },
+    { drug_name: "Repaglinide 2mg", imprint: "PRANDIN 2", shape: "round", color: "pink", notes: "Novo Nordisk • Meglitinide", ndc_code: "00169-0084" },
+    { drug_name: "Nateglinide 60mg", imprint: "STARLIX 60", shape: "round", color: "pink", notes: "Novartis • Meglitinide", ndc_code: "00078-0351" },
+    { drug_name: "Nateglinide 120mg", imprint: "STARLIX 120", shape: "oval", color: "yellow", notes: "Novartis • Meglitinide", ndc_code: "00078-0352" },
+  ],
+
   gi: [
     { drug_name: "Omeprazole 20mg", imprint: "PRILOSEC 20", shape: "capsule", color: "pink", notes: "AstraZeneca • PPI", ndc_code: "00186-0742" },
     { drug_name: "Omeprazole 40mg", imprint: "PRILOSEC 40", shape: "capsule", color: "purple", notes: "AstraZeneca • PPI", ndc_code: "00186-0743" },
