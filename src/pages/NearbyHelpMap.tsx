@@ -159,11 +159,14 @@ export default function NearbyHelpMap() {
       setFacilities(facs);
       setSearched(true);
 
-      const center = params.latitude && params.longitude
-        ? { lat: params.latitude, lng: params.longitude }
+      // Use search_coordinates from edge function (geocoded ZIP or passed lat/lng)
+      const center = data.search_coordinates
+        ? { lat: data.search_coordinates.lat, lng: data.search_coordinates.lng }
         : userLocation;
 
-      if (center) addMarkersToMap(facs.filter((f: Facility) => matchesFilter(f, filter)), center);
+      if (center && !userLocation) setUserLocation(center);
+
+      addMarkersToMap(facs.filter((f: Facility) => matchesFilter(f, filter)), center || undefined);
     } catch (e) {
       console.error("Error finding treatment:", e);
       setLocationError("Unable to find facilities. Try a different ZIP code.");
