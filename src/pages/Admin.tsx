@@ -429,6 +429,10 @@ export default function Admin() {
                 onImport={runApiImport}
               />
             </TabsContent>
+
+            <TabsContent value="community">
+              <CommunitySubmissionsTab />
+            </TabsContent>
           </Tabs>
         </div>
       </div>

@@ -14,6 +14,7 @@ export function Header() {
     { to: "/history", label: "History", icon: History },
     { to: "/education", label: "Learn", icon: BookOpen },
     { to: "/nearby-help", label: "Find Help", icon: MapPin },
+    { to: "/contribute", label: "Contribute", icon: Users },
   ];
 
   const isActive = (path: string) => location.pathname === path;
