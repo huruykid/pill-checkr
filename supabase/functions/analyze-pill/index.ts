@@ -12,11 +12,13 @@ const InputSchema = z.object({
   image: z.string()
     .min(1, "Image data is required")
     .max(15 * 1024 * 1024, "Image data exceeds maximum size of 15MB"),
+  backImage: z.string().max(15 * 1024 * 1024).optional().nullable(),
   imprint: z.string().max(50, "Imprint must be 50 characters or less").optional().nullable(),
   shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
   color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
   hasReferenceObject: z.boolean().default(false),
   photoUrl: z.string().optional().nullable(),
+  backPhotoUrl: z.string().optional().nullable(),
 });
 
 // Match scoring weights
@@ -286,7 +288,7 @@ serve(async (req) => {
       );
     }
     
-    const { image, imprint, shape, color, hasReferenceObject, photoUrl } = validationResult.data;
+    const { image, backImage, imprint, shape, color, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data;
     console.log("Input validated successfully");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -362,8 +364,9 @@ Respond with JSON only:
           {
             role: "user",
             content: [
-              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}` },
-              { type: "image_url", image_url: { url: image } }
+              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}${backImage ? ". A back-side photo is also provided — use both sides for more accurate imprint extraction and analysis." : ""}` },
+              { type: "image_url", image_url: { url: image } },
+              ...(backImage ? [{ type: "image_url" as const, image_url: { url: backImage } }] : []),
             ]
           }
         ],
@@ -585,6 +588,7 @@ Respond with JSON only:
         anomaly_reasons: anomalyReasons,
         risk_reasons: riskReasons,
         photo_url: photoUrl || null,
+        back_photo_url: backPhotoUrl || null,
         user_id: userId || null,
       })
       .select()

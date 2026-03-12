@@ -74,9 +74,12 @@ export default function CheckPill() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backFileInputRef = useRef<HTMLInputElement>(null);
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [backImageFile, setBackImageFile] = useState<File | null>(null);
+  const [backImagePreview, setBackImagePreview] = useState<string | null>(null);
   const [imprint, setImprint] = useState("");
   const [shape, setShape] = useState("");
   const [color, setColor] = useState("");
@@ -87,7 +90,7 @@ export default function CheckPill() {
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<string | null>(null);
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFileSelect = useCallback((file: File, side: "front" | "back" = "front") => {
     if (!file.type.startsWith("image/")) {
       setImageError("Please select an image file");
       return;
@@ -96,10 +99,15 @@ export default function CheckPill() {
       setImageError("Image must be less than 10MB");
       return;
     }
-    setImageFile(file);
     setImageError(null);
     const reader = new FileReader();
-    reader.onload = (e) => setImagePreview(e.target?.result as string);
+    if (side === "back") {
+      setBackImageFile(file);
+      reader.onload = (e) => setBackImagePreview(e.target?.result as string);
+    } else {
+      setImageFile(file);
+      reader.onload = (e) => setImagePreview(e.target?.result as string);
+    }
     reader.readAsDataURL(file);
   }, []);
 
@@ -113,24 +121,30 @@ export default function CheckPill() {
     e.preventDefault();
   }, []);
 
-  const clearImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    setImageError(null);
-    setQualityFeedback(null);
-    setShowRetakePrompt(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const clearImage = (side: "front" | "back" = "front") => {
+    if (side === "back") {
+      setBackImageFile(null);
+      setBackImagePreview(null);
+      if (backFileInputRef.current) backFileInputRef.current.value = "";
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
+      setImageError(null);
+      setQualityFeedback(null);
+      setShowRetakePrompt(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadImage = async (file: File, suffix?: string): Promise<string | null> => {
     try {
       const ext = file.name.split(".").pop() || "jpg";
-      const fileName = `${crypto.randomUUID()}.${ext}`;
+      const base = crypto.randomUUID();
+      const fileName = suffix ? `${base}_${suffix}.${ext}` : `${base}.${ext}`;
       const { error } = await supabase.storage
         .from("pill-images")
         .upload(fileName, file, { contentType: file.type });
       if (error) throw error;
-      // Store just the file name — bucket is private, signed URLs generated on display
       return fileName;
     } catch (err) {
       console.error("Image upload failed:", err);
@@ -147,18 +161,24 @@ export default function CheckPill() {
     setIsAnalyzing(true);
 
     try {
-      // Upload image to storage
+      // Upload images to storage
       const photoUrl = await uploadImage(imageFile);
+      let backPhotoUrl: string | null = null;
+      if (backImageFile && backImagePreview) {
+        backPhotoUrl = await uploadImage(backImageFile, "back");
+      }
 
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
         body: {
           image: imagePreview,
+          backImage: backImagePreview || null,
           imprint: imprint || null,
           shape: shape || null,
           color: color || null,
           hasReferenceObject: hasReference,
           photoUrl: photoUrl || null,
+          backPhotoUrl: backPhotoUrl || null,
         },
       });
 
@@ -276,7 +296,7 @@ export default function CheckPill() {
                   />
                   <button
                     type="button"
-                    onClick={clearImage}
+                    onClick={() => clearImage("front")}
                     className="absolute right-2 top-2 rounded-full bg-foreground/80 p-2 text-background transition-colors hover:bg-foreground"
                   >
                     <X className="h-4 w-4" />
@@ -359,7 +379,7 @@ export default function CheckPill() {
                   )}
 
                   <div className="flex gap-3 pt-2">
-                    <Button variant="outline" onClick={clearImage} className="flex-1">
+                    <Button variant="outline" onClick={() => clearImage("front")} className="flex-1">
                       <RefreshCw className="mr-2 h-4 w-4" />
                       Retake Photo
                     </Button>
@@ -373,6 +393,53 @@ export default function CheckPill() {
                     >
                       Continue Anyway
                     </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Back Image Upload (Optional) */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Back of Pill <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+              
+              {!backImagePreview ? (
+                <div
+                  className="relative flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-4 transition-colors hover:border-primary/50 hover:bg-accent/50"
+                  onClick={() => backFileInputRef.current?.click()}
+                >
+                  <input
+                    ref={backFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file, "back");
+                    }}
+                  />
+                  <ImageIcon className="mb-2 h-8 w-8 text-muted-foreground" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    Upload back side for better accuracy
+                  </p>
+                </div>
+              ) : (
+                <div className="relative overflow-hidden rounded-xl border border-border">
+                  <img
+                    src={backImagePreview}
+                    alt="Pill back preview"
+                    className="h-auto w-full max-h-[200px] object-contain bg-muted/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => clearImage("back")}
+                    className="absolute right-2 top-2 rounded-full bg-foreground/80 p-2 text-background transition-colors hover:bg-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="absolute bottom-2 left-2 flex items-center gap-2 rounded-lg bg-success/90 px-3 py-1.5 text-sm text-success-foreground">
+                    <CheckCircle className="h-4 w-4" />
+                    Back uploaded
                   </div>
                 </div>
               )}

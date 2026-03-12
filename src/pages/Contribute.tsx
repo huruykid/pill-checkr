@@ -58,6 +58,8 @@ export default function Contribute() {
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [backPhotoFile, setBackPhotoFile] = useState<File | null>(null);
+  const [backPhotoPreview, setBackPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -109,6 +111,7 @@ export default function Contribute() {
 
     setSubmitting(true);
     let photoUrl: string | null = null;
+    let backPhotoUrl: string | null = null;
 
     if (photoFile) {
       setUploading(true);
@@ -125,8 +128,25 @@ export default function Contribute() {
         return;
       }
       photoUrl = path;
-      setUploading(false);
     }
+
+    if (backPhotoFile) {
+      setUploading(true);
+      const ext = backPhotoFile.name.split(".").pop() || "jpg";
+      const path = `community/${user.id}/${Date.now()}_back.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("pill-images")
+        .upload(path, backPhotoFile, { contentType: backPhotoFile.type });
+
+      if (uploadError) {
+        toast.error("Back photo upload failed");
+        setSubmitting(false);
+        setUploading(false);
+        return;
+      }
+      backPhotoUrl = path;
+    }
+    setUploading(false);
 
     const { error } = await supabase.from("community_submissions").insert({
       user_id: user.id,
@@ -136,7 +156,8 @@ export default function Contribute() {
       color: form.color,
       notes: form.notes.trim() || null,
       photo_url: photoUrl,
-    });
+      back_photo_url: backPhotoUrl,
+    } as any);
 
     if (error) {
       toast.error("Submission failed. Please try again.");
@@ -145,6 +166,8 @@ export default function Contribute() {
       setForm({ drug_name: "", imprint: "", shape: "round", color: "white", notes: "" });
       setPhotoFile(null);
       setPhotoPreview(null);
+      setBackPhotoFile(null);
+      setBackPhotoPreview(null);
       await fetchSubmissions();
     }
 
@@ -246,6 +269,25 @@ export default function Contribute() {
                     </label>
                     {photoPreview && (
                       <img src={photoPreview} alt="Preview" className="h-16 w-16 rounded-sm border border-border object-cover" />
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Back Photo <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-sm border-2 border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground">
+                      <Upload className="h-4 w-4" />
+                      {backPhotoFile ? backPhotoFile.name : "Choose file"}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) { toast.error("Photo must be under 5MB"); return; }
+                        setBackPhotoFile(file);
+                        setBackPhotoPreview(URL.createObjectURL(file));
+                      }} />
+                    </label>
+                    {backPhotoPreview && (
+                      <img src={backPhotoPreview} alt="Back preview" className="h-16 w-16 rounded-sm border border-border object-cover" />
                     )}
                   </div>
                 </div>
