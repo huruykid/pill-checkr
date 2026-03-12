@@ -398,6 +398,53 @@ export default function CheckPill() {
               )}
             </div>
 
+            {/* Back Image Upload (Optional) */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Back of Pill <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+              
+              {!backImagePreview ? (
+                <div
+                  className="relative flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-4 transition-colors hover:border-primary/50 hover:bg-accent/50"
+                  onClick={() => backFileInputRef.current?.click()}
+                >
+                  <input
+                    ref={backFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file, "back");
+                    }}
+                  />
+                  <ImageIcon className="mb-2 h-8 w-8 text-muted-foreground" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    Upload back side for better accuracy
+                  </p>
+                </div>
+              ) : (
+                <div className="relative overflow-hidden rounded-xl border border-border">
+                  <img
+                    src={backImagePreview}
+                    alt="Pill back preview"
+                    className="h-auto w-full max-h-[200px] object-contain bg-muted/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => clearImage("back")}
+                    className="absolute right-2 top-2 rounded-full bg-foreground/80 p-2 text-background transition-colors hover:bg-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="absolute bottom-2 left-2 flex items-center gap-2 rounded-lg bg-success/90 px-3 py-1.5 text-sm text-success-foreground">
+                    <CheckCircle className="h-4 w-4" />
+                    Back uploaded
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Optional Fields */}
             <div className="space-y-4">
               <p className="text-sm font-medium text-muted-foreground">

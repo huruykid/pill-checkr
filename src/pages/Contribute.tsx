@@ -166,6 +166,8 @@ export default function Contribute() {
       setForm({ drug_name: "", imprint: "", shape: "round", color: "white", notes: "" });
       setPhotoFile(null);
       setPhotoPreview(null);
+      setBackPhotoFile(null);
+      setBackPhotoPreview(null);
       await fetchSubmissions();
     }
 
