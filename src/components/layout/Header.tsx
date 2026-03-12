@@ -1,13 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp } from "lucide-react";
+import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp, Globe } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { lang, setLang } = useI18n();
 
   const navLinks = [
     { to: "/check", label: "Check a Pill", icon: Search },
@@ -52,6 +54,15 @@ export function Header() {
               </Button>
             </Link>
           ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-background/80 hover:text-background hover:bg-background/10 font-mono text-xs"
+            onClick={() => setLang(lang === "en" ? "es" : "en")}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {lang === "en" ? "ES" : "EN"}
+          </Button>
           {user ? (
             <>
               <Link to="/settings">
@@ -129,6 +140,14 @@ export function Header() {
                 </Button>
               </Link>
             ))}
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10 font-mono"
+              onClick={() => { setLang(lang === "en" ? "es" : "en"); }}
+            >
+              <Globe className="h-5 w-5" />
+              {lang === "en" ? "Español" : "English"}
+            </Button>
             {user ? (
               <>
                 <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>

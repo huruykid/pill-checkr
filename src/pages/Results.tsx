@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useI18n } from "@/hooks/useI18n";
 import { Layout } from "@/components/layout/Layout";
 import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Disclaimer } from "@/components/shared/Disclaimer";
@@ -76,19 +77,13 @@ function getVisualScoreText(score: number): string {
   return "text-danger";
 }
 
-const harmReductionSteps = [
-  "Never use alone - have someone with you who can call for help",
-  "Start with a small test dose and wait to feel effects",
-  "Have naloxone (Narcan) available and know how to use it",
-  "Know the signs of overdose: slow breathing, blue lips, unresponsive",
-  "If unable to confidently match, treat as higher risk",
-  "Call 911 immediately if you suspect an overdose",
-];
+const harmReductionStepKeys = ["steps.1", "steps.2", "steps.3", "steps.4", "steps.5", "steps.6"];
 
 export default function Results() {
   const { reportId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -507,15 +502,15 @@ export default function Results() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Info className="h-5 w-5 text-primary" />
-                What To Do Next
+                {t("results.whatToDoNext")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
-                {harmReductionSteps.map((step, i) => (
+                {harmReductionStepKeys.map((key, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm">
                     <CheckCircle className="h-4 w-4 text-success shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">{step}</span>
+                    <span className="text-muted-foreground">{t(key)}</span>
                   </li>
                 ))}
               </ul>
