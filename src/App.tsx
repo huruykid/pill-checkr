@@ -14,6 +14,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
 import NearbyHelpMap from "./pages/NearbyHelpMap";
+import Contribute from "./pages/Contribute";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/nearby-help" element={<NearbyHelpMap />} />
+            <Route path="/contribute" element={<Contribute />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

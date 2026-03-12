@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings } from "lucide-react";
+import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -14,6 +14,7 @@ export function Header() {
     { to: "/history", label: "History", icon: History },
     { to: "/education", label: "Learn", icon: BookOpen },
     { to: "/nearby-help", label: "Find Help", icon: MapPin },
+    { to: "/contribute", label: "Contribute", icon: Users },
   ];
 
   const isActive = (path: string) => location.pathname === path;

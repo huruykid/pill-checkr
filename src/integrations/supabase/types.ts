@@ -49,6 +49,54 @@ export type Database = {
           },
         ]
       }
+      community_submissions: {
+        Row: {
+          color: Database["public"]["Enums"]["pill_color"]
+          created_at: string
+          drug_name: string
+          id: string
+          imprint: string
+          notes: string | null
+          photo_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          shape: Database["public"]["Enums"]["pill_shape"]
+          status: string
+          user_id: string
+        }
+        Insert: {
+          color?: Database["public"]["Enums"]["pill_color"]
+          created_at?: string
+          drug_name: string
+          id?: string
+          imprint: string
+          notes?: string | null
+          photo_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          shape?: Database["public"]["Enums"]["pill_shape"]
+          status?: string
+          user_id: string
+        }
+        Update: {
+          color?: Database["public"]["Enums"]["pill_color"]
+          created_at?: string
+          drug_name?: string
+          id?: string
+          imprint?: string
+          notes?: string | null
+          photo_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          shape?: Database["public"]["Enums"]["pill_shape"]
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       counterfeit_reports: {
         Row: {
           city: string | null
