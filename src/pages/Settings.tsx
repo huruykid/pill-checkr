@@ -19,6 +19,7 @@ import {
   Mail,
   UserPlus,
 } from "lucide-react";
+import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
 
 interface Contact {
   id: string;
