@@ -403,7 +403,19 @@ Respond with JSON only:
     const finalColor = color || analysis.extracted_color;
     const imprintConfidence = analysis.imprint_confidence || "low";
 
-    // ─── Step 2: Text-based reference matching (two-pass) ──────────────────
+    // ─── Step 2: Text-based reference matching (three-pass with agreement boost) ─
+    // Track which passes found each drug name (normalized) for cross-pass agreement
+    const drugPassMap: Record<string, Set<number>> = {}; // normalized drug name -> set of pass numbers
+    const trackPass = (refs: any[], passNum: number) => {
+      for (const r of refs) {
+        const key = r.drug_name?.toLowerCase().trim();
+        if (key) {
+          if (!drugPassMap[key]) drugPassMap[key] = new Set();
+          drugPassMap[key].add(passNum);
+        }
+      }
+    };
+
     // Pass 1: Search by imprint text
     let references: any[] = [];
     if (finalImprint) {
@@ -413,6 +425,7 @@ Respond with JSON only:
         .ilike("imprint", `%${finalImprint}%`)
         .limit(20);
       references = imprintMatches || [];
+      trackPass(references, 1);
     }
 
     // Pass 2: If imprint search returned < 3 results, broaden with shape+color fallback
@@ -423,14 +436,17 @@ Respond with JSON only:
       if (finalShape !== "other") fallbackQuery = fallbackQuery.eq("shape", finalShape);
       if (finalColor !== "other") fallbackQuery = fallbackQuery.eq("color", finalColor);
       const { data: fallbackMatches } = await fallbackQuery.limit(20);
+      const pass2New: any[] = [];
       if (fallbackMatches) {
         for (const m of fallbackMatches) {
           if (!existingIds.has(m.id)) {
             references.push(m);
             existingIds.add(m.id);
+            pass2New.push(m);
           }
         }
       }
+      trackPass(fallbackMatches || [], 2);
       console.log(`Total references after shape+color fallback: ${references.length}`);
     }
 
@@ -438,7 +454,6 @@ Respond with JSON only:
     if (references.length < 3 && finalImprint) {
       console.log(`Still only ${references.length} results — running drug name keyword fallback`);
       const existingIds = new Set(references.map((r: any) => r.id));
-      // Extract potential drug name keywords from imprint (common patterns: letters before numbers)
       const keywords = finalImprint
         .replace(/[^a-zA-Z\s]/g, " ")
         .split(/\s+/)
@@ -452,6 +467,7 @@ Respond with JSON only:
           .ilike("drug_name", `%${keyword}%`)
           .limit(10);
         if (nameMatches) {
+          trackPass(nameMatches, 3);
           for (const m of nameMatches) {
             if (!existingIds.has(m.id)) {
               references.push(m);
@@ -464,6 +480,16 @@ Respond with JSON only:
       console.log(`Total references after drug name fallback: ${references.length}`);
     }
 
+    // Log cross-pass agreement
+    const CROSS_PASS_BONUS = 15; // bonus points when a drug name appears in 2+ passes
+    const agreedDrugs = new Set<string>();
+    for (const [drugKey, passes] of Object.entries(drugPassMap)) {
+      if (passes.size >= 2) {
+        agreedDrugs.add(drugKey);
+        console.log(`Cross-pass agreement: "${drugKey}" found in passes ${[...passes].join(", ")}`);
+      }
+    }
+
     const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence };
     
     let scoredMatches = (references || []).map((ref) => {
@@ -471,7 +497,17 @@ Respond with JSON only:
         { imprint: finalImprint, shape: finalShape, color: finalColor },
         { imprint: ref.imprint, shape: ref.shape, color: ref.color }
       );
-      return { ...ref, score, matchReasons: reasons };
+      let finalScore = score;
+      const finalReasons = [...reasons];
+
+      // Apply cross-pass agreement boost
+      const drugKey = ref.drug_name?.toLowerCase().trim();
+      if (drugKey && agreedDrugs.has(drugKey)) {
+        finalScore += CROSS_PASS_BONUS;
+        finalReasons.push("Corroborated across multiple search passes");
+      }
+
+      return { ...ref, score: finalScore, matchReasons: finalReasons };
     })
     .filter(m => m.score > 0)
     .sort((a, b) => {
