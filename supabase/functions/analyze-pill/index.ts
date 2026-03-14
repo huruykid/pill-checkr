@@ -136,16 +136,11 @@ function calculateMatchScore(
     }
   }
 
-  // Thickness match with tolerance
-  if (extracted.sizeMm && reference.thickness_mm) {
-    // We don't have a separate extracted thickness yet, but if reference has it and size is available,
-    // this is a placeholder for future thickness extraction
-  }
-  // For now, use reference thickness_mm if available and compare against other references
-  if ((reference as any).thickness_mm && extracted.sizeMm) {
-    // Thickness scoring is available when reference data has thickness
-    // Currently thickness is only compared between references, not extracted from images
-  }
+  // Thickness match (when reference has thickness data)
+  // Note: thickness_mm is not yet extracted from images, but if reference data has it
+  // and the extracted size is available, we can compare thickness between top reference candidates
+  // to boost matches with consistent physical dimensions. This will be fully utilized once
+  // AI extraction includes thickness estimation.
 
   // Logo match
   if (extracted.detectedLogos && extracted.detectedLogos.length > 0 && reference.logo_description) {
