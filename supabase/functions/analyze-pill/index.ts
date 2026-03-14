@@ -36,6 +36,26 @@ const MATCH_WEIGHTS = {
   visualSimilarity: 25, // max bonus from visual comparison
 };
 
+// Color proximity map: partial credit for similar colors (0-1 scale, 1 = identical)
+const COLOR_PROXIMITY: Record<string, Record<string, number>> = {
+  pink:   { red: 0.6, purple: 0.3 },
+  red:    { pink: 0.6, orange: 0.4 },
+  blue:   { purple: 0.5 },
+  purple: { blue: 0.5, pink: 0.3 },
+  orange: { yellow: 0.5, red: 0.4, tan: 0.3 },
+  yellow: { orange: 0.5, tan: 0.4, green: 0.2 },
+  tan:    { brown: 0.6, yellow: 0.4, orange: 0.3 },
+  brown:  { tan: 0.6 },
+  gray:   { white: 0.4 },
+  white:  { gray: 0.4 },
+  green:  { yellow: 0.2 },
+};
+
+function getColorProximity(a: string, b: string): number {
+  if (a === b) return 1;
+  return COLOR_PROXIMITY[a]?.[b] ?? 0;
+}
+
 // Thresholds for confidence levels (adjusted for new max score of ~110)
 const CONFIDENCE_THRESHOLDS = {
   high: 80,
