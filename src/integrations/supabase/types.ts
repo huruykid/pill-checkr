@@ -332,6 +332,7 @@ export type Database = {
           id: string
           imprint: string
           last_synced: string | null
+          logo_description: string | null
           ndc_code: string | null
           notes: string | null
           scoring: Database["public"]["Enums"]["pill_scoring"] | null
@@ -348,6 +349,7 @@ export type Database = {
           id?: string
           imprint: string
           last_synced?: string | null
+          logo_description?: string | null
           ndc_code?: string | null
           notes?: string | null
           scoring?: Database["public"]["Enums"]["pill_scoring"] | null
@@ -364,6 +366,7 @@ export type Database = {
           id?: string
           imprint?: string
           last_synced?: string | null
+          logo_description?: string | null
           ndc_code?: string | null
           notes?: string | null
           scoring?: Database["public"]["Enums"]["pill_scoring"] | null
@@ -437,6 +440,7 @@ export type Database = {
           back_photo_url: string | null
           color: Database["public"]["Enums"]["pill_color"] | null
           created_at: string
+          detected_logos: Json | null
           estimated_size_mm: number | null
           has_reference_object: boolean | null
           id: string
@@ -459,6 +463,7 @@ export type Database = {
           back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
+          detected_logos?: Json | null
           estimated_size_mm?: number | null
           has_reference_object?: boolean | null
           id?: string
@@ -481,6 +486,7 @@ export type Database = {
           back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
+          detected_logos?: Json | null
           estimated_size_mm?: number | null
           has_reference_object?: boolean | null
           id?: string
