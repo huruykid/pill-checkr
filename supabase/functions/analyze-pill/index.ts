@@ -697,7 +697,7 @@ Respond with JSON only:
 
     const { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
       extracted,
-      topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color } : null,
+      topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color, scoring: topMatch.scoring, size_mm: topMatch.size_mm } : null,
       analysis.image_quality,
       visualMismatchDetected,
     );
