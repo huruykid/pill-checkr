@@ -91,6 +91,8 @@ export default function CheckPill() {
   const [imprint, setImprint] = useState("");
   const [shape, setShape] = useState("");
   const [color, setColor] = useState("");
+  const [scoring, setScoring] = useState("");
+  const [sizeMm, setSizeMm] = useState("");
   const [hasReference, setHasReference] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
