@@ -103,8 +103,8 @@ function calculateMatchScore(
 
 // Calculate anomaly score based on inconsistencies
 function calculateAnomalyScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null; imprintConfidence: string },
-  topMatch: { imprint: string; shape: string; color: string } | null,
+  extracted: { imprint: string | null; shape: string | null; color: string | null; imprintConfidence: string; scoring: string | null; sizeMm: number | null },
+  topMatch: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null } | null,
   imageQuality: string,
   visualMismatch: boolean,
 ): { score: number; reasons: string[] } {
