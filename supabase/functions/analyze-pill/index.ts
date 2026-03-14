@@ -58,10 +58,10 @@ function getColorProximity(a: string, b: string): number {
   return COLOR_PROXIMITY[a]?.[b] ?? 0;
 }
 
-// Thresholds for confidence levels (adjusted for new max score of ~110)
+// Thresholds for confidence levels (adjusted for new max score of ~121)
 const CONFIDENCE_THRESHOLDS = {
-  high: 80,
-  medium: 50,
+  high: 85,
+  medium: 55,
 };
 
 const SOURCE_PRIORITY: Record<string, number> = {
