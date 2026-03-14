@@ -18,6 +18,7 @@ import NearbyHelpMap from "./pages/NearbyHelpMap";
 import Contribute from "./pages/Contribute";
 import ApiDocs from "./pages/ApiDocs";
 import Trends from "./pages/Trends";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
