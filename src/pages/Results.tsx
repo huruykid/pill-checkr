@@ -381,6 +381,16 @@ export default function Results() {
                 const shapeMatch = (report.shape && topMatch.matched_shape)
                   ? (report.shape === topMatch.matched_shape ? 100 : 25)
                   : 0;
+
+                // Scoring match: parse from match_reasons
+                const scoringMatchText = topMatch.match_reasons?.includes("Scoring pattern matches");
+                const scoringValue = scoringMatchText ? 100 : (topMatch.match_reasons?.includes("scoring") ? 30 : 0);
+
+                // Size match: parse from match_reasons
+                const sizeExactMatch = topMatch.match_reasons?.match(/Size matches \(±([\d.]+)mm\)/);
+                const sizeCloseMatch = topMatch.match_reasons?.match(/Size close \(±([\d.]+)mm\)/);
+                const sizeValue = sizeExactMatch ? 100 : sizeCloseMatch ? 60 : 0;
+
                 // Size deviation: derive from anomaly score inversely
                 const sizeDeviation = Math.max(0, Math.min(100, 100 - anomalyScore * 1.2));
 
@@ -388,8 +398,10 @@ export default function Results() {
                   { label: "Imprint Match", value: imprintMatch, icon: "🔤" },
                   { label: "Color Similarity", value: colorMatch, icon: "🎨" },
                   { label: "Shape Match", value: shapeMatch, icon: "🔷" },
-                  { label: "Size Consistency", value: sizeDeviation, icon: "📏" },
-                ];
+                  { label: "Scoring Pattern", value: scoringValue || sizeDeviation, icon: "➗", hide: !scoringMatchText && !topMatch.match_reasons?.includes("scoring") },
+                  { label: "Size Match", value: sizeValue || sizeDeviation, icon: "📏", hide: !sizeExactMatch && !sizeCloseMatch },
+                  { label: "Size Consistency", value: sizeDeviation, icon: "📏", hide: !!sizeExactMatch || !!sizeCloseMatch },
+                ].filter(b => !b.hide);
 
                 const getBarColor = (v: number) =>
                   v >= 70 ? "bg-success" : v >= 40 ? "bg-warning" : "bg-danger";
