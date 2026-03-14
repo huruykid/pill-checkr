@@ -951,7 +951,8 @@ Respond with JSON only:
       reportId: report.id,
       imageQuality: analysis.image_quality,
       qualityIssues: analysis.quality_issues || [],
-      overallRecommendation: analysis.overall_recommendation || null
+      overallRecommendation: analysis.overall_recommendation || null,
+      counterfeitAlerts: counterfeitAlerts.length > 0 ? counterfeitAlerts : null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
