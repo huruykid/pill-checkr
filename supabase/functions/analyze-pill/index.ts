@@ -803,6 +803,58 @@ Respond with JSON only:
       }
     }
 
+    // ─── Step 3.75: Regional counterfeit cross-reference ──────────────────
+    let counterfeitAlerts: Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }> = [];
+    if (scoredMatches.length > 0) {
+      const matchedDrugNames = [...new Set(scoredMatches.map(m => m.drug_name))];
+      try {
+        // Get recent counterfeit reports (last 90 days) for matched drugs
+        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: cfReports } = await supabase
+          .from("counterfeit_reports")
+          .select("drug_name, state, city, risk_level, created_at")
+          .gte("created_at", ninetyDaysAgo)
+          .in("drug_name", matchedDrugNames)
+          .limit(100);
+
+        if (cfReports && cfReports.length > 0) {
+          // Group by drug_name + state
+          const grouped: Record<string, { drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }> = {};
+          for (const r of cfReports) {
+            const key = `${r.drug_name}|${r.state || "unknown"}`;
+            if (!grouped[key]) {
+              grouped[key] = {
+                drug_name: r.drug_name || "",
+                state: r.state || "Unknown",
+                city: r.city,
+                risk_level: r.risk_level,
+                count: 0,
+                latest: r.created_at,
+              };
+            }
+            grouped[key].count++;
+            if (r.created_at > grouped[key].latest) {
+              grouped[key].latest = r.created_at;
+              if (r.city) grouped[key].city = r.city;
+              if (r.risk_level === "high") grouped[key].risk_level = "high";
+            }
+          }
+          counterfeitAlerts = Object.values(grouped).sort((a, b) => b.count - a.count);
+          console.log(`Found ${counterfeitAlerts.length} regional counterfeit alerts for matched drugs`);
+
+          // Add to risk reasons if significant
+          const totalCfReports = cfReports.length;
+          if (totalCfReports >= 3) {
+            riskReasons.push(`⚠ ${totalCfReports} counterfeit reports in the last 90 days for this substance`);
+          } else if (totalCfReports > 0) {
+            riskReasons.push(`${totalCfReports} counterfeit report(s) found for this substance recently`);
+          }
+        }
+      } catch (e) {
+        console.error("Counterfeit cross-reference failed:", e);
+      }
+    }
+
     // ─── Step 4: Scoring and risk assessment ────────────────────────────────
     const topMatch = scoredMatches.length > 0 ? scoredMatches[0] : null;
     let matchConfidence: "low" | "medium" | "high" = "low";
