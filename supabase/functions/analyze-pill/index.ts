@@ -776,6 +776,7 @@ Respond with JSON only:
         color: finalColor,
         scoring: finalScoring,
         estimated_size_mm: finalSizeMm,
+        detected_logos: detectedLogos.length > 0 ? detectedLogos : null,
         image_quality: analysis.image_quality,
         risk_level: riskLevel,
         has_reference_object: hasReferenceObject,
