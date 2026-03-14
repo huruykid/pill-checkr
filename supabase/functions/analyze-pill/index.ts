@@ -23,13 +23,16 @@ const InputSchema = z.object({
   backPhotoUrl: z.string().optional().nullable(),
 });
 
-// Match scoring weights
+// Match scoring weights (total max ~110)
 const MATCH_WEIGHTS = {
-  imprintExact: 50,
-  imprintPartial: 25,
-  shape: 15,
-  color: 15,
-  visualSimilarity: 30, // max bonus from visual comparison
+  imprintExact: 45,
+  imprintPartial: 22,
+  shape: 12,
+  color: 12,
+  scoring: 8,
+  sizeExact: 8,   // within ±0.5mm
+  sizeClose: 4,   // within ±1mm
+  visualSimilarity: 25, // max bonus from visual comparison
 };
 
 // Thresholds for confidence levels (adjusted for new max score of ~110)
