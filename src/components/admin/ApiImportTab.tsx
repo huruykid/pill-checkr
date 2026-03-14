@@ -66,6 +66,7 @@ const CATEGORIES = [
   { value: "thyroid", label: "Thyroid" },
   { value: "muscle_relaxants", label: "Muscle Relaxants" },
   { value: "supplements", label: "Supplements" },
+  { value: "mdma_ecstasy", label: "MDMA / Ecstasy" },
 ];
 
 export function ApiImportTab({ isImporting, latestImport, stats, onImport }: ApiImportTabProps) {
