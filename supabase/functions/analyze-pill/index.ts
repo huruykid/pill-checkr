@@ -372,9 +372,16 @@ serve(async (req) => {
             role: "system",
             content: `You are a pill analysis assistant for harm reduction. Analyze pill images to extract features. You CANNOT detect fentanyl, confirm authenticity, or guarantee safety. This tool helps assess consistency with known reference pills only.
 
-Extract: imprint text (OCR), shape, color, and thoroughly assess image quality.
+Extract: imprint text (OCR), shape, color, scoring/break-line pattern, and thoroughly assess image quality.
 
 For imprint extraction, also rate your confidence in the OCR reading.
+
+For scoring pattern, identify the break lines on the pill:
+- "none" = no break line
+- "single" = one line across
+- "double" = cross/X pattern
+- "quad" = four-way split
+- "other" = unusual pattern
 
 For image quality, be VERY specific about what's wrong and how to fix it. Consider:
 - Blur/focus issues
@@ -392,6 +399,7 @@ Respond with JSON only:
   "imprint_confidence": "high|medium|low",
   "extracted_shape": "round|oval|capsule|diamond|triangle|hexagon|rectangle|other",
   "extracted_color": "white|blue|yellow|pink|green|orange|red|purple|gray|brown|tan|multicolor|other",
+  "extracted_scoring": "none|single|double|quad|other",
   "image_quality": "good|fair|poor",
   "quality_issues": [
     {
