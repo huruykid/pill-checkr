@@ -518,9 +518,12 @@ Respond with JSON only:
     const hasLogoOnly = analysis.has_logo_only || false;
 
     const finalImprint = imprint || analysis.extracted_imprint;
+    const finalBackImprint = analysis.back_imprint || null;
     const finalShape = shape || analysis.extracted_shape;
     const finalColor = color || analysis.extracted_color;
     const imprintConfidence = analysis.imprint_confidence || "low";
+
+    console.log(`Imprints — front: ${finalImprint}, back: ${finalBackImprint}`);
 
     // ─── Step 2: Text-based reference matching (three-pass with agreement boost) ─
     // Track which passes found each drug name (normalized) for cross-pass agreement
@@ -535,8 +538,9 @@ Respond with JSON only:
       }
     };
 
-    // Pass 1: Search by imprint text
+    // Pass 1: Search by imprint text (front + back)
     let references: any[] = [];
+    const existingIdsPass1 = new Set<string>();
     if (finalImprint) {
       const { data: imprintMatches } = await supabase
         .from("pill_reference")
@@ -544,7 +548,27 @@ Respond with JSON only:
         .ilike("imprint", `%${finalImprint}%`)
         .limit(20);
       references = imprintMatches || [];
+      for (const r of references) existingIdsPass1.add(r.id);
       trackPass(references, 1);
+    }
+
+    // Also search by back imprint if it differs from front
+    if (finalBackImprint && finalBackImprint !== finalImprint) {
+      const { data: backMatches } = await supabase
+        .from("pill_reference")
+        .select("*")
+        .ilike("imprint", `%${finalBackImprint}%`)
+        .limit(20);
+      if (backMatches) {
+        for (const m of backMatches) {
+          if (!existingIdsPass1.has(m.id)) {
+            references.push(m);
+            existingIdsPass1.add(m.id);
+          }
+        }
+        trackPass(backMatches, 1);
+      }
+      console.log(`Back imprint search added ${(backMatches || []).filter(m => !existingIdsPass1.has(m.id)).length} new results`);
     }
 
     // Pass 2: If imprint search returned < 3 results, broaden with shape+color fallback
