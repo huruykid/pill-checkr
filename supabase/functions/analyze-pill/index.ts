@@ -466,11 +466,17 @@ Respond with JSON only:
         imprint_confidence: "low",
         extracted_shape: "other", 
         extracted_color: "other", 
+        extracted_scoring: null,
+        detected_logos: [],
+        has_logo_only: false,
         image_quality: "fair",
         quality_issues: [],
         overall_recommendation: null
       };
     }
+
+    const detectedLogos = analysis.detected_logos || [];
+    const hasLogoOnly = analysis.has_logo_only || false;
 
     const finalImprint = imprint || analysis.extracted_imprint;
     const finalShape = shape || analysis.extracted_shape;
