@@ -99,6 +99,18 @@ function calculateMatchScore(
     }
   }
 
+  // Logo match
+  if (extracted.detectedLogos && extracted.detectedLogos.length > 0 && reference.logo_description) {
+    const refLogoLower = reference.logo_description.toLowerCase();
+    const logoMatched = extracted.detectedLogos.some(
+      logo => refLogoLower.includes(logo.name.toLowerCase()) || logo.name.toLowerCase().includes(refLogoLower.split(" ")[0])
+    );
+    if (logoMatched) {
+      score += MATCH_WEIGHTS.logoMatch;
+      reasons.push("Logo matches reference");
+    }
+  }
+
   return { score, reasons };
 }
 
