@@ -580,6 +580,49 @@ Respond with JSON only:
       console.log(`Back imprint search added ${(backMatches || []).filter(m => !existingIdsPass1.has(m.id)).length} new results`);
     }
 
+    // Fuzzy fallback: if Pass 1 returned < 3 results, use pg_trgm trigram similarity
+    if (references.length < 3 && finalImprint) {
+      console.log(`Pass 1 returned ${references.length} results — running fuzzy imprint fallback`);
+      const { data: fuzzyMatches } = await supabase.rpc('fuzzy_imprint_search', {
+        search_text: finalImprint,
+        similarity_threshold: 0.3,
+        max_results: 20,
+      });
+      if (fuzzyMatches) {
+        let fuzzyAdded = 0;
+        for (const m of fuzzyMatches as any[]) {
+          if (!existingIdsPass1.has(m.id)) {
+            references.push(m);
+            existingIdsPass1.add(m.id);
+            fuzzyAdded++;
+          }
+        }
+        trackPass(fuzzyMatches, 1);
+        console.log(`Fuzzy front imprint added ${fuzzyAdded} new results`);
+      }
+    }
+
+    // Fuzzy fallback for back imprint
+    if (references.length < 3 && finalBackImprint && finalBackImprint !== finalImprint) {
+      const { data: fuzzyBackMatches } = await supabase.rpc('fuzzy_imprint_search', {
+        search_text: finalBackImprint,
+        similarity_threshold: 0.3,
+        max_results: 20,
+      });
+      if (fuzzyBackMatches) {
+        let fuzzyBackAdded = 0;
+        for (const m of fuzzyBackMatches as any[]) {
+          if (!existingIdsPass1.has(m.id)) {
+            references.push(m);
+            existingIdsPass1.add(m.id);
+            fuzzyBackAdded++;
+          }
+        }
+        trackPass(fuzzyBackMatches, 1);
+        console.log(`Fuzzy back imprint added ${fuzzyBackAdded} new results`);
+      }
+    }
+
     // Pass 2: If imprint search returned < 3 results, broaden with shape+color fallback
     if (references.length < 3 && finalShape && finalColor) {
       console.log(`Imprint search returned ${references.length} results — running shape+color fallback`);
