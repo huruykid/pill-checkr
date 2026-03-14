@@ -153,6 +153,24 @@ function calculateAnomalyScore(
     reasons.push("Visual appearance differs significantly from legitimate reference images — possible counterfeit indicator");
   }
 
+  // Size deviation anomaly
+  if (extracted.sizeMm && topMatch?.size_mm) {
+    const deviation = Math.abs(extracted.sizeMm - topMatch.size_mm);
+    if (deviation > 2) {
+      score += 20;
+      reasons.push(`Size deviates significantly from reference (${deviation.toFixed(1)}mm difference)`);
+    } else if (deviation > 1) {
+      score += 10;
+      reasons.push(`Size slightly differs from reference (${deviation.toFixed(1)}mm difference)`);
+    }
+  }
+
+  // Scoring pattern mismatch
+  if (extracted.scoring && topMatch?.scoring && extracted.scoring !== topMatch.scoring) {
+    score += 15;
+    reasons.push(`Scoring pattern doesn't match reference (${extracted.scoring} vs ${topMatch.scoring})`);
+  }
+
   if (!topMatch) {
     score += 25;
     reasons.push("No matching pill found in reference database");
