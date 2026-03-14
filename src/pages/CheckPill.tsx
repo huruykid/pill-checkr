@@ -70,6 +70,14 @@ const COLORS = [
   { value: "other", label: "Other" },
 ];
 
+const SCORINGS = [
+  { value: "none", label: "None (no break line)" },
+  { value: "single", label: "Single line" },
+  { value: "double", label: "Cross / X pattern" },
+  { value: "quad", label: "Four-way split" },
+  { value: "other", label: "Other" },
+];
+
 export default function CheckPill() {
   const navigate = useNavigate();
   const { user } = useAuth();
