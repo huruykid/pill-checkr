@@ -36,6 +36,26 @@ const MATCH_WEIGHTS = {
   visualSimilarity: 25, // max bonus from visual comparison
 };
 
+// Color proximity map: partial credit for similar colors (0-1 scale, 1 = identical)
+const COLOR_PROXIMITY: Record<string, Record<string, number>> = {
+  pink:   { red: 0.6, purple: 0.3 },
+  red:    { pink: 0.6, orange: 0.4 },
+  blue:   { purple: 0.5 },
+  purple: { blue: 0.5, pink: 0.3 },
+  orange: { yellow: 0.5, red: 0.4, tan: 0.3 },
+  yellow: { orange: 0.5, tan: 0.4, green: 0.2 },
+  tan:    { brown: 0.6, yellow: 0.4, orange: 0.3 },
+  brown:  { tan: 0.6 },
+  gray:   { white: 0.4 },
+  white:  { gray: 0.4 },
+  green:  { yellow: 0.2 },
+};
+
+function getColorProximity(a: string, b: string): number {
+  if (a === b) return 1;
+  return COLOR_PROXIMITY[a]?.[b] ?? 0;
+}
+
 // Thresholds for confidence levels (adjusted for new max score of ~110)
 const CONFIDENCE_THRESHOLDS = {
   high: 80,
@@ -50,22 +70,31 @@ const SOURCE_PRIORITY: Record<string, number> = {
 
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
+  extracted: { imprint: string | null; backImprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
   reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null; logo_description: string | null }
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
 
-  if (extracted.imprint && reference.imprint) {
-    const extractedNorm = extracted.imprint.toLowerCase().replace(/\s+/g, "");
+  if (reference.imprint) {
     const refNorm = reference.imprint.toLowerCase().replace(/\s+/g, "");
+    const frontNorm = extracted.imprint?.toLowerCase().replace(/\s+/g, "") || "";
+    const backNorm = extracted.backImprint?.toLowerCase().replace(/\s+/g, "") || "";
     
-    if (extractedNorm === refNorm) {
+    // Check front imprint
+    if (frontNorm && frontNorm === refNorm) {
       score += MATCH_WEIGHTS.imprintExact;
       reasons.push("Imprint matches exactly");
-    } else if (refNorm.includes(extractedNorm) || extractedNorm.includes(refNorm)) {
+    } else if (frontNorm && (refNorm.includes(frontNorm) || frontNorm.includes(refNorm))) {
       score += MATCH_WEIGHTS.imprintPartial;
       reasons.push("Imprint partially matches");
+    } else if (backNorm && backNorm === refNorm) {
+      // Back imprint exact match
+      score += MATCH_WEIGHTS.imprintExact;
+      reasons.push("Back imprint matches exactly");
+    } else if (backNorm && (refNorm.includes(backNorm) || backNorm.includes(refNorm))) {
+      score += MATCH_WEIGHTS.imprintPartial;
+      reasons.push("Back imprint partially matches");
     }
   }
 
@@ -74,9 +103,15 @@ function calculateMatchScore(
     reasons.push("Shape matches");
   }
 
-  if (extracted.color && reference.color && extracted.color === reference.color) {
-    score += MATCH_WEIGHTS.color;
-    reasons.push("Color matches");
+  if (extracted.color && reference.color) {
+    const proximity = getColorProximity(extracted.color, reference.color);
+    if (proximity === 1) {
+      score += MATCH_WEIGHTS.color;
+      reasons.push("Color matches");
+    } else if (proximity > 0) {
+      score += Math.round(MATCH_WEIGHTS.color * proximity);
+      reasons.push(`Color similar (${extracted.color} ≈ ${reference.color})`);
+    }
   }
 
   // Scoring pattern match
@@ -156,8 +191,15 @@ function calculateAnomalyScore(
   }
 
   if (topMatch && extracted.color && extracted.color !== topMatch.color) {
-    score += 15;
-    reasons.push("Color doesn't match typical reference for this pill");
+    const proximity = getColorProximity(extracted.color, topMatch.color);
+    if (proximity === 0) {
+      score += 15;
+      reasons.push("Color doesn't match typical reference for this pill");
+    } else if (proximity < 0.5) {
+      score += 5;
+      reasons.push(`Color is similar but not exact (${extracted.color} vs ${topMatch.color})`);
+    }
+    // proximity >= 0.5: skip penalty entirely — colors are close enough
   }
 
   // Visual mismatch is a strong counterfeit signal
@@ -385,7 +427,9 @@ serve(async (req) => {
             role: "system",
             content: `You are a pill analysis assistant for harm reduction. Analyze pill images to extract features. You CANNOT detect fentanyl, confirm authenticity, or guarantee safety. This tool helps assess consistency with known reference pills only.
 
-Extract: imprint text (OCR), shape, color, scoring/break-line pattern, and thoroughly assess image quality.
+Extract: imprint text (OCR) from the FRONT side, shape, color, scoring/break-line pattern, and thoroughly assess image quality.
+
+If a back-side photo is provided, also extract any text or imprint visible on the BACK of the pill separately as "back_imprint".
 
 For imprint extraction, also rate your confidence in the OCR reading.
 
@@ -410,8 +454,10 @@ For image quality, be VERY specific about what's wrong and how to fix it. Consid
 
 Respond with JSON only:
 {
-  "extracted_imprint": "text on pill or null if not readable",
+  "extracted_imprint": "text on front of pill or null if not readable",
   "imprint_confidence": "high|medium|low",
+  "back_imprint": "text on back of pill or null if not visible/provided",
+  "back_imprint_confidence": "high|medium|low|null",
   "extracted_shape": "round|oval|capsule|diamond|triangle|hexagon|rectangle|other",
   "extracted_color": "white|blue|yellow|pink|green|orange|red|purple|gray|brown|tan|multicolor|other",
   "extracted_scoring": "none|single|double|quad|other",
@@ -464,6 +510,8 @@ Respond with JSON only:
       analysis = { 
         extracted_imprint: null, 
         imprint_confidence: "low",
+        back_imprint: null,
+        back_imprint_confidence: null,
         extracted_shape: "other", 
         extracted_color: "other", 
         extracted_scoring: null,
@@ -479,9 +527,12 @@ Respond with JSON only:
     const hasLogoOnly = analysis.has_logo_only || false;
 
     const finalImprint = imprint || analysis.extracted_imprint;
+    const finalBackImprint = analysis.back_imprint || null;
     const finalShape = shape || analysis.extracted_shape;
     const finalColor = color || analysis.extracted_color;
     const imprintConfidence = analysis.imprint_confidence || "low";
+
+    console.log(`Imprints — front: ${finalImprint}, back: ${finalBackImprint}`);
 
     // ─── Step 2: Text-based reference matching (three-pass with agreement boost) ─
     // Track which passes found each drug name (normalized) for cross-pass agreement
@@ -496,8 +547,9 @@ Respond with JSON only:
       }
     };
 
-    // Pass 1: Search by imprint text
+    // Pass 1: Search by imprint text (front + back)
     let references: any[] = [];
+    const existingIdsPass1 = new Set<string>();
     if (finalImprint) {
       const { data: imprintMatches } = await supabase
         .from("pill_reference")
@@ -505,7 +557,27 @@ Respond with JSON only:
         .ilike("imprint", `%${finalImprint}%`)
         .limit(20);
       references = imprintMatches || [];
+      for (const r of references) existingIdsPass1.add(r.id);
       trackPass(references, 1);
+    }
+
+    // Also search by back imprint if it differs from front
+    if (finalBackImprint && finalBackImprint !== finalImprint) {
+      const { data: backMatches } = await supabase
+        .from("pill_reference")
+        .select("*")
+        .ilike("imprint", `%${finalBackImprint}%`)
+        .limit(20);
+      if (backMatches) {
+        for (const m of backMatches) {
+          if (!existingIdsPass1.has(m.id)) {
+            references.push(m);
+            existingIdsPass1.add(m.id);
+          }
+        }
+        trackPass(backMatches, 1);
+      }
+      console.log(`Back imprint search added ${(backMatches || []).filter(m => !existingIdsPass1.has(m.id)).length} new results`);
     }
 
     // Pass 2: If imprint search returned < 3 results, broaden with shape+color fallback
@@ -599,7 +671,7 @@ Respond with JSON only:
     
     let scoredMatches = (references || []).map((ref) => {
       const { score, reasons } = calculateMatchScore(
-        { imprint: finalImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos },
+        { imprint: finalImprint, backImprint: finalBackImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos },
         { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
       );
       let finalScore = score;
