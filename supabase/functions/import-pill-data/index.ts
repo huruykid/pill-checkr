@@ -934,6 +934,10 @@ async function runCuratedImport(
           color: entry.color,
           notes: entry.notes,
           ndc_code: entry.ndc_code,
+          size_mm: entry.size_mm ?? null,
+          thickness_mm: entry.thickness_mm ?? null,
+          scoring: entry.scoring ?? null,
+          logo_description: entry.logo_description ?? null,
           source: "curated",
           last_synced: new Date().toISOString(),
         })
@@ -956,6 +960,10 @@ async function runCuratedImport(
           color: entry.color,
           notes: entry.notes,
           ndc_code: entry.ndc_code,
+          size_mm: entry.size_mm ?? null,
+          thickness_mm: entry.thickness_mm ?? null,
+          scoring: entry.scoring ?? null,
+          logo_description: entry.logo_description ?? null,
           source: "curated",
           last_synced: new Date().toISOString(),
         })
