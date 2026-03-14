@@ -560,6 +560,29 @@ Respond with JSON only:
       console.log(`Total references after drug name fallback: ${references.length}`);
     }
 
+    // Pass 4: Logo-based search when no text imprint found but logos detected
+    if (detectedLogos.length > 0 && references.length < 5) {
+      console.log(`Running logo-based search for ${detectedLogos.length} detected logos...`);
+      const existingIds = new Set(references.map((r: any) => r.id));
+      for (const logo of detectedLogos) {
+        const { data: logoMatches } = await supabase
+          .from("pill_reference")
+          .select("*")
+          .ilike("logo_description", `%${logo.name}%`)
+          .limit(10);
+        if (logoMatches) {
+          trackPass(logoMatches, 4);
+          for (const m of logoMatches) {
+            if (!existingIds.has(m.id)) {
+              references.push(m);
+              existingIds.add(m.id);
+            }
+          }
+        }
+      }
+      console.log(`Total references after logo search: ${references.length}`);
+    }
+
     // Log cross-pass agreement
     const CROSS_PASS_BONUS = 15; // bonus points when a drug name appears in 2+ passes
     const agreedDrugs = new Set<string>();
@@ -572,12 +595,12 @@ Respond with JSON only:
 
     const finalScoring = inputScoring || analysis.extracted_scoring || null;
     const finalSizeMm = estimatedSizeMm || null;
-    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm };
+    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos };
     
     let scoredMatches = (references || []).map((ref) => {
       const { score, reasons } = calculateMatchScore(
-        { imprint: finalImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm },
-        { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm }
+        { imprint: finalImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos },
+        { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
       );
       let finalScore = score;
       const finalReasons = [...reasons];
