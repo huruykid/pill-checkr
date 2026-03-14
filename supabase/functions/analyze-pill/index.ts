@@ -50,8 +50,8 @@ const SOURCE_PRIORITY: Record<string, number> = {
 
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null },
-  reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null }
+  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
+  reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null; logo_description: string | null }
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
