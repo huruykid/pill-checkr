@@ -290,6 +290,17 @@ export default function Results() {
                               {match.matched_shape && ` ${match.matched_shape}`}
                               {match.matched_color && ` • ${match.matched_color}`}
                             </p>
+                            {/* Detected Logos */}
+                            {report.detected_logos && Array.isArray(report.detected_logos) && (report.detected_logos as any[]).length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-1">
+                                {(report.detected_logos as any[]).map((logo: any, idx: number) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs gap-1">
+                                    🏷️ {logo.name}
+                                    {logo.confidence === "high" && <CheckCircle className="h-3 w-3 text-success" />}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                             {match.match_reasons && (
                               <p className="mt-1 text-sm text-primary/80">{match.match_reasons}</p>
                             )}
