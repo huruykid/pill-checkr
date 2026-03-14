@@ -13,6 +13,7 @@ import { InteractionChecker } from "@/components/results/InteractionChecker";
 import { EmergencyBar } from "@/components/results/EmergencyBar";
 import { BuddyAlert } from "@/components/results/BuddyAlert";
 import { ReportPill } from "@/components/results/ReportPill";
+import { RegionalCounterfeitAlert } from "@/components/results/RegionalCounterfeitAlert";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
