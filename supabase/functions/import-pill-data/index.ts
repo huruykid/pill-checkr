@@ -11,6 +11,8 @@ type ImportSource = "curated" | "dailymed";
 type PillShape = "round" | "oval" | "capsule" | "diamond" | "triangle" | "hexagon" | "rectangle" | "other";
 type PillColor = "white" | "blue" | "yellow" | "pink" | "green" | "orange" | "red" | "purple" | "gray" | "brown" | "tan" | "multicolor" | "other";
 
+type PillScoring = "none" | "single" | "double" | "quad" | "other";
+
 type CuratedEntry = {
   drug_name: string;
   imprint: string;
@@ -18,6 +20,10 @@ type CuratedEntry = {
   color: PillColor;
   notes: string | null;
   ndc_code: string | null;
+  size_mm?: number | null;
+  thickness_mm?: number | null;
+  scoring?: PillScoring | null;
+  logo_description?: string | null;
 };
 
 type ExistingReference = {
