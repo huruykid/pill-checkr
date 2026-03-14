@@ -11,6 +11,8 @@ type ImportSource = "curated" | "dailymed";
 type PillShape = "round" | "oval" | "capsule" | "diamond" | "triangle" | "hexagon" | "rectangle" | "other";
 type PillColor = "white" | "blue" | "yellow" | "pink" | "green" | "orange" | "red" | "purple" | "gray" | "brown" | "tan" | "multicolor" | "other";
 
+type PillScoring = "none" | "single" | "double" | "quad" | "other";
+
 type CuratedEntry = {
   drug_name: string;
   imprint: string;
@@ -18,6 +20,10 @@ type CuratedEntry = {
   color: PillColor;
   notes: string | null;
   ndc_code: string | null;
+  size_mm?: number | null;
+  thickness_mm?: number | null;
+  scoring?: PillScoring | null;
+  logo_description?: string | null;
 };
 
 type ExistingReference = {
@@ -50,20 +56,20 @@ type ImportResult = {
 const CURATED_DATA: Record<string, CuratedEntry[]> = {
   opioids: [
     // ── Oxycodone IR ──
-    { drug_name: "Oxycodone 5mg", imprint: "K 18", shape: "round", color: "white", notes: "KVK Tech • Schedule II", ndc_code: "10702-018" },
-    { drug_name: "Oxycodone 10mg", imprint: "K 56", shape: "round", color: "pink", notes: "KVK Tech • Schedule II", ndc_code: "10702-056" },
-    { drug_name: "Oxycodone 15mg", imprint: "K 8", shape: "round", color: "green", notes: "KVK Tech • Schedule II", ndc_code: "10702-008" },
-    { drug_name: "Oxycodone 20mg", imprint: "K 57", shape: "round", color: "gray", notes: "KVK Tech • Schedule II", ndc_code: "10702-057" },
-    { drug_name: "Oxycodone 30mg", imprint: "K 9", shape: "round", color: "blue", notes: "KVK Tech • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "10702-009" },
-    { drug_name: "Oxycodone 30mg", imprint: "M 30", shape: "round", color: "blue", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK — #1 most counterfeited pill in US", ndc_code: "00406-8530" },
-    { drug_name: "Oxycodone 30mg", imprint: "A 215", shape: "round", color: "blue", notes: "Actavis • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00228-2215" },
-    { drug_name: "Oxycodone 30mg", imprint: "ALG 265", shape: "round", color: "blue", notes: "Alvogen • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "47781-0265" },
-    { drug_name: "Oxycodone 30mg", imprint: "114", shape: "round", color: "blue", notes: "Mylan • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00378-6114" },
-    { drug_name: "Oxycodone 30mg", imprint: "V 4812", shape: "round", color: "blue", notes: "Qualitest • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00603-4992" },
-    { drug_name: "Oxycodone 30mg", imprint: "U24", shape: "round", color: "blue", notes: "Aurolife • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "13107-0024" },
-    { drug_name: "Oxycodone 30mg", imprint: "T 189", shape: "round", color: "blue", notes: "Camber • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "31722-0189" },
-    { drug_name: "Oxycodone 30mg", imprint: "RP 30", shape: "round", color: "blue", notes: "Rhodes • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "12634-0283" },
-    { drug_name: "Oxycodone 30mg", imprint: "E 8", shape: "round", color: "blue", notes: "Endo/Par • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "60951-0774" },
+    { drug_name: "Oxycodone 5mg", imprint: "K 18", shape: "round", color: "white", notes: "KVK Tech • Schedule II", ndc_code: "10702-018", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 10mg", imprint: "K 56", shape: "round", color: "pink", notes: "KVK Tech • Schedule II", ndc_code: "10702-056", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 15mg", imprint: "K 8", shape: "round", color: "green", notes: "KVK Tech • Schedule II", ndc_code: "10702-008", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 20mg", imprint: "K 57", shape: "round", color: "gray", notes: "KVK Tech • Schedule II", ndc_code: "10702-057", size_mm: 7, thickness_mm: 3.5, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "K 9", shape: "round", color: "blue", notes: "KVK Tech • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "10702-009", size_mm: 7, thickness_mm: 3.5, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "M 30", shape: "round", color: "blue", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK — #1 most counterfeited pill in US", ndc_code: "00406-8530", size_mm: 8, thickness_mm: 3.3, scoring: "single", logo_description: "Mallinckrodt M logo" },
+    { drug_name: "Oxycodone 30mg", imprint: "A 215", shape: "round", color: "blue", notes: "Actavis • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00228-2215", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "ALG 265", shape: "round", color: "blue", notes: "Alvogen • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "47781-0265", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "114", shape: "round", color: "blue", notes: "Mylan • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00378-6114", size_mm: 7, thickness_mm: 3.3, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "V 4812", shape: "round", color: "blue", notes: "Qualitest • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00603-4992", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "U24", shape: "round", color: "blue", notes: "Aurolife • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "13107-0024", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "T 189", shape: "round", color: "blue", notes: "Camber • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "31722-0189", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "RP 30", shape: "round", color: "blue", notes: "Rhodes • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "12634-0283", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
+    { drug_name: "Oxycodone 30mg", imprint: "E 8", shape: "round", color: "blue", notes: "Endo/Par • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "60951-0774", size_mm: 7, thickness_mm: 3.2, scoring: "single" },
     { drug_name: "Oxycodone 30mg", imprint: "54 199", shape: "round", color: "blue", notes: "Roxane • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00054-0199" },
     { drug_name: "Oxycodone 30mg", imprint: "WES 303", shape: "round", color: "blue", notes: "Wes Pharma • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: null },
     { drug_name: "Oxycodone 15mg", imprint: "M 15", shape: "round", color: "green", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-8515" },
@@ -83,16 +89,16 @@ const CURATED_DATA: Record<string, CuratedEntry[]> = {
     { drug_name: "Oxycodone/APAP 10-325mg", imprint: "T 194", shape: "round", color: "yellow", notes: "Camber • Percocet generic • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "31722-0194" },
     { drug_name: "Oxycodone/APAP 5-325mg", imprint: "TEC", shape: "round", color: "white", notes: "Various • Canadian variant • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: null },
     // ── Hydrocodone/APAP ──
-    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "M365", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-0365" },
-    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "IP 109", shape: "capsule", color: "white", notes: "Amneal • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "65162-0109" },
-    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "M366", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-0366" },
-    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "IP 110", shape: "capsule", color: "white", notes: "Amneal • Schedule II", ndc_code: "65162-0110" },
-    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "M367", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-0367" },
-    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "IP 112", shape: "capsule", color: "white", notes: "Amneal • Schedule II", ndc_code: "65162-0112" },
-    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "Watson 853", shape: "capsule", color: "yellow", notes: "Watson Labs • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00591-0853" },
-    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "U03", shape: "capsule", color: "white", notes: "Aurolife • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "13107-0145" },
-    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "G 036", shape: "capsule", color: "yellow", notes: "Qualitest • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00603-3890" },
-    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "V 3601", shape: "capsule", color: "yellow", notes: "Qualitest • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00603-3891" },
+    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "M365", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-0365", size_mm: 15, thickness_mm: 5.5, scoring: "single", logo_description: "Mallinckrodt M logo" },
+    { drug_name: "Hydrocodone/APAP 5-325mg", imprint: "IP 109", shape: "capsule", color: "white", notes: "Amneal • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "65162-0109", size_mm: 15, thickness_mm: 5.5, scoring: "single" },
+    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "M366", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-0366", size_mm: 16, thickness_mm: 5.5, scoring: "single", logo_description: "Mallinckrodt M logo" },
+    { drug_name: "Hydrocodone/APAP 7.5-325mg", imprint: "IP 110", shape: "capsule", color: "white", notes: "Amneal • Schedule II", ndc_code: "65162-0110", size_mm: 16, thickness_mm: 5.5, scoring: "single" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "M367", shape: "capsule", color: "white", notes: "Mallinckrodt • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-0367", size_mm: 17, thickness_mm: 5.8, scoring: "single", logo_description: "Mallinckrodt M logo" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "IP 112", shape: "capsule", color: "white", notes: "Amneal • Schedule II", ndc_code: "65162-0112", size_mm: 17, thickness_mm: 5.8, scoring: "single" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "Watson 853", shape: "capsule", color: "yellow", notes: "Watson Labs • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00591-0853", size_mm: 17, thickness_mm: 5.8, scoring: "single" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "U03", shape: "capsule", color: "white", notes: "Aurolife • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "13107-0145", size_mm: 17, thickness_mm: 5.8, scoring: "single" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "G 036", shape: "capsule", color: "yellow", notes: "Qualitest • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00603-3890", size_mm: 17, thickness_mm: 5.8, scoring: "single" },
+    { drug_name: "Hydrocodone/APAP 10-325mg", imprint: "V 3601", shape: "capsule", color: "yellow", notes: "Qualitest • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00603-3891", size_mm: 17, thickness_mm: 5.8, scoring: "single" },
     // ── Hydromorphone / Dilaudid (NEW) ──
     { drug_name: "Hydromorphone 2mg", imprint: "M2", shape: "round", color: "white", notes: "Mallinckrodt • Dilaudid generic • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-3242" },
     { drug_name: "Hydromorphone 4mg", imprint: "M4", shape: "round", color: "yellow", notes: "Mallinckrodt • Dilaudid generic • Schedule II • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00406-3244" },
@@ -153,17 +159,17 @@ const CURATED_DATA: Record<string, CuratedEntry[]> = {
     { drug_name: "Alprazolam 0.25mg", imprint: "GG 256", shape: "oval", color: "white", notes: "Sandoz • Schedule IV", ndc_code: "00781-1062" },
     { drug_name: "Alprazolam 0.5mg", imprint: "GG 257", shape: "oval", color: "orange", notes: "Sandoz • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00781-1063" },
     { drug_name: "Alprazolam 1mg", imprint: "GG 258", shape: "oval", color: "blue", notes: "Sandoz • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00781-1064" },
-    { drug_name: "Alprazolam 2mg", imprint: "GG 249", shape: "rectangle", color: "white", notes: "Sandoz • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'white bar'", ndc_code: "00781-1089" },
-    { drug_name: "Alprazolam 2mg", imprint: "XANAX 2", shape: "rectangle", color: "white", notes: "Pfizer • Brand • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00009-0094" },
-    { drug_name: "Alprazolam 2mg", imprint: "S 90 3", shape: "rectangle", color: "green", notes: "Dava • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'green bar'", ndc_code: "67253-0903" },
-    { drug_name: "Alprazolam 2mg", imprint: "R 039", shape: "rectangle", color: "yellow", notes: "Actavis • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'yellow bar'", ndc_code: "00228-2039" },
-    { drug_name: "Alprazolam 2mg", imprint: "B 707", shape: "rectangle", color: "blue", notes: "Breckenridge • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'blue bar', heavily faked", ndc_code: "51991-0707" },
-    { drug_name: "Alprazolam 2mg", imprint: "Y 21", shape: "rectangle", color: "white", notes: "Aurobindo • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — white bar variant", ndc_code: "65862-0921" },
-    { drug_name: "Alprazolam 2mg", imprint: "2090 V", shape: "rectangle", color: "white", notes: "Qualitest • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — white bar", ndc_code: "00603-2090" },
-    { drug_name: "Alprazolam 2mg", imprint: "ONAX 2", shape: "rectangle", color: "white", notes: "Foreign brand • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — commonly faked foreign bar", ndc_code: null },
-    { drug_name: "Alprazolam 1mg", imprint: "B 705", shape: "oval", color: "blue", notes: "Breckenridge • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'blue football'", ndc_code: "51991-0705" },
-    { drug_name: "Alprazolam 1mg", imprint: "S 900", shape: "oval", color: "blue", notes: "Dava • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "67253-0900" },
-    { drug_name: "Alprazolam 0.5mg", imprint: "S 901", shape: "oval", color: "orange", notes: "Dava • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "67253-0901" },
+    { drug_name: "Alprazolam 2mg", imprint: "GG 249", shape: "rectangle", color: "white", notes: "Sandoz • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'white bar'", ndc_code: "00781-1089", size_mm: 15, thickness_mm: 5.4, scoring: "double" },
+    { drug_name: "Alprazolam 2mg", imprint: "XANAX 2", shape: "rectangle", color: "white", notes: "Pfizer • Brand • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "00009-0094", size_mm: 15, thickness_mm: 5.4, scoring: "double", logo_description: "Pfizer logo" },
+    { drug_name: "Alprazolam 2mg", imprint: "S 90 3", shape: "rectangle", color: "green", notes: "Dava • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'green bar'", ndc_code: "67253-0903", size_mm: 15, thickness_mm: 5.4, scoring: "double" },
+    { drug_name: "Alprazolam 2mg", imprint: "R 039", shape: "rectangle", color: "yellow", notes: "Actavis • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'yellow bar'", ndc_code: "00228-2039", size_mm: 15, thickness_mm: 5.4, scoring: "double" },
+    { drug_name: "Alprazolam 2mg", imprint: "B 707", shape: "rectangle", color: "blue", notes: "Breckenridge • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'blue bar', heavily faked", ndc_code: "51991-0707", size_mm: 15, thickness_mm: 5.4, scoring: "double" },
+    { drug_name: "Alprazolam 2mg", imprint: "Y 21", shape: "rectangle", color: "white", notes: "Aurobindo • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — white bar variant", ndc_code: "65862-0921", size_mm: 15, thickness_mm: 5.4, scoring: "double" },
+    { drug_name: "Alprazolam 2mg", imprint: "2090 V", shape: "rectangle", color: "white", notes: "Qualitest • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — white bar", ndc_code: "00603-2090", size_mm: 15, thickness_mm: 5.4, scoring: "double" },
+    { drug_name: "Alprazolam 2mg", imprint: "ONAX 2", shape: "rectangle", color: "white", notes: "Foreign brand • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — commonly faked foreign bar", ndc_code: null, size_mm: 15, thickness_mm: 5.4, scoring: "double" },
+    { drug_name: "Alprazolam 1mg", imprint: "B 705", shape: "oval", color: "blue", notes: "Breckenridge • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK — 'blue football'", ndc_code: "51991-0705", size_mm: 9, thickness_mm: 4, scoring: "single" },
+    { drug_name: "Alprazolam 1mg", imprint: "S 900", shape: "oval", color: "blue", notes: "Dava • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "67253-0900", size_mm: 9, thickness_mm: 4, scoring: "single" },
+    { drug_name: "Alprazolam 0.5mg", imprint: "S 901", shape: "oval", color: "orange", notes: "Dava • Schedule IV • ⚠️ HIGH COUNTERFEIT RISK", ndc_code: "67253-0901", size_mm: 8, thickness_mm: 3.5, scoring: "single" },
     // ── Diazepam ──
     { drug_name: "Diazepam 2mg", imprint: "3926 TEVA", shape: "round", color: "white", notes: "Teva • Schedule IV", ndc_code: "00093-3926" },
     { drug_name: "Diazepam 5mg", imprint: "3927 TEVA", shape: "round", color: "yellow", notes: "Teva • Schedule IV", ndc_code: "00093-3927" },
@@ -928,6 +934,10 @@ async function runCuratedImport(
           color: entry.color,
           notes: entry.notes,
           ndc_code: entry.ndc_code,
+          size_mm: entry.size_mm ?? null,
+          thickness_mm: entry.thickness_mm ?? null,
+          scoring: entry.scoring ?? null,
+          logo_description: entry.logo_description ?? null,
           source: "curated",
           last_synced: new Date().toISOString(),
         })
@@ -950,6 +960,10 @@ async function runCuratedImport(
           color: entry.color,
           notes: entry.notes,
           ndc_code: entry.ndc_code,
+          size_mm: entry.size_mm ?? null,
+          thickness_mm: entry.thickness_mm ?? null,
+          scoring: entry.scoring ?? null,
+          logo_description: entry.logo_description ?? null,
           source: "curated",
           last_synced: new Date().toISOString(),
         })

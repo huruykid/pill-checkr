@@ -23,15 +23,16 @@ const InputSchema = z.object({
   backPhotoUrl: z.string().optional().nullable(),
 });
 
-// Match scoring weights (total max ~110)
+// Match scoring weights (total max ~115)
 const MATCH_WEIGHTS = {
-  imprintExact: 45,
-  imprintPartial: 22,
+  imprintExact: 40,
+  imprintPartial: 20,
   shape: 12,
   color: 12,
   scoring: 8,
   sizeExact: 8,   // within ±0.5mm
   sizeClose: 4,   // within ±1mm
+  logoMatch: 10,  // logo description match
   visualSimilarity: 25, // max bonus from visual comparison
 };
 
@@ -49,8 +50,8 @@ const SOURCE_PRIORITY: Record<string, number> = {
 
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null },
-  reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null }
+  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
+  reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null; logo_description: string | null }
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
@@ -95,6 +96,18 @@ function calculateMatchScore(
     } else if (deviation <= 1.0) {
       score += MATCH_WEIGHTS.sizeClose;
       reasons.push(`Size close (±${deviation.toFixed(1)}mm)`);
+    }
+  }
+
+  // Logo match
+  if (extracted.detectedLogos && extracted.detectedLogos.length > 0 && reference.logo_description) {
+    const refLogoLower = reference.logo_description.toLowerCase();
+    const logoMatched = extracted.detectedLogos.some(
+      logo => refLogoLower.includes(logo.name.toLowerCase()) || logo.name.toLowerCase().includes(refLogoLower.split(" ")[0])
+    );
+    if (logoMatched) {
+      score += MATCH_WEIGHTS.logoMatch;
+      reasons.push("Logo matches reference");
     }
   }
 
@@ -383,6 +396,8 @@ For scoring pattern, identify the break lines on the pill:
 - "quad" = four-way split
 - "other" = unusual pattern
 
+LOGO DETECTION: Many pills have manufacturer logos stamped on them (e.g., Pfizer shield, Lilly logo, Teva mark, Tesla T, Punisher skull, Superman S). Detect ANY logos or symbols on the pill that are not plain text. Report each logo with a name, confidence level, and description. Set has_logo_only to true if the pill has logos/symbols but NO readable text imprint.
+
 For image quality, be VERY specific about what's wrong and how to fix it. Consider:
 - Blur/focus issues
 - Lighting problems (too dark, overexposed, shadows)
@@ -400,6 +415,14 @@ Respond with JSON only:
   "extracted_shape": "round|oval|capsule|diamond|triangle|hexagon|rectangle|other",
   "extracted_color": "white|blue|yellow|pink|green|orange|red|purple|gray|brown|tan|multicolor|other",
   "extracted_scoring": "none|single|double|quad|other",
+  "detected_logos": [
+    {
+      "name": "manufacturer or symbol name e.g. Pfizer, Tesla, Punisher",
+      "confidence": "high|medium|low",
+      "description": "brief visual description of the logo/symbol"
+    }
+  ],
+  "has_logo_only": false,
   "image_quality": "good|fair|poor",
   "quality_issues": [
     {
@@ -443,11 +466,17 @@ Respond with JSON only:
         imprint_confidence: "low",
         extracted_shape: "other", 
         extracted_color: "other", 
+        extracted_scoring: null,
+        detected_logos: [],
+        has_logo_only: false,
         image_quality: "fair",
         quality_issues: [],
         overall_recommendation: null
       };
     }
+
+    const detectedLogos = analysis.detected_logos || [];
+    const hasLogoOnly = analysis.has_logo_only || false;
 
     const finalImprint = imprint || analysis.extracted_imprint;
     const finalShape = shape || analysis.extracted_shape;
@@ -531,6 +560,29 @@ Respond with JSON only:
       console.log(`Total references after drug name fallback: ${references.length}`);
     }
 
+    // Pass 4: Logo-based search when no text imprint found but logos detected
+    if (detectedLogos.length > 0 && references.length < 5) {
+      console.log(`Running logo-based search for ${detectedLogos.length} detected logos...`);
+      const existingIds = new Set(references.map((r: any) => r.id));
+      for (const logo of detectedLogos) {
+        const { data: logoMatches } = await supabase
+          .from("pill_reference")
+          .select("*")
+          .ilike("logo_description", `%${logo.name}%`)
+          .limit(10);
+        if (logoMatches) {
+          trackPass(logoMatches, 4);
+          for (const m of logoMatches) {
+            if (!existingIds.has(m.id)) {
+              references.push(m);
+              existingIds.add(m.id);
+            }
+          }
+        }
+      }
+      console.log(`Total references after logo search: ${references.length}`);
+    }
+
     // Log cross-pass agreement
     const CROSS_PASS_BONUS = 15; // bonus points when a drug name appears in 2+ passes
     const agreedDrugs = new Set<string>();
@@ -543,12 +595,12 @@ Respond with JSON only:
 
     const finalScoring = inputScoring || analysis.extracted_scoring || null;
     const finalSizeMm = estimatedSizeMm || null;
-    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm };
+    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos };
     
     let scoredMatches = (references || []).map((ref) => {
       const { score, reasons } = calculateMatchScore(
-        { imprint: finalImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm },
-        { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm }
+        { imprint: finalImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos },
+        { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
       );
       let finalScore = score;
       const finalReasons = [...reasons];
@@ -724,6 +776,7 @@ Respond with JSON only:
         color: finalColor,
         scoring: finalScoring,
         estimated_size_mm: finalSizeMm,
+        detected_logos: detectedLogos.length > 0 ? detectedLogos : null,
         image_quality: analysis.image_quality,
         risk_level: riskLevel,
         has_reference_object: hasReferenceObject,
