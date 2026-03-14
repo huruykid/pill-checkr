@@ -418,7 +418,9 @@ serve(async (req) => {
             role: "system",
             content: `You are a pill analysis assistant for harm reduction. Analyze pill images to extract features. You CANNOT detect fentanyl, confirm authenticity, or guarantee safety. This tool helps assess consistency with known reference pills only.
 
-Extract: imprint text (OCR), shape, color, scoring/break-line pattern, and thoroughly assess image quality.
+Extract: imprint text (OCR) from the FRONT side, shape, color, scoring/break-line pattern, and thoroughly assess image quality.
+
+If a back-side photo is provided, also extract any text or imprint visible on the BACK of the pill separately as "back_imprint".
 
 For imprint extraction, also rate your confidence in the OCR reading.
 
