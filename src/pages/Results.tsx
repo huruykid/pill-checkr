@@ -89,6 +89,7 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
+  const [counterfeitAlerts, setCounterfeitAlerts] = useState<Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }>>([]);
 
   const hasCounterfeitRisk = useMemo(() => {
     return data?.matches.some(
