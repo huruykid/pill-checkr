@@ -400,6 +400,11 @@ export default function Results() {
           {/* Counterfeit Warning */}
           {hasCounterfeitRisk && <CounterfeitWarning className="mb-6" />}
 
+          {/* Regional Counterfeit Alerts */}
+          {counterfeitAlerts.length > 0 && (
+            <RegionalCounterfeitAlert alerts={counterfeitAlerts} className="mb-6" />
+          )}
+
           {/* Section B: Uncertainty & Consistency Check */}
           <Card className="mb-6">
             <CardHeader>
