@@ -445,8 +445,10 @@ For image quality, be VERY specific about what's wrong and how to fix it. Consid
 
 Respond with JSON only:
 {
-  "extracted_imprint": "text on pill or null if not readable",
+  "extracted_imprint": "text on front of pill or null if not readable",
   "imprint_confidence": "high|medium|low",
+  "back_imprint": "text on back of pill or null if not visible/provided",
+  "back_imprint_confidence": "high|medium|low|null",
   "extracted_shape": "round|oval|capsule|diamond|triangle|hexagon|rectangle|other",
   "extracted_color": "white|blue|yellow|pink|green|orange|red|purple|gray|brown|tan|multicolor|other",
   "extracted_scoring": "none|single|double|quad|other",
