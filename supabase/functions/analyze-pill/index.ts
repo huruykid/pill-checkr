@@ -722,6 +722,8 @@ Respond with JSON only:
         imprint_text: finalImprint,
         shape: finalShape,
         color: finalColor,
+        scoring: finalScoring,
+        estimated_size_mm: finalSizeMm,
         image_quality: analysis.image_quality,
         risk_level: riskLevel,
         has_reference_object: hasReferenceObject,
