@@ -91,6 +91,7 @@ export default function Results() {
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
   const [counterfeitAlerts, setCounterfeitAlerts] = useState<Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }>>([]);
 

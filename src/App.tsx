@@ -48,6 +48,7 @@ const App = () => (
             <Route path="/contribute" element={<Contribute />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/trends" element={<Trends />} />
+            <Route path="/install" element={<Install />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -149,10 +149,13 @@ export function Header() {
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10 font-mono"
-              onClick={() => { setLang(lang === "en" ? "es" : "en"); }}
+              onClick={() => {
+                const idx = LANGUAGES.indexOf(lang as Language);
+                setLang(LANGUAGES[(idx + 1) % LANGUAGES.length]);
+              }}
             >
               <Globe className="h-5 w-5" />
-              {lang === "en" ? "Español" : "English"}
+              {LANGUAGE_LABELS[lang as Language]} → {LANGUAGE_LABELS[LANGUAGES[(LANGUAGES.indexOf(lang as Language) + 1) % LANGUAGES.length]]}
             </Button>
             {user ? (
               <>
