@@ -94,9 +94,15 @@ function calculateMatchScore(
     reasons.push("Shape matches");
   }
 
-  if (extracted.color && reference.color && extracted.color === reference.color) {
-    score += MATCH_WEIGHTS.color;
-    reasons.push("Color matches");
+  if (extracted.color && reference.color) {
+    const proximity = getColorProximity(extracted.color, reference.color);
+    if (proximity === 1) {
+      score += MATCH_WEIGHTS.color;
+      reasons.push("Color matches");
+    } else if (proximity > 0) {
+      score += Math.round(MATCH_WEIGHTS.color * proximity);
+      reasons.push(`Color similar (${extracted.color} ≈ ${reference.color})`);
+    }
   }
 
   // Scoring pattern match
