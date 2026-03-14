@@ -396,6 +396,8 @@ For scoring pattern, identify the break lines on the pill:
 - "quad" = four-way split
 - "other" = unusual pattern
 
+LOGO DETECTION: Many pills have manufacturer logos stamped on them (e.g., Pfizer shield, Lilly logo, Teva mark, Tesla T, Punisher skull, Superman S). Detect ANY logos or symbols on the pill that are not plain text. Report each logo with a name, confidence level, and description. Set has_logo_only to true if the pill has logos/symbols but NO readable text imprint.
+
 For image quality, be VERY specific about what's wrong and how to fix it. Consider:
 - Blur/focus issues
 - Lighting problems (too dark, overexposed, shadows)
@@ -413,6 +415,14 @@ Respond with JSON only:
   "extracted_shape": "round|oval|capsule|diamond|triangle|hexagon|rectangle|other",
   "extracted_color": "white|blue|yellow|pink|green|orange|red|purple|gray|brown|tan|multicolor|other",
   "extracted_scoring": "none|single|double|quad|other",
+  "detected_logos": [
+    {
+      "name": "manufacturer or symbol name e.g. Pfizer, Tesla, Punisher",
+      "confidence": "high|medium|low",
+      "description": "brief visual description of the logo/symbol"
+    }
+  ],
+  "has_logo_only": false,
   "image_quality": "good|fair|poor",
   "quality_issues": [
     {
