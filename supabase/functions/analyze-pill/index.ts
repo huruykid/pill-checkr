@@ -182,8 +182,15 @@ function calculateAnomalyScore(
   }
 
   if (topMatch && extracted.color && extracted.color !== topMatch.color) {
-    score += 15;
-    reasons.push("Color doesn't match typical reference for this pill");
+    const proximity = getColorProximity(extracted.color, topMatch.color);
+    if (proximity === 0) {
+      score += 15;
+      reasons.push("Color doesn't match typical reference for this pill");
+    } else if (proximity < 0.5) {
+      score += 5;
+      reasons.push(`Color is similar but not exact (${extracted.color} vs ${topMatch.color})`);
+    }
+    // proximity >= 0.5: skip penalty entirely — colors are close enough
   }
 
   // Visual mismatch is a strong counterfeit signal
