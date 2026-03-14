@@ -70,22 +70,31 @@ const SOURCE_PRIORITY: Record<string, number> = {
 
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
+  extracted: { imprint: string | null; backImprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
   reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null; logo_description: string | null }
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
 
-  if (extracted.imprint && reference.imprint) {
-    const extractedNorm = extracted.imprint.toLowerCase().replace(/\s+/g, "");
+  if (reference.imprint) {
     const refNorm = reference.imprint.toLowerCase().replace(/\s+/g, "");
+    const frontNorm = extracted.imprint?.toLowerCase().replace(/\s+/g, "") || "";
+    const backNorm = extracted.backImprint?.toLowerCase().replace(/\s+/g, "") || "";
     
-    if (extractedNorm === refNorm) {
+    // Check front imprint
+    if (frontNorm && frontNorm === refNorm) {
       score += MATCH_WEIGHTS.imprintExact;
       reasons.push("Imprint matches exactly");
-    } else if (refNorm.includes(extractedNorm) || extractedNorm.includes(refNorm)) {
+    } else if (frontNorm && (refNorm.includes(frontNorm) || frontNorm.includes(refNorm))) {
       score += MATCH_WEIGHTS.imprintPartial;
       reasons.push("Imprint partially matches");
+    } else if (backNorm && backNorm === refNorm) {
+      // Back imprint exact match
+      score += MATCH_WEIGHTS.imprintExact;
+      reasons.push("Back imprint matches exactly");
+    } else if (backNorm && (refNorm.includes(backNorm) || backNorm.includes(refNorm))) {
+      score += MATCH_WEIGHTS.imprintPartial;
+      reasons.push("Back imprint partially matches");
     }
   }
 
