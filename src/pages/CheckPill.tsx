@@ -508,6 +508,40 @@ export default function CheckPill() {
                 </div>
               </div>
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Scoring / Break Lines <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Select value={scoring} onValueChange={setScoring}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select scoring pattern" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SCORINGS.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sizeMm">Size (mm) <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Input
+                    id="sizeMm"
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="50"
+                    placeholder="e.g., 8.5"
+                    value={sizeMm}
+                    onChange={(e) => setSizeMm(e.target.value)}
+                    className="h-12"
+                  />
+                  <p className="text-xs text-muted-foreground">Diameter or length — place next to a coin for scale</p>
+                </div>
+              </div>
+
               <div className="flex items-center space-x-3 rounded-lg bg-muted/50 p-4">
                 <Checkbox
                   id="reference"
