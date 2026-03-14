@@ -334,8 +334,11 @@ export type Database = {
           last_synced: string | null
           ndc_code: string | null
           notes: string | null
+          scoring: Database["public"]["Enums"]["pill_scoring"] | null
           shape: Database["public"]["Enums"]["pill_shape"]
+          size_mm: number | null
           source: string | null
+          thickness_mm: number | null
         }
         Insert: {
           color?: Database["public"]["Enums"]["pill_color"]
@@ -347,8 +350,11 @@ export type Database = {
           last_synced?: string | null
           ndc_code?: string | null
           notes?: string | null
+          scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"]
+          size_mm?: number | null
           source?: string | null
+          thickness_mm?: number | null
         }
         Update: {
           color?: Database["public"]["Enums"]["pill_color"]
@@ -360,8 +366,11 @@ export type Database = {
           last_synced?: string | null
           ndc_code?: string | null
           notes?: string | null
+          scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"]
+          size_mm?: number | null
           source?: string | null
+          thickness_mm?: number | null
         }
         Relationships: []
       }
@@ -428,6 +437,7 @@ export type Database = {
           back_photo_url: string | null
           color: Database["public"]["Enums"]["pill_color"] | null
           created_at: string
+          estimated_size_mm: number | null
           has_reference_object: boolean | null
           id: string
           image_quality: Database["public"]["Enums"]["image_quality"] | null
@@ -439,6 +449,7 @@ export type Database = {
           photo_url: string | null
           risk_level: Database["public"]["Enums"]["risk_level"] | null
           risk_reasons: string[] | null
+          scoring: Database["public"]["Enums"]["pill_scoring"] | null
           shape: Database["public"]["Enums"]["pill_shape"] | null
           user_id: string | null
         }
@@ -448,6 +459,7 @@ export type Database = {
           back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
+          estimated_size_mm?: number | null
           has_reference_object?: boolean | null
           id?: string
           image_quality?: Database["public"]["Enums"]["image_quality"] | null
@@ -459,6 +471,7 @@ export type Database = {
           photo_url?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
           risk_reasons?: string[] | null
+          scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"] | null
           user_id?: string | null
         }
@@ -468,6 +481,7 @@ export type Database = {
           back_photo_url?: string | null
           color?: Database["public"]["Enums"]["pill_color"] | null
           created_at?: string
+          estimated_size_mm?: number | null
           has_reference_object?: boolean | null
           id?: string
           image_quality?: Database["public"]["Enums"]["image_quality"] | null
@@ -479,6 +493,7 @@ export type Database = {
           photo_url?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
           risk_reasons?: string[] | null
+          scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"] | null
           user_id?: string | null
         }
@@ -610,6 +625,7 @@ export type Database = {
         | "tan"
         | "multicolor"
         | "other"
+      pill_scoring: "none" | "single" | "double" | "quad" | "other"
       pill_shape:
         | "round"
         | "oval"
@@ -765,6 +781,7 @@ export const Constants = {
         "multicolor",
         "other",
       ],
+      pill_scoring: ["none", "single", "double", "quad", "other"],
       pill_shape: [
         "round",
         "oval",

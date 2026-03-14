@@ -70,6 +70,14 @@ const COLORS = [
   { value: "other", label: "Other" },
 ];
 
+const SCORINGS = [
+  { value: "none", label: "None (no break line)" },
+  { value: "single", label: "Single line" },
+  { value: "double", label: "Cross / X pattern" },
+  { value: "quad", label: "Four-way split" },
+  { value: "other", label: "Other" },
+];
+
 export default function CheckPill() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -83,6 +91,8 @@ export default function CheckPill() {
   const [imprint, setImprint] = useState("");
   const [shape, setShape] = useState("");
   const [color, setColor] = useState("");
+  const [scoring, setScoring] = useState("");
+  const [sizeMm, setSizeMm] = useState("");
   const [hasReference, setHasReference] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -170,16 +180,18 @@ export default function CheckPill() {
 
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
-        body: {
-          image: imagePreview,
-          backImage: backImagePreview || null,
-          imprint: imprint || null,
-          shape: shape || null,
-          color: color || null,
-          hasReferenceObject: hasReference,
-          photoUrl: photoUrl || null,
-          backPhotoUrl: backPhotoUrl || null,
-        },
+          body: {
+            image: imagePreview,
+            backImage: backImagePreview || null,
+            imprint: imprint || null,
+            shape: shape || null,
+            color: color || null,
+            scoring: scoring || null,
+            estimatedSizeMm: sizeMm ? parseFloat(sizeMm) : null,
+            hasReferenceObject: hasReference,
+            photoUrl: photoUrl || null,
+            backPhotoUrl: backPhotoUrl || null,
+          },
       });
 
       if (error) throw error;
@@ -493,6 +505,40 @@ export default function CheckPill() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Scoring / Break Lines <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Select value={scoring} onValueChange={setScoring}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select scoring pattern" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SCORINGS.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sizeMm">Size (mm) <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Input
+                    id="sizeMm"
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="50"
+                    placeholder="e.g., 8.5"
+                    value={sizeMm}
+                    onChange={(e) => setSizeMm(e.target.value)}
+                    className="h-12"
+                  />
+                  <p className="text-xs text-muted-foreground">Diameter or length — place next to a coin for scale</p>
                 </div>
               </div>
 

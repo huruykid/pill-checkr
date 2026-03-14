@@ -16,18 +16,23 @@ const InputSchema = z.object({
   imprint: z.string().max(50, "Imprint must be 50 characters or less").optional().nullable(),
   shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
   color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
+  scoring: z.enum(['none', 'single', 'double', 'quad', 'other']).optional().nullable(),
+  estimatedSizeMm: z.number().positive().max(50).optional().nullable(),
   hasReferenceObject: z.boolean().default(false),
   photoUrl: z.string().optional().nullable(),
   backPhotoUrl: z.string().optional().nullable(),
 });
 
-// Match scoring weights
+// Match scoring weights (total max ~110)
 const MATCH_WEIGHTS = {
-  imprintExact: 50,
-  imprintPartial: 25,
-  shape: 15,
-  color: 15,
-  visualSimilarity: 30, // max bonus from visual comparison
+  imprintExact: 45,
+  imprintPartial: 22,
+  shape: 12,
+  color: 12,
+  scoring: 8,
+  sizeExact: 8,   // within ±0.5mm
+  sizeClose: 4,   // within ±1mm
+  visualSimilarity: 25, // max bonus from visual comparison
 };
 
 // Thresholds for confidence levels (adjusted for new max score of ~110)
@@ -44,8 +49,8 @@ const SOURCE_PRIORITY: Record<string, number> = {
 
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null },
-  reference: { imprint: string; shape: string; color: string }
+  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null },
+  reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null }
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
@@ -73,13 +78,33 @@ function calculateMatchScore(
     reasons.push("Color matches");
   }
 
+  // Scoring pattern match
+  if (extracted.scoring && reference.scoring) {
+    if (extracted.scoring === reference.scoring) {
+      score += MATCH_WEIGHTS.scoring;
+      reasons.push("Scoring pattern matches");
+    }
+  }
+
+  // Size match with tolerance
+  if (extracted.sizeMm && reference.size_mm) {
+    const deviation = Math.abs(extracted.sizeMm - reference.size_mm);
+    if (deviation <= 0.5) {
+      score += MATCH_WEIGHTS.sizeExact;
+      reasons.push(`Size matches (±${deviation.toFixed(1)}mm)`);
+    } else if (deviation <= 1.0) {
+      score += MATCH_WEIGHTS.sizeClose;
+      reasons.push(`Size close (±${deviation.toFixed(1)}mm)`);
+    }
+  }
+
   return { score, reasons };
 }
 
 // Calculate anomaly score based on inconsistencies
 function calculateAnomalyScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null; imprintConfidence: string },
-  topMatch: { imprint: string; shape: string; color: string } | null,
+  extracted: { imprint: string | null; shape: string | null; color: string | null; imprintConfidence: string; scoring: string | null; sizeMm: number | null },
+  topMatch: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null } | null,
   imageQuality: string,
   visualMismatch: boolean,
 ): { score: number; reasons: string[] } {
@@ -126,6 +151,24 @@ function calculateAnomalyScore(
   if (visualMismatch) {
     score += 25;
     reasons.push("Visual appearance differs significantly from legitimate reference images — possible counterfeit indicator");
+  }
+
+  // Size deviation anomaly
+  if (extracted.sizeMm && topMatch?.size_mm) {
+    const deviation = Math.abs(extracted.sizeMm - topMatch.size_mm);
+    if (deviation > 2) {
+      score += 20;
+      reasons.push(`Size deviates significantly from reference (${deviation.toFixed(1)}mm difference)`);
+    } else if (deviation > 1) {
+      score += 10;
+      reasons.push(`Size slightly differs from reference (${deviation.toFixed(1)}mm difference)`);
+    }
+  }
+
+  // Scoring pattern mismatch
+  if (extracted.scoring && topMatch?.scoring && extracted.scoring !== topMatch.scoring) {
+    score += 15;
+    reasons.push(`Scoring pattern doesn't match reference (${extracted.scoring} vs ${topMatch.scoring})`);
   }
 
   if (!topMatch) {
@@ -288,7 +331,7 @@ serve(async (req) => {
       );
     }
     
-    const { image, backImage, imprint, shape, color, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data;
+    const { image, backImage, imprint, shape, color, scoring: inputScoring, estimatedSizeMm, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data;
     console.log("Input validated successfully");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -329,9 +372,16 @@ serve(async (req) => {
             role: "system",
             content: `You are a pill analysis assistant for harm reduction. Analyze pill images to extract features. You CANNOT detect fentanyl, confirm authenticity, or guarantee safety. This tool helps assess consistency with known reference pills only.
 
-Extract: imprint text (OCR), shape, color, and thoroughly assess image quality.
+Extract: imprint text (OCR), shape, color, scoring/break-line pattern, and thoroughly assess image quality.
 
 For imprint extraction, also rate your confidence in the OCR reading.
+
+For scoring pattern, identify the break lines on the pill:
+- "none" = no break line
+- "single" = one line across
+- "double" = cross/X pattern
+- "quad" = four-way split
+- "other" = unusual pattern
 
 For image quality, be VERY specific about what's wrong and how to fix it. Consider:
 - Blur/focus issues
@@ -349,6 +399,7 @@ Respond with JSON only:
   "imprint_confidence": "high|medium|low",
   "extracted_shape": "round|oval|capsule|diamond|triangle|hexagon|rectangle|other",
   "extracted_color": "white|blue|yellow|pink|green|orange|red|purple|gray|brown|tan|multicolor|other",
+  "extracted_scoring": "none|single|double|quad|other",
   "image_quality": "good|fair|poor",
   "quality_issues": [
     {
@@ -490,12 +541,14 @@ Respond with JSON only:
       }
     }
 
-    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence };
+    const finalScoring = inputScoring || analysis.extracted_scoring || null;
+    const finalSizeMm = estimatedSizeMm || null;
+    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm };
     
     let scoredMatches = (references || []).map((ref) => {
       const { score, reasons } = calculateMatchScore(
-        { imprint: finalImprint, shape: finalShape, color: finalColor },
-        { imprint: ref.imprint, shape: ref.shape, color: ref.color }
+        { imprint: finalImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm },
+        { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm }
       );
       let finalScore = score;
       const finalReasons = [...reasons];
@@ -644,7 +697,7 @@ Respond with JSON only:
 
     const { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
       extracted,
-      topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color } : null,
+      topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color, scoring: topMatch.scoring, size_mm: topMatch.size_mm } : null,
       analysis.image_quality,
       visualMismatchDetected,
     );
@@ -669,6 +722,8 @@ Respond with JSON only:
         imprint_text: finalImprint,
         shape: finalShape,
         color: finalColor,
+        scoring: finalScoring,
+        estimated_size_mm: finalSizeMm,
         image_quality: analysis.image_quality,
         risk_level: riskLevel,
         has_reference_object: hasReferenceObject,
