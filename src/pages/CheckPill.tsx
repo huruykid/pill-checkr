@@ -180,16 +180,18 @@ export default function CheckPill() {
 
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
-        body: {
-          image: imagePreview,
-          backImage: backImagePreview || null,
-          imprint: imprint || null,
-          shape: shape || null,
-          color: color || null,
-          hasReferenceObject: hasReference,
-          photoUrl: photoUrl || null,
-          backPhotoUrl: backPhotoUrl || null,
-        },
+          body: {
+            image: imagePreview,
+            backImage: backImagePreview || null,
+            imprint: imprint || null,
+            shape: shape || null,
+            color: color || null,
+            scoring: scoring || null,
+            estimatedSizeMm: sizeMm ? parseFloat(sizeMm) : null,
+            hasReferenceObject: hasReference,
+            photoUrl: photoUrl || null,
+            backPhotoUrl: backPhotoUrl || null,
+          },
       });
 
       if (error) throw error;
