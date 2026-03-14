@@ -541,12 +541,14 @@ Respond with JSON only:
       }
     }
 
-    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence };
+    const finalScoring = inputScoring || analysis.extracted_scoring || null;
+    const finalSizeMm = estimatedSizeMm || null;
+    const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm };
     
     let scoredMatches = (references || []).map((ref) => {
       const { score, reasons } = calculateMatchScore(
-        { imprint: finalImprint, shape: finalShape, color: finalColor },
-        { imprint: ref.imprint, shape: ref.shape, color: ref.color }
+        { imprint: finalImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm },
+        { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm }
       );
       let finalScore = score;
       const finalReasons = [...reasons];
