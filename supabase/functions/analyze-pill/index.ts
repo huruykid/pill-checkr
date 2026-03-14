@@ -49,8 +49,8 @@ const SOURCE_PRIORITY: Record<string, number> = {
 
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
-  extracted: { imprint: string | null; shape: string | null; color: string | null },
-  reference: { imprint: string; shape: string; color: string }
+  extracted: { imprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null },
+  reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null }
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
@@ -76,6 +76,26 @@ function calculateMatchScore(
   if (extracted.color && reference.color && extracted.color === reference.color) {
     score += MATCH_WEIGHTS.color;
     reasons.push("Color matches");
+  }
+
+  // Scoring pattern match
+  if (extracted.scoring && reference.scoring) {
+    if (extracted.scoring === reference.scoring) {
+      score += MATCH_WEIGHTS.scoring;
+      reasons.push("Scoring pattern matches");
+    }
+  }
+
+  // Size match with tolerance
+  if (extracted.sizeMm && reference.size_mm) {
+    const deviation = Math.abs(extracted.sizeMm - reference.size_mm);
+    if (deviation <= 0.5) {
+      score += MATCH_WEIGHTS.sizeExact;
+      reasons.push(`Size matches (±${deviation.toFixed(1)}mm)`);
+    } else if (deviation <= 1.0) {
+      score += MATCH_WEIGHTS.sizeClose;
+      reasons.push(`Size close (±${deviation.toFixed(1)}mm)`);
+    }
   }
 
   return { score, reasons };
