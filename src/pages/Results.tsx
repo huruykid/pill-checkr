@@ -125,6 +125,35 @@ export default function Results() {
       if (matchesError) throw matchesError;
       setData({ report, matches: matches || [] });
 
+      // Fetch regional counterfeit alerts for matched drug names
+      if (matches && matches.length > 0) {
+        const drugNames = [...new Set(matches.map(m => m.drug_name))];
+        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: cfReports } = await supabase
+          .from("counterfeit_reports")
+          .select("drug_name, state, city, risk_level, created_at")
+          .gte("created_at", ninetyDaysAgo)
+          .in("drug_name", drugNames)
+          .limit(100);
+
+        if (cfReports && cfReports.length > 0) {
+          const grouped: Record<string, { drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }> = {};
+          for (const r of cfReports) {
+            const key = `${r.drug_name}|${r.state || "unknown"}`;
+            if (!grouped[key]) {
+              grouped[key] = { drug_name: r.drug_name || "", state: r.state || "Unknown", city: r.city, risk_level: r.risk_level, count: 0, latest: r.created_at };
+            }
+            grouped[key].count++;
+            if (r.created_at > grouped[key].latest) {
+              grouped[key].latest = r.created_at;
+              if (r.city) grouped[key].city = r.city;
+              if (r.risk_level === "high") grouped[key].risk_level = "high";
+            }
+          }
+          setCounterfeitAlerts(Object.values(grouped).sort((a, b) => b.count - a.count));
+        }
+      }
+
       // Generate signed URL for pill photo if stored as a file path
       if (report.photo_url) {
         if (report.photo_url.startsWith("http")) {
