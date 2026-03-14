@@ -501,6 +501,8 @@ Respond with JSON only:
       analysis = { 
         extracted_imprint: null, 
         imprint_confidence: "low",
+        back_imprint: null,
+        back_imprint_confidence: null,
         extracted_shape: "other", 
         extracted_color: "other", 
         extracted_scoring: null,
