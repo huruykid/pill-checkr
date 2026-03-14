@@ -36,6 +36,9 @@ import {
   Eye,
   ImageIcon,
   MapPin,
+  Share2,
+  Link2,
+  LinkIcon,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
