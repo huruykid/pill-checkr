@@ -401,6 +401,7 @@ export default function Results() {
                   { label: "Scoring Pattern", value: scoringValue || sizeDeviation, icon: "➗", hide: !scoringMatchText && !topMatch.match_reasons?.includes("scoring") },
                   { label: "Size Match", value: sizeValue || sizeDeviation, icon: "📏", hide: !sizeExactMatch && !sizeCloseMatch },
                   { label: "Size Consistency", value: sizeDeviation, icon: "📏", hide: !!sizeExactMatch || !!sizeCloseMatch },
+                  { label: "Logo Match", value: topMatch.match_reasons?.includes("Logo matches") ? 100 : 0, icon: "🏷️", hide: !topMatch.match_reasons?.includes("Logo matches") },
                 ].filter(b => !b.hide);
 
                 const getBarColor = (v: number) =>
