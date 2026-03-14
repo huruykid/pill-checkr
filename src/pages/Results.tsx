@@ -36,6 +36,9 @@ import {
   Eye,
   ImageIcon,
   MapPin,
+  Share2,
+  Link2,
+  LinkIcon,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -88,6 +91,7 @@ export default function Results() {
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
   const [counterfeitAlerts, setCounterfeitAlerts] = useState<Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }>>([]);
 
@@ -621,6 +625,54 @@ export default function Results() {
           )}
 
           <Disclaimer className="mb-8" />
+
+          {/* Share Toggle */}
+          {user && data.report.user_id === user.id && (
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Share2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Shareable Link</span>
+                  </div>
+                  <Button
+                    variant={(data.report as any).shared ? "outline" : "default"}
+                    size="sm"
+                    disabled={sharing}
+                    onClick={async () => {
+                      setSharing(true);
+                      try {
+                        const newShared = !(data.report as any).shared;
+                        await supabase
+                          .from("reports")
+                          .update({ shared: newShared } as any)
+                          .eq("id", data.report.id);
+                        setData({ ...data, report: { ...data.report, shared: newShared } as any });
+                        if (newShared) {
+                          await navigator.clipboard.writeText(window.location.href);
+                          toast.success("Link copied! Anyone with this link can view the results.");
+                        } else {
+                          toast.success("Link unshared — only you can view this report now.");
+                        }
+                      } catch {
+                        toast.error("Failed to update sharing");
+                      } finally {
+                        setSharing(false);
+                      }
+                    }}
+                  >
+                    <LinkIcon className="mr-1.5 h-3.5 w-3.5" />
+                    {(data.report as any).shared ? "Unshare" : "Share"}
+                  </Button>
+                </div>
+                {(data.report as any).shared && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Anyone with the link can view this report. No personal info is shared.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Actions */}
           <div className="flex flex-col gap-4 sm:flex-row">

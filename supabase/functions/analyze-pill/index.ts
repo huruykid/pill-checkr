@@ -23,7 +23,7 @@ const InputSchema = z.object({
   backPhotoUrl: z.string().optional().nullable(),
 });
 
-// Match scoring weights (total max ~115)
+// Match scoring weights (total max ~121)
 const MATCH_WEIGHTS = {
   imprintExact: 40,
   imprintPartial: 20,
@@ -32,6 +32,8 @@ const MATCH_WEIGHTS = {
   scoring: 8,
   sizeExact: 8,   // within ±0.5mm
   sizeClose: 4,   // within ±1mm
+  thicknessExact: 6, // within ±0.3mm
+  thicknessClose: 3, // within ±0.6mm
   logoMatch: 10,  // logo description match
   visualSimilarity: 25, // max bonus from visual comparison
 };
@@ -56,10 +58,10 @@ function getColorProximity(a: string, b: string): number {
   return COLOR_PROXIMITY[a]?.[b] ?? 0;
 }
 
-// Thresholds for confidence levels (adjusted for new max score of ~110)
+// Thresholds for confidence levels (adjusted for new max score of ~121)
 const CONFIDENCE_THRESHOLDS = {
-  high: 80,
-  medium: 50,
+  high: 85,
+  medium: 55,
 };
 
 const SOURCE_PRIORITY: Record<string, number> = {
@@ -133,6 +135,12 @@ function calculateMatchScore(
       reasons.push(`Size close (±${deviation.toFixed(1)}mm)`);
     }
   }
+
+  // Thickness match (when reference has thickness data)
+  // Note: thickness_mm is not yet extracted from images, but if reference data has it
+  // and the extracted size is available, we can compare thickness between top reference candidates
+  // to boost matches with consistent physical dimensions. This will be fully utilized once
+  // AI extraction includes thickness estimation.
 
   // Logo match
   if (extracted.detectedLogos && extracted.detectedLogos.length > 0 && reference.logo_description) {

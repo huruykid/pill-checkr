@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type Language = "en" | "es";
+type Language = "en" | "es" | "fr" | "pt";
 
 interface I18nContextType {
   lang: Language;
@@ -10,7 +10,6 @@ interface I18nContextType {
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
-    // Results page
     "results.title": "Analysis Results",
     "results.backToCheck": "Back to Check",
     "results.possibleMatches": "Possible Matches",
@@ -37,23 +36,17 @@ const translations: Record<Language, Record<string, string>> = {
     "results.visualComparison": "Visual Comparison",
     "results.noRefImage": "No reference image — visual comparison not available",
     "results.openFullMap": "Open Full Map — Find Treatment Centers & Naloxone Near You",
-
-    // Harm reduction steps
     "steps.1": "Never use alone - have someone with you who can call for help",
     "steps.2": "Start with a small test dose and wait to feel effects",
     "steps.3": "Have naloxone (Narcan) available and know how to use it",
     "steps.4": "Know the signs of overdose: slow breathing, blue lips, unresponsive",
     "steps.5": "If unable to confidently match, treat as higher risk",
     "steps.6": "Call 911 immediately if you suspect an overdose",
-
-    // Emergency bar
     "emergency.title": "🆘 Emergency",
     "emergency.911": "911",
     "emergency.poisonControl": "Poison Control",
     "emergency.988": "988 Crisis",
     "emergency.footer": "If you or someone else is in danger, call immediately. Good Samaritan laws protect you in most states.",
-
-    // Harm reduction resources
     "hr.title": "Harm Reduction Resources",
     "hr.findHelp": "Find help near you →",
     "hr.crisisLines": "Crisis Lines",
@@ -68,12 +61,9 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "Naloxone reverses opioid overdoses and can save lives. It's available without a prescription in most states. Carry it even if you don't use — you might save someone else.",
     "hr.freeByMail": "Free by Mail (NEXT Distro)",
     "hr.findNaloxone": "Find Naloxone Near Me",
-
-    // Nav
     "nav.language": "EN",
   },
   es: {
-    // Results page
     "results.title": "Resultados del Análisis",
     "results.backToCheck": "Volver a Verificar",
     "results.possibleMatches": "Posibles Coincidencias",
@@ -100,23 +90,17 @@ const translations: Record<Language, Record<string, string>> = {
     "results.visualComparison": "Comparación Visual",
     "results.noRefImage": "Sin imagen de referencia — comparación visual no disponible",
     "results.openFullMap": "Abrir Mapa — Encontrar Centros de Tratamiento y Naloxona Cerca",
-
-    // Harm reduction steps
     "steps.1": "Nunca uses solo/a — ten a alguien contigo que pueda pedir ayuda",
     "steps.2": "Comienza con una dosis pequeña de prueba y espera a sentir los efectos",
     "steps.3": "Ten naloxona (Narcan) disponible y aprende a usarla",
     "steps.4": "Conoce los signos de sobredosis: respiración lenta, labios azules, sin respuesta",
     "steps.5": "Si no se puede identificar con confianza, trátala como de mayor riesgo",
     "steps.6": "Llama al 911 inmediatamente si sospechas una sobredosis",
-
-    // Emergency bar
     "emergency.title": "🆘 Emergencia",
     "emergency.911": "911",
     "emergency.poisonControl": "Control de Envenenamiento",
     "emergency.988": "988 Crisis",
     "emergency.footer": "Si tú o alguien más está en peligro, llama inmediatamente. Las leyes del Buen Samaritano te protegen en la mayoría de los estados.",
-
-    // Harm reduction resources
     "hr.title": "Recursos de Reducción de Daños",
     "hr.findHelp": "Encuentra ayuda cerca →",
     "hr.crisisLines": "Líneas de Crisis",
@@ -131,10 +115,124 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "La naloxona revierte sobredosis de opioides y puede salvar vidas. Está disponible sin receta en la mayoría de los estados. Llévala aunque no uses — podrías salvar a alguien.",
     "hr.freeByMail": "Gratis por Correo (NEXT Distro)",
     "hr.findNaloxone": "Encontrar Naloxona Cerca",
-
-    // Nav
     "nav.language": "ES",
   },
+  fr: {
+    "results.title": "Résultats de l'Analyse",
+    "results.backToCheck": "Retour à la Vérification",
+    "results.possibleMatches": "Correspondances Possibles",
+    "results.noMatch": "Impossible de trouver une correspondance connue",
+    "results.noMatchDesc": "Ce comprimé n'a pas pu être identifié avec confiance dans notre base de données de référence.",
+    "results.uncertaintyTitle": "Vérification d'Incertitude et de Cohérence",
+    "results.matchBreakdown": "Détail de la Correspondance",
+    "results.imprintMatch": "Correspondance de l'Empreinte",
+    "results.colorSimilarity": "Similarité de Couleur",
+    "results.shapeMatch": "Correspondance de Forme",
+    "results.sizeConsistency": "Cohérence de Taille",
+    "results.inconsistencyScore": "Score d'Incohérence",
+    "results.highInconsistency": "Incohérence élevée",
+    "results.moderateInconsistency": "Incohérence modérée",
+    "results.lowInconsistency": "Faible incohérence",
+    "results.matchConfidence": "Confiance de la Correspondance",
+    "results.consistencyNotes": "Notes de cohérence :",
+    "results.riskNotes": "Notes d'évaluation des risques :",
+    "results.poorImage": "La qualité de l'image est mauvaise — les résultats peuvent être moins précis",
+    "results.whatToDoNext": "Que Faire Ensuite",
+    "results.saveToAccount": "Enregistrer dans le Compte",
+    "results.saveToHistory": "Enregistrer dans l'Historique",
+    "results.checkAnother": "Vérifier un Autre Comprimé",
+    "results.visualComparison": "Comparaison Visuelle",
+    "results.noRefImage": "Pas d'image de référence — comparaison visuelle non disponible",
+    "results.openFullMap": "Ouvrir la Carte — Trouver des Centres de Traitement et de la Naloxone",
+    "steps.1": "N'utilisez jamais seul(e) — ayez quelqu'un avec vous qui peut appeler à l'aide",
+    "steps.2": "Commencez par une petite dose test et attendez de ressentir les effets",
+    "steps.3": "Ayez de la naloxone (Narcan) disponible et sachez comment l'utiliser",
+    "steps.4": "Connaissez les signes de surdose : respiration lente, lèvres bleues, inconscient",
+    "steps.5": "Si impossible à identifier avec confiance, considérez comme à risque élevé",
+    "steps.6": "Appelez le 911 immédiatement si vous suspectez une surdose",
+    "emergency.title": "🆘 Urgence",
+    "emergency.911": "911",
+    "emergency.poisonControl": "Centre Antipoison",
+    "emergency.988": "988 Crise",
+    "emergency.footer": "Si vous ou quelqu'un d'autre êtes en danger, appelez immédiatement. Les lois du Bon Samaritain vous protègent dans la plupart des États.",
+    "hr.title": "Ressources de Réduction des Risques",
+    "hr.findHelp": "Trouvez de l'aide près de chez vous →",
+    "hr.crisisLines": "Lignes de Crise",
+    "hr.neverUseAlone": "N'Utilisez Jamais Seul(e)",
+    "hr.neverUseAloneDesc": "1-800-484-3731 — Restez en ligne pendant l'utilisation. Ils appelleront le 911 si vous ne répondez plus.",
+    "hr.988Title": "988 Ligne de Crise et Prévention du Suicide",
+    "hr.988Desc": "Appelez ou envoyez un SMS au 988 — Gratuit, confidentiel, soutien 24/7.",
+    "hr.testStripsTitle": "Bandelettes de Test de Fentanyl",
+    "hr.testStripsDesc": "Les bandelettes de test détectent le fentanyl dans les comprimés, poudres et liquides. Elles coûtent ~1$ chacune et prennent 2-5 minutes.",
+    "hr.getTestStrips": "Obtenir des Bandelettes",
+    "hr.naloxoneTitle": "Obtenir de la Naloxone (Narcan)",
+    "hr.naloxoneDesc": "La naloxone inverse les surdoses d'opioïdes et peut sauver des vies. Elle est disponible sans ordonnance dans la plupart des États. Portez-la même si vous n'utilisez pas — vous pourriez sauver quelqu'un.",
+    "hr.freeByMail": "Gratuit par Courrier (NEXT Distro)",
+    "hr.findNaloxone": "Trouver de la Naloxone Près de Moi",
+    "nav.language": "FR",
+  },
+  pt: {
+    "results.title": "Resultados da Análise",
+    "results.backToCheck": "Voltar à Verificação",
+    "results.possibleMatches": "Correspondências Possíveis",
+    "results.noMatch": "Não foi possível encontrar correspondência conhecida",
+    "results.noMatchDesc": "Este comprimido não pôde ser identificado com confiança na nossa base de dados de referência.",
+    "results.uncertaintyTitle": "Verificação de Incerteza e Consistência",
+    "results.matchBreakdown": "Detalhes da Correspondência",
+    "results.imprintMatch": "Correspondência da Impressão",
+    "results.colorSimilarity": "Similaridade de Cor",
+    "results.shapeMatch": "Correspondência de Forma",
+    "results.sizeConsistency": "Consistência de Tamanho",
+    "results.inconsistencyScore": "Pontuação de Inconsistência",
+    "results.highInconsistency": "Alta inconsistência",
+    "results.moderateInconsistency": "Inconsistência moderada",
+    "results.lowInconsistency": "Baixa inconsistência",
+    "results.matchConfidence": "Confiança da Correspondência",
+    "results.consistencyNotes": "Notas de consistência:",
+    "results.riskNotes": "Notas de avaliação de risco:",
+    "results.poorImage": "A qualidade da imagem é baixa — os resultados podem ser menos precisos",
+    "results.whatToDoNext": "O Que Fazer a Seguir",
+    "results.saveToAccount": "Salvar na Conta",
+    "results.saveToHistory": "Salvar no Histórico",
+    "results.checkAnother": "Verificar Outro Comprimido",
+    "results.visualComparison": "Comparação Visual",
+    "results.noRefImage": "Sem imagem de referência — comparação visual não disponível",
+    "results.openFullMap": "Abrir Mapa — Encontrar Centros de Tratamento e Naloxona",
+    "steps.1": "Nunca use sozinho(a) — tenha alguém com você que possa pedir ajuda",
+    "steps.2": "Comece com uma dose teste pequena e espere sentir os efeitos",
+    "steps.3": "Tenha naloxona (Narcan) disponível e saiba como usá-la",
+    "steps.4": "Conheça os sinais de overdose: respiração lenta, lábios azuis, sem resposta",
+    "steps.5": "Se não puder identificar com confiança, trate como de maior risco",
+    "steps.6": "Ligue 911 imediatamente se suspeitar de uma overdose",
+    "emergency.title": "🆘 Emergência",
+    "emergency.911": "911",
+    "emergency.poisonControl": "Controle de Envenenamento",
+    "emergency.988": "988 Crise",
+    "emergency.footer": "Se você ou outra pessoa está em perigo, ligue imediatamente. As leis do Bom Samaritano protegem você na maioria dos estados.",
+    "hr.title": "Recursos de Redução de Danos",
+    "hr.findHelp": "Encontre ajuda perto de você →",
+    "hr.crisisLines": "Linhas de Crise",
+    "hr.neverUseAlone": "Nunca Use Sozinho(a)",
+    "hr.neverUseAloneDesc": "1-800-484-3731 — Fique na linha enquanto usa. Eles ligarão para o 911 se você parar de responder.",
+    "hr.988Title": "988 Linha de Crise e Prevenção do Suicídio",
+    "hr.988Desc": "Ligue ou envie mensagem para 988 — Gratuito, confidencial, suporte 24/7.",
+    "hr.testStripsTitle": "Tiras de Teste de Fentanil",
+    "hr.testStripsDesc": "As tiras de teste detectam fentanil em comprimidos, pós e líquidos. Custam ~$1 cada e levam 2-5 minutos.",
+    "hr.getTestStrips": "Obter Tiras de Teste",
+    "hr.naloxoneTitle": "Obter Naloxona (Narcan)",
+    "hr.naloxoneDesc": "A naloxona reverte overdoses de opioides e pode salvar vidas. Está disponível sem receita na maioria dos estados. Leve-a mesmo que não use — você pode salvar alguém.",
+    "hr.freeByMail": "Grátis pelo Correio (NEXT Distro)",
+    "hr.findNaloxone": "Encontrar Naloxona Perto de Mim",
+    "nav.language": "PT",
+  },
+};
+
+const LANGUAGES: Language[] = ["en", "es", "fr", "pt"];
+const LANGUAGE_LABELS: Record<Language, string> = {
+  en: "English",
+  es: "Español",
+  fr: "Français",
+  pt: "Português",
 };
 
 const I18nContext = createContext<I18nContextType>({
@@ -146,7 +244,8 @@ const I18nContext = createContext<I18nContextType>({
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Language>(() => {
     const saved = localStorage.getItem("ff_lang");
-    return (saved === "es" ? "es" : "en") as Language;
+    if (saved && LANGUAGES.includes(saved as Language)) return saved as Language;
+    return "en";
   });
 
   const handleSetLang = (newLang: Language) => {
@@ -166,3 +265,5 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 }
 
 export const useI18n = () => useContext(I18nContext);
+export { LANGUAGES, LANGUAGE_LABELS };
+export type { Language };

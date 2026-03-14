@@ -455,6 +455,7 @@ export type Database = {
           risk_reasons: string[] | null
           scoring: Database["public"]["Enums"]["pill_scoring"] | null
           shape: Database["public"]["Enums"]["pill_shape"] | null
+          shared: boolean
           user_id: string | null
         }
         Insert: {
@@ -478,6 +479,7 @@ export type Database = {
           risk_reasons?: string[] | null
           scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"] | null
+          shared?: boolean
           user_id?: string | null
         }
         Update: {
@@ -501,6 +503,7 @@ export type Database = {
           risk_reasons?: string[] | null
           scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"] | null
+          shared?: boolean
           user_id?: string | null
         }
         Relationships: []
