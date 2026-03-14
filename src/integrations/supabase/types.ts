@@ -605,6 +605,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fuzzy_imprint_search: {
+        Args: {
+          max_results?: number
+          search_text: string
+          similarity_threshold?: number
+        }
+        Returns: {
+          color: Database["public"]["Enums"]["pill_color"]
+          created_at: string
+          drug_name: string
+          external_id: string
+          id: string
+          imprint: string
+          last_synced: string
+          logo_description: string
+          ndc_code: string
+          notes: string
+          scoring: Database["public"]["Enums"]["pill_scoring"]
+          shape: Database["public"]["Enums"]["pill_shape"]
+          similarity: number
+          size_mm: number
+          source: string
+          thickness_mm: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -612,6 +637,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
