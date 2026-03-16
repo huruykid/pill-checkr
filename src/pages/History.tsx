@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { History as HistoryIcon, Search, Trash2, AlertCircle, Gauge, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -27,6 +28,7 @@ interface LocalHistoryItem {
 
 export default function History() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const [localHistory, setLocalHistory] = useState<LocalHistoryItem[]>([]);
   const [dbReports, setDbReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,13 +41,11 @@ export default function History() {
   const loadHistory = async () => {
     setLoading(true);
     
-    // Always load localStorage history
     try {
       const stored = localStorage.getItem("pillCheckHistory");
       if (stored) setLocalHistory(JSON.parse(stored));
     } catch {}
 
-    // If authenticated, also load from DB
     if (user) {
       try {
         const { data } = await supabase
@@ -57,7 +57,6 @@ export default function History() {
         const reports = data || [];
         setDbReports(reports);
 
-        // Generate signed URLs for pill photos
         const urlMap: Record<string, string> = {};
         await Promise.all(
           reports.filter(r => r.photo_url).map(async (r) => {
@@ -89,7 +88,6 @@ export default function History() {
     setLocalHistory(updated);
   };
 
-  // Merge: show DB reports first (if authenticated), then local-only items
   const dbIds = new Set(dbReports.map((r) => r.id));
   const localOnlyItems = localHistory.filter((item) => !dbIds.has(item.id));
 
@@ -105,15 +103,15 @@ export default function History() {
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <h1 className="text-3xl font-bold md:text-4xl">Check History</h1>
+              <h1 className="text-3xl font-bold md:text-4xl">{t("history.title")}</h1>
               <p className="mt-1 text-muted-foreground font-sans normal-case">
-                {user ? "Your saved pill checks" : "Your previous pill checks"}
+                {user ? t("history.savedChecks") : t("history.previousChecks")}
               </p>
             </div>
             {localOnlyItems.length > 0 && !user && (
               <Button variant="outline" size="sm" onClick={clearLocalHistory}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Clear All
+                {t("history.clearAll")}
               </Button>
             )}
           </div>
@@ -122,8 +120,8 @@ export default function History() {
             <div className="mb-6 flex items-start gap-3 rounded-lg bg-accent/50 p-4 text-sm">
               <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <p className="text-muted-foreground">
-                History is stored locally in your browser.{" "}
-                <Link to="/auth" className="text-primary hover:underline font-semibold">Sign in</Link> to sync across devices.
+                {t("history.localNotice")}{" "}
+                <Link to="/auth" className="text-primary hover:underline font-semibold">{t("history.syncPrompt")}</Link> {t("history.syncSuffix")}
               </p>
             </div>
           )}
@@ -136,21 +134,20 @@ export default function History() {
             <Card>
               <CardContent className="py-12 text-center">
                 <HistoryIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mb-2 text-lg font-semibold">No history yet</h3>
+                <h3 className="mb-2 text-lg font-semibold">{t("history.empty")}</h3>
                 <p className="mb-6 text-muted-foreground">
-                  Your pill check history will appear here
+                  {t("history.emptyDesc")}
                 </p>
                 <Link to="/check">
                   <Button>
                     <Search className="mr-2 h-4 w-4" />
-                    Check a Pill
+                    {t("nav.checkPill")}
                   </Button>
                 </Link>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-3">
-              {/* DB reports (authenticated) */}
               {dbReports.map((report) => (
                 <Card key={report.id} className="overflow-hidden transition-all hover:shadow-md">
                   <CardContent className="p-4">
@@ -166,7 +163,7 @@ export default function History() {
                         <div className="flex items-center gap-3">
                           <RiskBadge level={(report.risk_level || "medium") as "low" | "medium" | "high"} size="sm" showIcon={false} />
                           <span className="font-medium text-foreground truncate">
-                            {report.imprint_text || "Unable to match"}
+                            {report.imprint_text || t("history.unableToMatch")}
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mt-1">
@@ -179,7 +176,7 @@ export default function History() {
                             {report.anomaly_score !== null && (
                               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Gauge className="h-3 w-3" />
-                                Inconsistency: {report.anomaly_score}/100
+                                {t("history.inconsistency")}: {report.anomaly_score}/100
                               </span>
                             )}
                             {report.match_confidence && (
@@ -193,7 +190,6 @@ export default function History() {
                 </Card>
               ))}
 
-              {/* Local-only items */}
               {localOnlyItems.map((item) => (
                 <Card key={item.id} className="overflow-hidden transition-all hover:shadow-md">
                   <CardContent className="p-4">
@@ -203,7 +199,7 @@ export default function History() {
                           <RiskBadge level={item.riskLevel} size="sm" showIcon={false} />
                           <div className="min-w-0 flex-1">
                             <p className="font-medium text-foreground truncate">
-                              {item.imprint || "Unable to match"}
+                              {item.imprint || t("history.unableToMatch")}
                             </p>
                             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                               {item.shape && <span>{item.shape}</span>}
@@ -215,7 +211,7 @@ export default function History() {
                                 {item.anomalyScore !== undefined && (
                                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <Gauge className="h-3 w-3" />
-                                    Inconsistency: {item.anomalyScore}/100
+                                    {t("history.inconsistency")}: {item.anomalyScore}/100
                                   </span>
                                 )}
                                 {item.matchConfidence && (

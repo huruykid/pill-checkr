@@ -1,21 +1,23 @@
 import { useState } from "react";
 import { Phone, X, AlertTriangle, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 interface EmergencyFABProps {
   /** When true, the FAB pulses and is larger — used on high-risk results */
   urgent?: boolean;
 }
 
-const LINES = [
-  { label: "911", number: "911", description: "Emergency", color: "bg-danger text-danger-foreground" },
-  { label: "Poison Control", number: "18002221222", description: "1-800-222-1222", color: "bg-warning text-warning-foreground" },
-  { label: "988 Crisis", number: "988", description: "Suicide & Crisis", color: "bg-primary text-primary-foreground" },
-  { label: "Never Use Alone", number: "18004843731", description: "1-800-484-3731", color: "bg-success text-success-foreground" },
-];
-
 export function EmergencyFAB({ urgent = false }: EmergencyFABProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
+
+  const LINES = [
+    { label: "911", number: "911", description: t("fab.911desc"), color: "bg-danger text-danger-foreground" },
+    { label: t("emergency.poisonControl"), number: "18002221222", description: t("fab.poisonDesc"), color: "bg-warning text-warning-foreground" },
+    { label: t("emergency.988"), number: "988", description: t("fab.988desc"), color: "bg-primary text-primary-foreground" },
+    { label: t("hr.neverUseAlone"), number: "18004843731", description: t("fab.nuaDesc"), color: "bg-success text-success-foreground" },
+  ];
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
@@ -25,7 +27,7 @@ export function EmergencyFAB({ urgent = false }: EmergencyFABProps) {
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-danger" />
-              <span className="text-sm font-bold uppercase tracking-wide text-foreground">Emergency Lines</span>
+              <span className="text-sm font-bold uppercase tracking-wide text-foreground">{t("fab.title")}</span>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -53,7 +55,7 @@ export function EmergencyFAB({ urgent = false }: EmergencyFABProps) {
           </div>
           <div className="border-t border-border px-4 py-2.5">
             <p className="text-[11px] text-muted-foreground text-center font-sans normal-case">
-              If someone is unconscious or not breathing, call 911 immediately.
+              {t("fab.footer")}
             </p>
           </div>
         </div>

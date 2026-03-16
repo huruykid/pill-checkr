@@ -1,5 +1,6 @@
 import { AlertTriangle, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 interface DisclaimerProps {
   variant?: "default" | "compact" | "emergency";
@@ -7,6 +8,8 @@ interface DisclaimerProps {
 }
 
 export function Disclaimer({ variant = "default", className }: DisclaimerProps) {
+  const { t } = useI18n();
+
   if (variant === "emergency") {
     return (
       <div className={cn(
@@ -17,10 +20,10 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
           <Phone className="h-6 w-6 text-danger shrink-0 mt-0.5" />
           <div className="space-y-2">
             <p className="font-semibold text-danger text-lg">
-              If someone is overdosing, call 911 now
+              {t("disclaimer.emergencyTitle")}
             </p>
             <p className="text-sm text-danger/80">
-              Administer naloxone (Narcan) if available. Stay with the person until help arrives.
+              {t("disclaimer.emergencyDesc")}
             </p>
           </div>
         </div>
@@ -36,11 +39,18 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
       )}>
         <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
         <p className="text-warning-foreground">
-          This tool cannot confirm fentanyl or guarantee safety. Not medical advice.
+          {t("disclaimer.compact")}
         </p>
       </div>
     );
   }
+
+  const items = [
+    t("disclaimer.item1"),
+    t("disclaimer.item2"),
+    t("disclaimer.item3"),
+    t("disclaimer.item4"),
+  ];
 
   return (
     <div className={cn(
@@ -51,25 +61,15 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
         <AlertTriangle className="h-6 w-6 text-warning shrink-0 mt-0.5" />
         <div className="space-y-3">
           <p className="font-semibold text-warning-foreground">
-            Important Disclaimer
+            {t("disclaimer.title")}
           </p>
           <ul className="space-y-2 text-sm text-warning-foreground/90">
-            <li className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
-              <span>This is <strong>not</strong> medical advice or lab-grade testing</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
-              <span>This tool <strong>cannot</strong> confirm fentanyl or guarantee any pill is safe</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
-              <span>If we <strong>cannot confidently match</strong> a pill, treat it as higher risk</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
-              <span>If you suspect an overdose, <strong>call 911 immediately</strong></span>
-            </li>
+            {items.map((item, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
+                <span dangerouslySetInnerHTML={{ __html: item }} />
+              </li>
+            ))}
           </ul>
         </div>
       </div>
