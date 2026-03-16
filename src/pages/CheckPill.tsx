@@ -162,7 +162,7 @@ export default function CheckPill() {
 
   const handleQuickCheck = async () => {
     if (!imprint.trim()) {
-      toast.error("Please enter an imprint / marking for quick check");
+      toast.error(t("check.quickError"));
       return;
     }
 
