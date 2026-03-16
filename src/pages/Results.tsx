@@ -584,7 +584,7 @@ export default function Results() {
 
               {riskReasons.length > 0 && (
                 <div className="space-y-2 border-t border-border pt-4">
-                  <p className="text-sm font-medium text-muted-foreground">Risk assessment notes:</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t("results.riskNotes")}</p>
                   <ul className="space-y-2">
                     {riskReasons.map((reason, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm">
