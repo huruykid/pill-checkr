@@ -509,7 +509,7 @@ export default function Results() {
 
                 return (
                   <div className="rounded-lg bg-muted/50 p-4 space-y-3">
-                    <p className="text-sm font-medium text-foreground mb-1">Match Breakdown</p>
+                    <p className="text-sm font-medium text-foreground mb-1">{t("results.matchBreakdown")}</p>
                     {bars.map((bar) => (
                       <div key={bar.label} className="space-y-1">
                         <div className="flex items-center justify-between">
