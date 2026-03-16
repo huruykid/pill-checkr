@@ -666,7 +666,7 @@ export default function CheckPill() {
                     onChange={(e) => setSizeMm(e.target.value)}
                     className="h-12"
                   />
-                  <p className="text-xs text-muted-foreground">Diameter or length — place next to a coin for scale</p>
+                  <p className="text-xs text-muted-foreground">{t("check.sizeHint")}</p>
                 </div>
               </div>
 
