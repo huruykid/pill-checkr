@@ -8,7 +8,8 @@ const corsHeaders = {
 };
 
 // Input validation schema
-const InputSchema = z.object({
+const FullInputSchema = z.object({
+  quickCheck: z.literal(false).optional().default(false),
   image: z.string()
     .min(1, "Image data is required")
     .max(15 * 1024 * 1024, "Image data exceeds maximum size of 15MB"),
@@ -22,6 +23,20 @@ const InputSchema = z.object({
   photoUrl: z.string().optional().nullable(),
   backPhotoUrl: z.string().optional().nullable(),
 });
+
+const QuickCheckInputSchema = z.object({
+  quickCheck: z.literal(true),
+  imprint: z.string().min(1, "Imprint is required for quick check").max(50),
+  shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
+  color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
+  scoring: z.enum(['none', 'single', 'double', 'quad', 'other']).optional().nullable(),
+  estimatedSizeMm: z.number().positive().max(50).optional().nullable(),
+});
+
+const InputSchema = z.discriminatedUnion("quickCheck", [
+  FullInputSchema.extend({ quickCheck: z.literal(false) }),
+  QuickCheckInputSchema,
+]);
 
 // Match scoring weights (total max ~121)
 const MATCH_WEIGHTS = {
