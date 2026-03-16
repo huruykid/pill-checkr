@@ -270,7 +270,7 @@ export default function Results() {
           </Link>
 
           <div className="mb-8 text-center">
-            <h1 className="mb-4 text-3xl font-bold md:text-4xl">Analysis Results</h1>
+            <h1 className="mb-4 text-3xl font-bold md:text-4xl">{t("results.title")}</h1>
             <RiskBadge level={riskLevel} size="lg" />
           </div>
 
