@@ -24,7 +24,10 @@ import {
   Image as ImageIcon,
   AlertTriangle,
   Lightbulb,
-  RefreshCw
+  RefreshCw,
+  Type,
+  Search,
+  Zap
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
