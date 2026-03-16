@@ -351,9 +351,9 @@ export default function Results() {
               {matches.length === 0 ? (
                 <div className="py-6 text-center">
                   <XCircle className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground font-medium">Unable to match to known references</p>
+                   <p className="text-muted-foreground font-medium">{t("results.noMatch")}</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    This pill could not be confidently matched to any entries in our reference database.
+                    {t("results.noMatchDesc")}
                   </p>
                 </div>
               ) : (
