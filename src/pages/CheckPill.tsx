@@ -679,10 +679,10 @@ export default function CheckPill() {
                 />
                 <div className="space-y-1">
                   <Label htmlFor="reference" className="cursor-pointer font-medium">
-                    I included a reference object (coin)
+                    {t("check.referenceObject")}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Including a coin helps estimate the pill's actual size
+                    {t("check.referenceHint")}
                   </p>
                 </div>
               </div>
