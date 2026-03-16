@@ -422,7 +422,7 @@ export default function CheckPill() {
                       }}
                     >
                       <Camera className="mr-2 h-4 w-4" />
-                      Camera
+                      {t("check.camera")}
                     </Button>
                   </div>
                 </div>
