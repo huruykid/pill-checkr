@@ -334,10 +334,10 @@ export default function CheckPill() {
                 <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-foreground" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-foreground font-sans normal-case">
-                    Quick check matches by text only — no AI vision analysis.
+                    {t("check.quickInfo")}
                   </p>
                   <p className="text-xs text-muted-foreground font-sans normal-case">
-                    For more accurate results, switch to Photo Analysis when you can.
+                    {t("check.quickInfoSub")}
                   </p>
                 </div>
               </div>
