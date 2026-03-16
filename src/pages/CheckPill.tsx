@@ -584,11 +584,12 @@ export default function CheckPill() {
                 </div>
               )}
             </div>
+            </>)}
 
-            {/* Optional Fields */}
+            {/* Fields — required in quick mode, optional in photo mode */}
             <div className="space-y-4">
               <p className="text-sm font-medium text-muted-foreground">
-                Optional: Add details to improve matching accuracy
+                {mode === "quick" ? "Describe the pill" : "Optional: Add details to improve matching accuracy"}
               </p>
 
               <div className="space-y-2">
