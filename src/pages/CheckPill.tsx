@@ -259,7 +259,7 @@ export default function CheckPill() {
 
       if (data.imageQuality === "poor") {
         setShowRetakePrompt(true);
-        toast.warning("Image quality is low. Consider retaking the photo for better results.");
+        toast.warning(t("check.lowQualityToast"));
         setIsAnalyzing(false);
         setAnalysisStep(0);
         return;
