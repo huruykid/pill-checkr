@@ -750,15 +750,15 @@ export default function CheckPill() {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  {mode === "quick" ? "Checking…" : "Analyzing…"}
+                  {mode === "quick" ? t("check.checkingBtn") : t("check.analyzingBtn")}
                 </>
               ) : mode === "quick" ? (
                 <>
                   <Zap className="h-5 w-5" />
-                  Quick Check
+                  {t("check.quickCheckBtn")}
                 </>
               ) : (
-                <>Analyze Pill</>
+                <>{t("check.analyzeBtn")}</>
               )}
             </Button>
 
