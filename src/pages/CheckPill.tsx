@@ -469,7 +469,7 @@ export default function CheckPill() {
 
                   {qualityFeedback.issues.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-sm font-medium text-foreground">Issues Found:</h4>
+                      <h4 className="text-sm font-medium text-foreground">{t("check.issuesFound")}</h4>
                       <div className="space-y-2">
                         {qualityFeedback.issues.map((issue, idx) => (
                           <div 
