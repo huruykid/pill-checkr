@@ -671,6 +671,7 @@ export default function CheckPill() {
                 </div>
               </div>
 
+              {mode === "photo" && (
               <div className="flex items-center space-x-3 rounded-lg bg-muted/50 p-4">
                 <Checkbox
                   id="reference"
@@ -686,6 +687,7 @@ export default function CheckPill() {
                   </p>
                 </div>
               </div>
+              )}
             </div>
 
             {/* Analysis Progress */}
