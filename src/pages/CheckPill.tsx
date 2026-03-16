@@ -460,9 +460,9 @@ export default function CheckPill() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-warning" />
                     <div className="space-y-1">
-                      <h3 className="font-semibold text-foreground">Low Image Quality Detected</h3>
+                      <h3 className="font-semibold text-foreground">{t("check.lowQuality")}</h3>
                       <p className="text-sm text-muted-foreground">
-                        The analysis may be inaccurate due to image quality issues. Consider retaking the photo.
+                        {t("check.lowQualityDesc")}
                       </p>
                     </div>
                   </div>
