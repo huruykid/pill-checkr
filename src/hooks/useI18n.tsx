@@ -197,6 +197,9 @@ const translations: Record<Language, Record<string, string>> = {
     "results.scoringPattern": "Scoring Pattern",
     "results.sizeMatch": "Size Match",
     "results.logoMatch": "Logo Match",
+    "results.narcan.title": "Find Narcan Near You",
+    "results.narcan.description": "Naloxone can reverse an opioid overdose. Find free Narcan distribution near you.",
+    "results.narcan.button": "Find Naloxone Nearby",
 
     // History
     "history.title": "Check History",
