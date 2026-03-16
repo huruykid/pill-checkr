@@ -368,6 +368,30 @@ export default function CheckPill() {
               </div>
             )}
             {mode === "photo" && (<>
+            {/* Photo Tips Guide */}
+            {!imagePreview && (
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-warning" />
+                  <h3 className="text-sm font-semibold text-foreground">Photo Tips for Best Results</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { icon: "☀️", title: "Good lighting", desc: "Use bright, even light — no harsh shadows" },
+                    { icon: "📄", title: "White background", desc: "Place pill on a plain white surface" },
+                    { icon: "🪙", title: "Add a coin", desc: "Place a coin next to it for size reference" },
+                    { icon: "📷", title: "Focus & steady", desc: "Hold still, tap to focus on the pill" },
+                  ].map((tip) => (
+                    <div key={tip.title} className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/50 p-3 text-center">
+                      <span className="text-2xl" role="img" aria-label={tip.title}>{tip.icon}</span>
+                      <span className="text-xs font-medium text-foreground">{tip.title}</span>
+                      <span className="text-[11px] leading-tight text-muted-foreground">{tip.desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Image Upload */}
             <div className="space-y-3">
               <Label className="text-base font-semibold">Pill Photo</Label>
