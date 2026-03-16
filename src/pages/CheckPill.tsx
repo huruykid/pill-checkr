@@ -79,11 +79,11 @@ export default function CheckPill() {
 
   const handleFileSelect = useCallback((file: File, side: "front" | "back" = "front") => {
     if (!file.type.startsWith("image/")) {
-      setImageError("Please select an image file");
+      setImageError(t("check.imageError.type"));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      setImageError("Image must be less than 10MB");
+      setImageError(t("check.imageError.size"));
       return;
     }
     setImageError(null);
