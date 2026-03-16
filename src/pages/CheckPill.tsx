@@ -321,7 +321,7 @@ export default function CheckPill() {
               disabled={isAnalyzing}
             >
               <Type className="h-4 w-4" />
-              Quick Check
+              {t("check.quickMode")}
             </button>
           </div>
 
