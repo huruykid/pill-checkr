@@ -407,7 +407,7 @@ export default function CheckPill() {
                       }}
                     >
                       <Upload className="mr-2 h-4 w-4" />
-                      Browse
+                      {t("check.browse")}
                     </Button>
                     <Button 
                       type="button" 
