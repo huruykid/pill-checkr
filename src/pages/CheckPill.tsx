@@ -164,6 +164,19 @@ export default function CheckPill() {
     }
   };
 
+  const ANALYSIS_STEPS = [
+    { label: "Uploading image…", icon: Upload },
+    { label: "Extracting features…", icon: Camera },
+    { label: "Searching database…", icon: AlertCircle },
+    { label: "Comparing visually…", icon: ImageIcon },
+    { label: "Generating report…", icon: CheckCircle },
+  ];
+
+  const clearStepTimers = () => {
+    stepTimersRef.current.forEach(clearTimeout);
+    stepTimersRef.current = [];
+  };
+
   const handleAnalyze = async () => {
     if (!imagePreview || !imageFile) {
       toast.error("Please upload an image first");
@@ -171,14 +184,24 @@ export default function CheckPill() {
     }
 
     setIsAnalyzing(true);
+    setAnalysisStep(0);
+    clearStepTimers();
 
     try {
-      // Upload images to storage
+      // Step 0: Uploading image
       const photoUrl = await uploadImage(imageFile);
       let backPhotoUrl: string | null = null;
       if (backImageFile && backImagePreview) {
         backPhotoUrl = await uploadImage(backImageFile, "back");
       }
+
+      // Step 1: Extracting features (real call starts)
+      setAnalysisStep(1);
+
+      // Schedule simulated progress steps during the edge function call
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(2), 2000));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(3), 4500));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(4), 7000));
 
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
@@ -196,6 +219,9 @@ export default function CheckPill() {
           },
       });
 
+      clearStepTimers();
+      setAnalysisStep(4); // Jump to final step on completion
+
       if (error) throw error;
 
       const feedback: QualityFeedback = {
@@ -210,6 +236,7 @@ export default function CheckPill() {
         setShowRetakePrompt(true);
         toast.warning("Image quality is low. Consider retaking the photo for better results.");
         setIsAnalyzing(false);
+        setAnalysisStep(0);
         return;
       }
 
@@ -218,7 +245,9 @@ export default function CheckPill() {
       console.error("Analysis error:", error);
       toast.error("Failed to analyze pill. Please try again.");
     } finally {
+      clearStepTimers();
       setIsAnalyzing(false);
+      setAnalysisStep(0);
     }
   };
 
