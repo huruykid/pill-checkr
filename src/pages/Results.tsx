@@ -300,7 +300,7 @@ export default function Results() {
                     icon: <AlertCircle className="h-6 w-6 text-warning shrink-0 mt-0.5" />,
                     border: "border-l-warning",
                     bg: "bg-warning-light",
-                    message: `This pill partially matches ${topDrug || "a known reference"}, but some characteristics are inconsistent. Exercise caution.`,
+                    message: t("results.summary.medRisk").replace("{drug}", topDrug || t("results.noMatch")),
                   };
 
             return (
