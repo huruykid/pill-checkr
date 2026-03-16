@@ -287,11 +287,11 @@ export default function CheckPill() {
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-3xl font-bold md:text-4xl">Check a Pill</h1>
+            <h1 className="mb-2 text-3xl font-bold md:text-4xl">{t("check.title")}</h1>
             <p className="text-muted-foreground font-sans normal-case">
               {mode === "photo" 
-                ? "Upload a clear photo for analysis. Include a reference object like a coin for better accuracy."
-                : "No photo? Type the imprint and pick the shape/color for instant database matches."}
+                ? t("check.photoSubtitle")
+                : t("check.quickSubtitle")}
             </p>
           </div>
 
