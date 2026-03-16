@@ -559,7 +559,7 @@ export default function CheckPill() {
                   />
                   <ImageIcon className="mb-2 h-8 w-8 text-muted-foreground" />
                   <p className="text-center text-sm text-muted-foreground">
-                    Upload back side for better accuracy
+                    {t("check.uploadBack")}
                   </p>
                 </div>
               ) : (
