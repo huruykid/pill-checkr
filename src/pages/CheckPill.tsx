@@ -168,17 +168,62 @@ export default function CheckPill() {
     }
   };
 
-  const ANALYSIS_STEPS = [
+  const ANALYSIS_STEPS = mode === "photo" ? [
     { label: "Uploading image…", icon: Upload },
     { label: "Extracting features…", icon: Camera },
-    { label: "Searching database…", icon: AlertCircle },
+    { label: "Searching database…", icon: Search },
     { label: "Comparing visually…", icon: ImageIcon },
+    { label: "Generating report…", icon: CheckCircle },
+  ] : [
+    { label: "Searching database…", icon: Search },
+    { label: "Matching references…", icon: Zap },
     { label: "Generating report…", icon: CheckCircle },
   ];
 
   const clearStepTimers = () => {
     stepTimersRef.current.forEach(clearTimeout);
     stepTimersRef.current = [];
+  };
+
+  const handleQuickCheck = async () => {
+    if (!imprint.trim()) {
+      toast.error("Please enter an imprint / marking for quick check");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisStep(0);
+    clearStepTimers();
+
+    try {
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(1), 800));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(2), 1600));
+
+      const { data, error } = await supabase.functions.invoke("analyze-pill", {
+        body: {
+          quickCheck: true,
+          imprint: imprint.trim(),
+          shape: shape || null,
+          color: color || null,
+          scoring: scoring || null,
+          estimatedSizeMm: sizeMm ? parseFloat(sizeMm) : null,
+        },
+      });
+
+      clearStepTimers();
+      setAnalysisStep(2);
+
+      if (error) throw error;
+
+      navigate(`/results/${data.reportId}`);
+    } catch (error) {
+      console.error("Quick check error:", error);
+      toast.error("Failed to check pill. Please try again.");
+    } finally {
+      clearStepTimers();
+      setIsAnalyzing(false);
+      setAnalysisStep(0);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -210,6 +255,7 @@ export default function CheckPill() {
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
           body: {
+            quickCheck: false,
             image: imagePreview,
             backImage: backImagePreview || null,
             imprint: imprint || null,
