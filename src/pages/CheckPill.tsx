@@ -694,7 +694,7 @@ export default function CheckPill() {
               <div className="rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-foreground">Analyzing your pill…</span>
+                    <span className="font-medium text-foreground">{t("check.analyzing")}</span>
                     <span className="text-muted-foreground">{Math.round(((analysisStep + 1) / ANALYSIS_STEPS.length) * 100)}%</span>
                   </div>
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
