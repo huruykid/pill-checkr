@@ -590,6 +590,56 @@ export default function CheckPill() {
               </div>
             </div>
 
+            {/* Analysis Progress */}
+            {isAnalyzing && (
+              <div className="rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-foreground">Analyzing your pill…</span>
+                    <span className="text-muted-foreground">{Math.round(((analysisStep + 1) / ANALYSIS_STEPS.length) * 100)}%</span>
+                  </div>
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+                      style={{ width: `${((analysisStep + 1) / ANALYSIS_STEPS.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {ANALYSIS_STEPS.map((step, idx) => {
+                    const isCompleted = idx < analysisStep;
+                    const isCurrent = idx === analysisStep;
+                    const StepIcon = step.icon;
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ${
+                          isCurrent
+                            ? "bg-primary/10 border border-primary/20"
+                            : isCompleted
+                            ? "opacity-70"
+                            : "opacity-30"
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="h-4 w-4 flex-shrink-0 text-success" />
+                        ) : isCurrent ? (
+                          <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-primary" />
+                        ) : (
+                          <StepIcon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                        )}
+                        <span className={`text-sm font-sans normal-case ${
+                          isCurrent ? "font-medium text-foreground" : "text-muted-foreground"
+                        }`}>
+                          {step.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Submit Button */}
             <Button
               variant="hero"
