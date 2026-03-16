@@ -219,7 +219,7 @@ export default function Results() {
         <div className="container flex min-h-[50vh] items-center justify-center py-12">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Loading results...</p>
+            <p className="text-muted-foreground">{t("common.loadingResults")}</p>
           </div>
         </div>
       </Layout>
@@ -230,9 +230,9 @@ export default function Results() {
     return (
       <Layout>
         <div className="container py-12 text-center">
-          <p className="text-muted-foreground">No results found</p>
+          <p className="text-muted-foreground">{t("common.noResults")}</p>
           <Link to="/check">
-            <Button className="mt-4">Check Another Pill</Button>
+            <Button className="mt-4">{t("results.checkAnother")}</Button>
           </Link>
         </div>
       </Layout>
@@ -247,9 +247,9 @@ export default function Results() {
   const matchConfidence = report.match_confidence as "low" | "medium" | "high" | null;
 
   const getAnomalyDescription = (score: number) => {
-    if (score >= 60) return { text: "High inconsistency", color: "text-danger" };
-    if (score >= 30) return { text: "Moderate inconsistency", color: "text-warning" };
-    return { text: "Low inconsistency", color: "text-success" };
+    if (score >= 60) return { text: t("results.highInconsistency"), color: "text-danger" };
+    if (score >= 30) return { text: t("results.moderateInconsistency"), color: "text-warning" };
+    return { text: t("results.lowInconsistency"), color: "text-success" };
   };
 
   const anomalyInfo = getAnomalyDescription(anomalyScore);
@@ -266,11 +266,11 @@ export default function Results() {
         <div className="mx-auto max-w-3xl">
           <Link to="/check" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
-            Back to Check
+            {t("results.backToCheck")}
           </Link>
 
           <div className="mb-8 text-center">
-            <h1 className="mb-4 text-3xl font-bold md:text-4xl">Analysis Results</h1>
+            <h1 className="mb-4 text-3xl font-bold md:text-4xl">{t("results.title")}</h1>
             <RiskBadge level={riskLevel} size="lg" />
           </div>
 
@@ -285,7 +285,7 @@ export default function Results() {
                   icon: <CheckCircle className="h-6 w-6 text-success shrink-0 mt-0.5" />,
                   border: "border-l-success",
                   bg: "bg-success-light",
-                  message: `This pill looks consistent with ${topDrug}. Our reference database found matching characteristics.`,
+                  message: t("results.summary.lowRisk").replace("{drug}", topDrug || ""),
                 }
               : isHigh
                 ? {
@@ -293,14 +293,14 @@ export default function Results() {
                     border: "border-l-danger",
                     bg: "bg-danger-light",
                     message: topDrug
-                      ? `This pill has inconsistencies with known ${topDrug} references. Treat it as high risk and do not consume without further testing.`
-                      : "We couldn't confidently match this pill to any known reference. Treat it as high risk and do not consume without further testing.",
+                      ? t("results.summary.highRiskDrug").replace("{drug}", topDrug)
+                      : t("results.summary.highRiskNone"),
                   }
                 : {
                     icon: <AlertCircle className="h-6 w-6 text-warning shrink-0 mt-0.5" />,
                     border: "border-l-warning",
                     bg: "bg-warning-light",
-                    message: `This pill partially matches ${topDrug || "a known reference"}, but some characteristics are inconsistent. Exercise caution.`,
+                    message: t("results.summary.medRisk").replace("{drug}", topDrug || t("results.noMatch")),
                   };
 
             return (
@@ -344,16 +344,16 @@ export default function Results() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Pill className="h-5 w-5 text-primary" />
-                Possible Matches
+                {t("results.possibleMatches")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {matches.length === 0 ? (
                 <div className="py-6 text-center">
                   <XCircle className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground font-medium">Unable to match to known references</p>
+                   <p className="text-muted-foreground font-medium">{t("results.noMatch")}</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    This pill could not be confidently matched to any entries in our reference database.
+                    {t("results.noMatchDesc")}
                   </p>
                 </div>
               ) : (
@@ -431,7 +431,7 @@ export default function Results() {
                                   ) : (
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                       <ImageIcon className="h-4 w-4" />
-                                      <span className="text-xs">No reference image — visual comparison not available</span>
+                                      <span className="text-xs">{t("results.noRefImage")}</span>
                                     </div>
                                   )}
                                 </div>
@@ -461,7 +461,7 @@ export default function Results() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gauge className="h-5 w-5 text-primary" />
-                Uncertainty & Consistency Check
+                {t("results.uncertaintyTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -509,7 +509,7 @@ export default function Results() {
 
                 return (
                   <div className="rounded-lg bg-muted/50 p-4 space-y-3">
-                    <p className="text-sm font-medium text-foreground mb-1">Match Breakdown</p>
+                    <p className="text-sm font-medium text-foreground mb-1">{t("results.matchBreakdown")}</p>
                     {bars.map((bar) => (
                       <div key={bar.label} className="space-y-1">
                         <div className="flex items-center justify-between">
@@ -534,7 +534,7 @@ export default function Results() {
 
               <div className="rounded-lg bg-muted/50 p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-medium text-foreground">Inconsistency Score</span>
+                  <span className="font-medium text-foreground">{t("results.inconsistencyScore")}</span>
                   <span className={`font-bold text-lg ${anomalyInfo.color}`}>
                     {anomalyScore}/100
                   </span>
@@ -570,7 +570,7 @@ export default function Results() {
 
               {anomalyReasons.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Consistency notes:</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t("results.consistencyNotes")}</p>
                   <ul className="space-y-2">
                     {anomalyReasons.map((reason, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm">
@@ -584,7 +584,7 @@ export default function Results() {
 
               {riskReasons.length > 0 && (
                 <div className="space-y-2 border-t border-border pt-4">
-                  <p className="text-sm font-medium text-muted-foreground">Risk assessment notes:</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t("results.riskNotes")}</p>
                   <ul className="space-y-2">
                     {riskReasons.map((reason, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm">
@@ -602,7 +602,7 @@ export default function Results() {
               {report.image_quality === "poor" && (
                 <div className="flex items-center gap-2 rounded-lg bg-warning-light px-3 py-2 text-sm text-warning">
                   <ImageOff className="h-4 w-4" />
-                  Image quality is poor - results may be less accurate
+                  {t("results.poorImage")}
                 </div>
               )}
             </CardContent>
@@ -665,7 +665,7 @@ export default function Results() {
               <Link to="/nearby-help" className="mb-8 block">
                 <Button variant="outline" className="w-full gap-2">
                   <MapPin className="h-4 w-4" />
-                  Open Full Map — Find Treatment Centers & Naloxone Near You
+                  {t("results.openFullMap")}
                 </Button>
               </Link>
             </>
@@ -680,7 +680,7 @@ export default function Results() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Share2 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Shareable Link</span>
+                    <span className="text-sm font-medium">{t("results.shareableLink")}</span>
                   </div>
                   <Button
                     variant={(data.report as any).shared ? "outline" : "default"}
@@ -697,24 +697,24 @@ export default function Results() {
                         setData({ ...data, report: { ...data.report, shared: newShared } as any });
                         if (newShared) {
                           await navigator.clipboard.writeText(window.location.href);
-                          toast.success("Link copied! Anyone with this link can view the results.");
+                          toast.success(t("results.shareCopied"));
                         } else {
-                          toast.success("Link unshared — only you can view this report now.");
+                          toast.success(t("results.unshareMsg"));
                         }
                       } catch {
-                        toast.error("Failed to update sharing");
+                        toast.error(t("results.shareError"));
                       } finally {
                         setSharing(false);
                       }
                     }}
                   >
                     <LinkIcon className="mr-1.5 h-3.5 w-3.5" />
-                    {(data.report as any).shared ? "Unshare" : "Share"}
+                    {(data.report as any).shared ? t("results.unshare") : t("results.share")}
                   </Button>
                 </div>
                 {(data.report as any).shared && (
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Anyone with the link can view this report. No personal info is shared.
+                    {t("results.shareNote")}
                   </p>
                 )}
               </CardContent>
@@ -734,12 +734,12 @@ export default function Results() {
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
-              {user ? "Save to Account" : "Save to History"}
+              {user ? t("results.saveToAccount") : t("results.saveToHistory")}
             </Button>
             <Link to="/check" className="flex-1">
               <Button variant="default" className="w-full">
                 <RotateCcw className="mr-2 h-4 w-4" />
-                Check Another Pill
+                {t("results.checkAnother")}
               </Button>
             </Link>
           </div>

@@ -32,6 +32,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 
 interface QualityIssue {
   issue: string;
@@ -46,44 +47,14 @@ interface QualityFeedback {
   recommendation: string | null;
 }
 
-const SHAPES = [
-  { value: "round", label: "Round" },
-  { value: "oval", label: "Oval" },
-  { value: "capsule", label: "Capsule" },
-  { value: "diamond", label: "Diamond" },
-  { value: "triangle", label: "Triangle" },
-  { value: "hexagon", label: "Hexagon" },
-  { value: "rectangle", label: "Rectangle/Bar" },
-  { value: "other", label: "Other" },
-];
-
-const COLORS = [
-  { value: "white", label: "White" },
-  { value: "blue", label: "Blue" },
-  { value: "yellow", label: "Yellow" },
-  { value: "pink", label: "Pink" },
-  { value: "green", label: "Green" },
-  { value: "orange", label: "Orange" },
-  { value: "red", label: "Red" },
-  { value: "purple", label: "Purple" },
-  { value: "gray", label: "Gray" },
-  { value: "brown", label: "Brown" },
-  { value: "tan", label: "Tan" },
-  { value: "multicolor", label: "Multicolor" },
-  { value: "other", label: "Other" },
-];
-
-const SCORINGS = [
-  { value: "none", label: "None (no break line)" },
-  { value: "single", label: "Single line" },
-  { value: "double", label: "Cross / X pattern" },
-  { value: "quad", label: "Four-way split" },
-  { value: "other", label: "Other" },
-];
+const SHAPE_KEYS = ["round","oval","capsule","diamond","triangle","hexagon","rectangle","other"] as const;
+const COLOR_KEYS = ["white","blue","yellow","pink","green","orange","red","purple","gray","brown","tan","multicolor","other"] as const;
+const SCORING_KEYS = ["none","single","double","quad","other"] as const;
 
 export default function CheckPill() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backFileInputRef = useRef<HTMLInputElement>(null);
   
@@ -108,11 +79,11 @@ export default function CheckPill() {
 
   const handleFileSelect = useCallback((file: File, side: "front" | "back" = "front") => {
     if (!file.type.startsWith("image/")) {
-      setImageError("Please select an image file");
+      setImageError(t("check.imageError.type"));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      setImageError("Image must be less than 10MB");
+      setImageError(t("check.imageError.size"));
       return;
     }
     setImageError(null);
@@ -168,16 +139,20 @@ export default function CheckPill() {
     }
   };
 
+  const SHAPES = SHAPE_KEYS.map(v => ({ value: v, label: t(`shape.${v}`) }));
+  const COLORS = COLOR_KEYS.map(v => ({ value: v, label: t(`color.${v}`) }));
+  const SCORINGS = SCORING_KEYS.map(v => ({ value: v, label: t(`scoring.${v}`) }));
+
   const ANALYSIS_STEPS = mode === "photo" ? [
-    { label: "Uploading image…", icon: Upload },
-    { label: "Extracting features…", icon: Camera },
-    { label: "Searching database…", icon: Search },
-    { label: "Comparing visually…", icon: ImageIcon },
-    { label: "Generating report…", icon: CheckCircle },
+    { label: t("check.step.upload"), icon: Upload },
+    { label: t("check.step.extract"), icon: Camera },
+    { label: t("check.step.search"), icon: Search },
+    { label: t("check.step.compare"), icon: ImageIcon },
+    { label: t("check.step.report"), icon: CheckCircle },
   ] : [
-    { label: "Searching database…", icon: Search },
-    { label: "Matching references…", icon: Zap },
-    { label: "Generating report…", icon: CheckCircle },
+    { label: t("check.step.search"), icon: Search },
+    { label: t("check.step.match"), icon: Zap },
+    { label: t("check.step.report"), icon: CheckCircle },
   ];
 
   const clearStepTimers = () => {
@@ -187,7 +162,7 @@ export default function CheckPill() {
 
   const handleQuickCheck = async () => {
     if (!imprint.trim()) {
-      toast.error("Please enter an imprint / marking for quick check");
+      toast.error(t("check.quickError"));
       return;
     }
 
@@ -218,7 +193,7 @@ export default function CheckPill() {
       navigate(`/results/${data.reportId}`);
     } catch (error) {
       console.error("Quick check error:", error);
-      toast.error("Failed to check pill. Please try again.");
+      toast.error(t("check.failedCheck"));
     } finally {
       clearStepTimers();
       setIsAnalyzing(false);
@@ -228,7 +203,7 @@ export default function CheckPill() {
 
   const handleAnalyze = async () => {
     if (!imagePreview || !imageFile) {
-      toast.error("Please upload an image first");
+      toast.error(t("check.uploadError"));
       return;
     }
 
@@ -284,7 +259,7 @@ export default function CheckPill() {
 
       if (data.imageQuality === "poor") {
         setShowRetakePrompt(true);
-        toast.warning("Image quality is low. Consider retaking the photo for better results.");
+        toast.warning(t("check.lowQualityToast"));
         setIsAnalyzing(false);
         setAnalysisStep(0);
         return;
@@ -293,7 +268,7 @@ export default function CheckPill() {
       navigate(`/results/${data.reportId}`);
     } catch (error) {
       console.error("Analysis error:", error);
-      toast.error("Failed to analyze pill. Please try again.");
+      toast.error(t("check.failedAnalyze"));
     } finally {
       clearStepTimers();
       setIsAnalyzing(false);
@@ -312,11 +287,11 @@ export default function CheckPill() {
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-3xl font-bold md:text-4xl">Check a Pill</h1>
+            <h1 className="mb-2 text-3xl font-bold md:text-4xl">{t("check.title")}</h1>
             <p className="text-muted-foreground font-sans normal-case">
               {mode === "photo" 
-                ? "Upload a clear photo for analysis. Include a reference object like a coin for better accuracy."
-                : "No photo? Type the imprint and pick the shape/color for instant database matches."}
+                ? t("check.photoSubtitle")
+                : t("check.quickSubtitle")}
             </p>
           </div>
 
@@ -333,7 +308,7 @@ export default function CheckPill() {
               disabled={isAnalyzing}
             >
               <Camera className="h-4 w-4" />
-              Photo Analysis
+              {t("check.photoMode")}
             </button>
             <button
               type="button"
@@ -346,7 +321,7 @@ export default function CheckPill() {
               disabled={isAnalyzing}
             >
               <Type className="h-4 w-4" />
-              Quick Check
+              {t("check.quickMode")}
             </button>
           </div>
 
@@ -359,10 +334,10 @@ export default function CheckPill() {
                 <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-foreground" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-foreground font-sans normal-case">
-                    Quick check matches by text only — no AI vision analysis.
+                    {t("check.quickInfo")}
                   </p>
                   <p className="text-xs text-muted-foreground font-sans normal-case">
-                    For more accurate results, switch to Photo Analysis when you can.
+                    {t("check.quickInfoSub")}
                   </p>
                 </div>
               </div>
@@ -373,14 +348,14 @@ export default function CheckPill() {
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="mb-3 flex items-center gap-2">
                   <Lightbulb className="h-5 w-5 text-warning" />
-                  <h3 className="text-sm font-semibold text-foreground">Photo Tips for Best Results</h3>
+                  <h3 className="text-sm font-semibold text-foreground">{t("check.tipsTitle")}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {[
-                    { icon: "☀️", title: "Good lighting", desc: "Use bright, even light — no harsh shadows" },
-                    { icon: "📄", title: "White background", desc: "Place pill on a plain white surface" },
-                    { icon: "🪙", title: "Add a coin", desc: "Place a coin next to it for size reference" },
-                    { icon: "📷", title: "Focus & steady", desc: "Hold still, tap to focus on the pill" },
+                    { icon: "☀️", title: t("check.tipLight"), desc: t("check.tipLightDesc") },
+                    { icon: "📄", title: t("check.tipBg"), desc: t("check.tipBgDesc") },
+                    { icon: "🪙", title: t("check.tipCoin"), desc: t("check.tipCoinDesc") },
+                    { icon: "📷", title: t("check.tipFocus"), desc: t("check.tipFocusDesc") },
                   ].map((tip) => (
                     <div key={tip.title} className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/50 p-3 text-center">
                       <span className="text-2xl" role="img" aria-label={tip.title}>{tip.icon}</span>
@@ -394,7 +369,7 @@ export default function CheckPill() {
 
             {/* Image Upload */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Pill Photo</Label>
+              <Label className="text-base font-semibold">{t("check.pillPhoto")}</Label>
               
               {!imagePreview ? (
                 <div
@@ -416,10 +391,10 @@ export default function CheckPill() {
                   />
                   <ImageIcon className="mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="mb-2 text-center font-medium text-foreground">
-                    Drop image here or click to upload
+                    {t("check.dropImage")}
                   </p>
                   <p className="text-center text-sm text-muted-foreground">
-                    Supports JPEG, PNG, WEBP (max 10MB)
+                    {t("check.supportedFormats")}
                   </p>
                   <div className="mt-4 flex gap-2">
                     <Button 
@@ -432,7 +407,7 @@ export default function CheckPill() {
                       }}
                     >
                       <Upload className="mr-2 h-4 w-4" />
-                      Browse
+                      {t("check.browse")}
                     </Button>
                     <Button 
                       type="button" 
@@ -447,7 +422,7 @@ export default function CheckPill() {
                       }}
                     >
                       <Camera className="mr-2 h-4 w-4" />
-                      Camera
+                      {t("check.camera")}
                     </Button>
                   </div>
                 </div>
@@ -467,7 +442,7 @@ export default function CheckPill() {
                   </button>
                   <div className="absolute bottom-2 left-2 flex items-center gap-2 rounded-lg bg-success/90 px-3 py-1.5 text-sm text-success-foreground">
                     <CheckCircle className="h-4 w-4" />
-                    Image uploaded
+                    {t("check.imageUploaded")}
                   </div>
                 </div>
               )}
@@ -485,16 +460,16 @@ export default function CheckPill() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-warning" />
                     <div className="space-y-1">
-                      <h3 className="font-semibold text-foreground">Low Image Quality Detected</h3>
+                      <h3 className="font-semibold text-foreground">{t("check.lowQuality")}</h3>
                       <p className="text-sm text-muted-foreground">
-                        The analysis may be inaccurate due to image quality issues. Consider retaking the photo.
+                        {t("check.lowQualityDesc")}
                       </p>
                     </div>
                   </div>
 
                   {qualityFeedback.issues.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-sm font-medium text-foreground">Issues Found:</h4>
+                      <h4 className="text-sm font-medium text-foreground">{t("check.issuesFound")}</h4>
                       <div className="space-y-2">
                         {qualityFeedback.issues.map((issue, idx) => (
                           <div 
@@ -535,7 +510,7 @@ export default function CheckPill() {
                       <div className="flex items-start gap-2">
                         <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
                         <div>
-                          <h4 className="font-medium text-foreground mb-1">Top Recommendation</h4>
+                          <h4 className="font-medium text-foreground mb-1">{t("check.topRec")}</h4>
                           <p className="text-sm text-foreground">{qualityFeedback.recommendation}</p>
                         </div>
                       </div>
@@ -545,7 +520,7 @@ export default function CheckPill() {
                   <div className="flex gap-3 pt-2">
                     <Button variant="outline" onClick={() => clearImage("front")} className="flex-1">
                       <RefreshCw className="mr-2 h-4 w-4" />
-                      Retake Photo
+                      {t("check.retakePhoto")}
                     </Button>
                     <Button
                       variant="secondary"
@@ -555,7 +530,7 @@ export default function CheckPill() {
                       className="flex-1"
                       disabled={!currentReportId}
                     >
-                      Continue Anyway
+                      {t("check.continueAnyway")}
                     </Button>
                   </div>
                 </div>
@@ -564,7 +539,7 @@ export default function CheckPill() {
 
             {/* Back Image Upload (Optional) */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Back of Pill <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+              <Label className="text-base font-semibold">{t("check.backOfPill")} <span className="text-muted-foreground font-normal text-sm">({t("common.optional")})</span></Label>
               
               {!backImagePreview ? (
                 <div
@@ -584,7 +559,7 @@ export default function CheckPill() {
                   />
                   <ImageIcon className="mb-2 h-8 w-8 text-muted-foreground" />
                   <p className="text-center text-sm text-muted-foreground">
-                    Upload back side for better accuracy
+                    {t("check.uploadBack")}
                   </p>
                 </div>
               ) : (
@@ -603,7 +578,7 @@ export default function CheckPill() {
                   </button>
                   <div className="absolute bottom-2 left-2 flex items-center gap-2 rounded-lg bg-success/90 px-3 py-1.5 text-sm text-success-foreground">
                     <CheckCircle className="h-4 w-4" />
-                    Back uploaded
+                    {t("check.backUploaded")}
                   </div>
                 </div>
               )}
@@ -613,14 +588,14 @@ export default function CheckPill() {
             {/* Fields — required in quick mode, optional in photo mode */}
             <div className="space-y-4">
               <p className="text-sm font-medium text-muted-foreground">
-                {mode === "quick" ? "Describe the pill" : "Optional: Add details to improve matching accuracy"}
+                {mode === "quick" ? t("check.describePill") : t("check.optionalDetails")}
               </p>
 
               <div className="space-y-2">
-                <Label htmlFor="imprint">Imprint / Markings {mode === "quick" && <span className="text-danger text-sm">*</span>}</Label>
+                <Label htmlFor="imprint">{t("check.imprint")} {mode === "quick" && <span className="text-danger text-sm">*</span>}</Label>
                 <Input
                   id="imprint"
-                  placeholder="e.g., M30, XANAX 2, G3722"
+                  placeholder={t("check.imprintPlaceholder")}
                   value={imprint}
                   onChange={(e) => setImprint(e.target.value)}
                   className="h-12"
@@ -629,10 +604,10 @@ export default function CheckPill() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Shape</Label>
+                  <Label>{t("check.shape")}</Label>
                   <Select value={shape} onValueChange={setShape}>
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select shape" />
+                      <SelectValue placeholder={t("check.selectShape")} />
                     </SelectTrigger>
                     <SelectContent>
                       {SHAPES.map((s) => (
@@ -645,10 +620,10 @@ export default function CheckPill() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Color</Label>
+                  <Label>{t("check.color")}</Label>
                   <Select value={color} onValueChange={setColor}>
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select color" />
+                      <SelectValue placeholder={t("check.selectColor")} />
                     </SelectTrigger>
                     <SelectContent>
                       {COLORS.map((c) => (
@@ -663,10 +638,10 @@ export default function CheckPill() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Scoring / Break Lines <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Label>{t("check.scoring")} <span className="text-muted-foreground font-normal text-sm">({t("common.optional")})</span></Label>
                   <Select value={scoring} onValueChange={setScoring}>
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select scoring pattern" />
+                      <SelectValue placeholder={t("check.selectScoring")} />
                     </SelectTrigger>
                     <SelectContent>
                       {SCORINGS.map((s) => (
@@ -679,19 +654,19 @@ export default function CheckPill() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sizeMm">Size (mm) <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Label htmlFor="sizeMm">{t("check.sizeMm")} <span className="text-muted-foreground font-normal text-sm">({t("common.optional")})</span></Label>
                   <Input
                     id="sizeMm"
                     type="number"
                     step="0.5"
                     min="1"
                     max="50"
-                    placeholder="e.g., 8.5"
+                    placeholder={t("check.sizePlaceholder")}
                     value={sizeMm}
                     onChange={(e) => setSizeMm(e.target.value)}
                     className="h-12"
                   />
-                  <p className="text-xs text-muted-foreground">Diameter or length — place next to a coin for scale</p>
+                  <p className="text-xs text-muted-foreground">{t("check.sizeHint")}</p>
                 </div>
               </div>
 
@@ -704,10 +679,10 @@ export default function CheckPill() {
                 />
                 <div className="space-y-1">
                   <Label htmlFor="reference" className="cursor-pointer font-medium">
-                    I included a reference object (coin)
+                    {t("check.referenceObject")}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Including a coin helps estimate the pill's actual size
+                    {t("check.referenceHint")}
                   </p>
                 </div>
               </div>
@@ -719,7 +694,7 @@ export default function CheckPill() {
               <div className="rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-foreground">Analyzing your pill…</span>
+                    <span className="font-medium text-foreground">{t("check.analyzing")}</span>
                     <span className="text-muted-foreground">{Math.round(((analysisStep + 1) / ANALYSIS_STEPS.length) * 100)}%</span>
                   </div>
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -775,21 +750,21 @@ export default function CheckPill() {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  {mode === "quick" ? "Checking…" : "Analyzing…"}
+                  {mode === "quick" ? t("check.checkingBtn") : t("check.analyzingBtn")}
                 </>
               ) : mode === "quick" ? (
                 <>
                   <Zap className="h-5 w-5" />
-                  Quick Check
+                  {t("check.quickCheckBtn")}
                 </>
               ) : (
-                <>Analyze Pill</>
+                <>{t("check.analyzeBtn")}</>
               )}
             </Button>
 
             {!user && (
               <p className="text-center text-sm text-muted-foreground">
-                <a href="/auth" className="text-primary hover:underline">Sign in</a> to save your check history automatically.
+                <a href="/auth" className="text-primary hover:underline">{t("common.signInPrompt")}</a> {t("check.signInSave")}
               </p>
             )}
           </div>

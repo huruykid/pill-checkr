@@ -9,16 +9,16 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
 
   const navLinks = [
-    { to: "/check", label: "Check a Pill", icon: Search },
-    { to: "/history", label: "History", icon: History },
-    { to: "/education", label: "Learn", icon: BookOpen },
-    { to: "/nearby-help", label: "Find Help", icon: MapPin },
-    { to: "/contribute", label: "Contribute", icon: Users },
-    { to: "/api-docs", label: "API", icon: Code },
-    { to: "/trends", label: "Trends", icon: TrendingUp },
+    { to: "/check", label: t("nav.checkPill"), icon: Search },
+    { to: "/history", label: t("nav.history"), icon: History },
+    { to: "/education", label: t("nav.learn"), icon: BookOpen },
+    { to: "/nearby-help", label: t("nav.findHelp"), icon: MapPin },
+    { to: "/contribute", label: t("nav.contribute"), icon: Users },
+    { to: "/api-docs", label: t("nav.api"), icon: Code },
+    { to: "/trends", label: t("nav.trends"), icon: TrendingUp },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -80,7 +80,7 @@ export function Header() {
                   }`}
                 >
                   <Settings className="h-4 w-4" />
-                  Settings
+                  {t("nav.settings")}
                 </Button>
               </Link>
               <Button
@@ -90,7 +90,7 @@ export function Header() {
                 onClick={() => signOut()}
               >
                 <LogOut className="h-4 w-4" />
-                Sign Out
+                {t("nav.signOut")}
               </Button>
             </>
           ) : (
@@ -103,7 +103,7 @@ export function Header() {
                 }`}
               >
                 <User className="h-4 w-4" />
-                Sign In
+                {t("nav.signIn")}
               </Button>
             </Link>
           )}
@@ -167,7 +167,7 @@ export function Header() {
                     }`}
                   >
                     <Settings className="h-5 w-5" />
-                    Settings
+                    {t("nav.settings")}
                   </Button>
                 </Link>
                 <Button
@@ -176,7 +176,7 @@ export function Header() {
                   onClick={() => { signOut(); setMobileMenuOpen(false); }}
                 >
                   <LogOut className="h-5 w-5" />
-                  Sign Out
+                  {t("nav.signOut")}
                 </Button>
               </>
             ) : (
@@ -186,7 +186,7 @@ export function Header() {
                   className="w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10"
                 >
                   <User className="h-5 w-5" />
-                  Sign In
+                  {t("nav.signIn")}
                 </Button>
               </Link>
             )}

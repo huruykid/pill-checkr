@@ -9,12 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, ArrowLeft, BookOpen, ExternalLink, Loader2, MapPin } from "lucide-react";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import { CounterfeitHotspots } from "@/components/results/CounterfeitHotspots";
+import { useI18n } from "@/hooks/useI18n";
 import type { Database } from "@/integrations/supabase/types";
 
 type EducationPost = Database["public"]["Tables"]["education_posts"]["Row"];
 
 export default function Education() {
   const { slug } = useParams();
+  const { t } = useI18n();
   const [posts, setPosts] = useState<EducationPost[]>([]);
   const [selectedPost, setSelectedPost] = useState<EducationPost | null>(null);
   const [loading, setLoading] = useState(true);
@@ -137,7 +139,7 @@ export default function Education() {
               className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Articles
+              {t("edu.backToArticles")}
             </Link>
 
             <h1 className="mb-6 text-3xl font-bold md:text-4xl">{selectedPost.title}</h1>
@@ -150,7 +152,7 @@ export default function Education() {
               <Link to="/education">
                 <Button variant="outline">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to All Articles
+                  {t("edu.backToAll")}
                 </Button>
               </Link>
             </div>
@@ -174,11 +176,11 @@ export default function Education() {
           <div className="mb-8 text-center">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
               <BookOpen className="h-4 w-4" />
-              Education
+              {t("edu.badge")}
             </div>
-            <h1 className="mb-4 text-3xl font-bold md:text-4xl">Learn About Safety</h1>
+            <h1 className="mb-4 text-3xl font-bold md:text-4xl">{t("edu.title")}</h1>
             <p className="text-muted-foreground">
-              Essential information for harm reduction and staying safe
+              {t("edu.subtitle")}
             </p>
           </div>
 
@@ -189,10 +191,10 @@ export default function Education() {
                 <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-warning" />
                 <div>
                   <h2 className="text-lg font-bold text-warning-foreground">
-                    Fentanyl Test Strips Save Lives
+                    {t("edu.testStripTitle")}
                   </h2>
                   <p className="mt-1 text-sm text-warning-foreground/80">
-                    Inexpensive strips that detect fentanyl in pills and powders. They cost about $1 each and take just minutes to use.
+                    {t("edu.testStripDesc")}
                   </p>
                 </div>
               </div>
@@ -202,7 +204,7 @@ export default function Education() {
                 rel="noopener noreferrer"
               >
                 <Button variant="warning" className="w-full shrink-0 sm:w-auto">
-                  Order Test Strips
+                  {t("edu.orderStrips")}
                   <ExternalLink className="ml-1 h-4 w-4" />
                 </Button>
               </a>
@@ -218,7 +220,7 @@ export default function Education() {
           <Link to="/nearby-help" className="mb-6 block">
             <Button variant="outline" className="w-full gap-2">
               <MapPin className="h-4 w-4" />
-              Open Full Map — Find Treatment Centers Near You
+              {t("edu.openFullMap")}
             </Button>
           </Link>
 
@@ -227,7 +229,7 @@ export default function Education() {
 
           {/* Section Label */}
           <div className="mb-4">
-            <h2 className="text-xl font-semibold text-foreground">Articles</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("edu.articles")}</h2>
           </div>
 
           {/* Article Grid */}
@@ -240,7 +242,7 @@ export default function Education() {
                       {post.title}
                     </h2>
                     <p className="text-muted-foreground">
-                      {post.summary || "Read more..."}
+                      {post.summary || t("edu.readMore")}
                     </p>
                   </CardContent>
                 </Card>
