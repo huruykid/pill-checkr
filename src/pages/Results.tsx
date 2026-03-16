@@ -734,7 +734,7 @@ export default function Results() {
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
-              {user ? "Save to Account" : "Save to History"}
+              {user ? t("results.saveToAccount") : t("results.saveToHistory")}
             </Button>
             <Link to="/check" className="flex-1">
               <Button variant="default" className="w-full">
