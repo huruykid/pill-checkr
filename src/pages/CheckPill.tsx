@@ -139,16 +139,20 @@ export default function CheckPill() {
     }
   };
 
+  const SHAPES = SHAPE_KEYS.map(v => ({ value: v, label: t(`shape.${v}`) }));
+  const COLORS = COLOR_KEYS.map(v => ({ value: v, label: t(`color.${v}`) }));
+  const SCORINGS = SCORING_KEYS.map(v => ({ value: v, label: t(`scoring.${v}`) }));
+
   const ANALYSIS_STEPS = mode === "photo" ? [
-    { label: "Uploading image…", icon: Upload },
-    { label: "Extracting features…", icon: Camera },
-    { label: "Searching database…", icon: Search },
-    { label: "Comparing visually…", icon: ImageIcon },
-    { label: "Generating report…", icon: CheckCircle },
+    { label: t("check.step.upload"), icon: Upload },
+    { label: t("check.step.extract"), icon: Camera },
+    { label: t("check.step.search"), icon: Search },
+    { label: t("check.step.compare"), icon: ImageIcon },
+    { label: t("check.step.report"), icon: CheckCircle },
   ] : [
-    { label: "Searching database…", icon: Search },
-    { label: "Matching references…", icon: Zap },
-    { label: "Generating report…", icon: CheckCircle },
+    { label: t("check.step.search"), icon: Search },
+    { label: t("check.step.match"), icon: Zap },
+    { label: t("check.step.report"), icon: CheckCircle },
   ];
 
   const clearStepTimers = () => {
