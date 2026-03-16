@@ -8,7 +8,8 @@ const corsHeaders = {
 };
 
 // Input validation schema
-const InputSchema = z.object({
+const FullInputSchema = z.object({
+  quickCheck: z.literal(false).optional().default(false),
   image: z.string()
     .min(1, "Image data is required")
     .max(15 * 1024 * 1024, "Image data exceeds maximum size of 15MB"),
@@ -22,6 +23,20 @@ const InputSchema = z.object({
   photoUrl: z.string().optional().nullable(),
   backPhotoUrl: z.string().optional().nullable(),
 });
+
+const QuickCheckInputSchema = z.object({
+  quickCheck: z.literal(true),
+  imprint: z.string().min(1, "Imprint is required for quick check").max(50),
+  shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
+  color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
+  scoring: z.enum(['none', 'single', 'double', 'quad', 'other']).optional().nullable(),
+  estimatedSizeMm: z.number().positive().max(50).optional().nullable(),
+});
+
+const InputSchema = z.discriminatedUnion("quickCheck", [
+  FullInputSchema.extend({ quickCheck: z.literal(false) }),
+  QuickCheckInputSchema,
+]);
 
 // Match scoring weights (total max ~121)
 const MATCH_WEIGHTS = {
@@ -381,7 +396,17 @@ serve(async (req) => {
 
   try {
     const rawInput = await req.json();
-    const validationResult = InputSchema.safeParse(rawInput);
+    
+    // Try to determine if this is a quick check first
+    const isQuickCheck = rawInput?.quickCheck === true;
+    
+    let validationResult;
+    if (isQuickCheck) {
+      validationResult = QuickCheckInputSchema.safeParse(rawInput);
+    } else {
+      // For non-quick-check, ensure quickCheck is explicitly false for the schema
+      validationResult = FullInputSchema.safeParse({ ...rawInput, quickCheck: false });
+    }
     
     if (!validationResult.success) {
       console.error("Input validation failed:", validationResult.error.errors);
@@ -393,16 +418,13 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    
-    const { image, backImage, imprint, shape, color, scoring: inputScoring, estimatedSizeMm, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data;
-    console.log("Input validated successfully");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const lovableKey = Deno.env.get("LOVABLE_API_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Derive userId from auth header instead of trusting client-supplied value
+    // Derive userId from auth header
     let userId: string | null = null;
     const authHeader = req.headers.get("authorization");
     if (authHeader?.startsWith("Bearer ")) {
@@ -413,11 +435,230 @@ serve(async (req) => {
         const { data: { user } } = await userClient.auth.getUser();
         userId = user?.id ?? null;
       } catch {
-        // Anonymous usage is fine — userId stays null
+        // Anonymous usage is fine
       }
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // QUICK CHECK MODE — text-only, no AI vision, no visual comparison
+    // ═══════════════════════════════════════════════════════════════════════
+    if (isQuickCheck) {
+      const input = validationResult.data as z.infer<typeof QuickCheckInputSchema>;
+      console.log("Quick check mode — text-only search");
+
+      const finalImprint = input.imprint;
+      const finalShape = input.shape || null;
+      const finalColor = input.color || null;
+      const finalScoring = input.scoring || null;
+      const finalSizeMm = input.estimatedSizeMm || null;
+
+      // Multi-pass reference search (same as full mode but without AI extraction)
+      const drugPassMap: Record<string, Set<number>> = {};
+      const trackPass = (refs: any[], passNum: number) => {
+        for (const r of refs) {
+          const key = r.drug_name?.toLowerCase().trim();
+          if (key) {
+            if (!drugPassMap[key]) drugPassMap[key] = new Set();
+            drugPassMap[key].add(passNum);
+          }
+        }
+      };
+
+      // Pass 1: Imprint search
+      let references: any[] = [];
+      const existingIds = new Set<string>();
+
+      const { data: imprintMatches } = await supabase
+        .from("pill_reference")
+        .select("*")
+        .ilike("imprint", `%${finalImprint}%`)
+        .limit(20);
+      references = imprintMatches || [];
+      for (const r of references) existingIds.add(r.id);
+      trackPass(references, 1);
+
+      // Fuzzy fallback
+      if (references.length < 3) {
+        const { data: fuzzyMatches } = await supabase.rpc('fuzzy_imprint_search', {
+          search_text: finalImprint,
+          similarity_threshold: 0.3,
+          max_results: 20,
+        });
+        if (fuzzyMatches) {
+          for (const m of fuzzyMatches as any[]) {
+            if (!existingIds.has(m.id)) {
+              references.push(m);
+              existingIds.add(m.id);
+            }
+          }
+          trackPass(fuzzyMatches, 1);
+        }
+      }
+
+      // Pass 2: Shape+color fallback
+      if (references.length < 3 && finalShape && finalColor) {
+        let fallbackQuery = supabase.from("pill_reference").select("*");
+        if (finalShape !== "other") fallbackQuery = fallbackQuery.eq("shape", finalShape);
+        if (finalColor !== "other") fallbackQuery = fallbackQuery.eq("color", finalColor);
+        const { data: fallbackMatches } = await fallbackQuery.limit(20);
+        if (fallbackMatches) {
+          for (const m of fallbackMatches) {
+            if (!existingIds.has(m.id)) {
+              references.push(m);
+              existingIds.add(m.id);
+            }
+          }
+          trackPass(fallbackMatches, 2);
+        }
+      }
+
+      // Cross-pass agreement
+      const CROSS_PASS_BONUS = 15;
+      const agreedDrugs = new Set<string>();
+      for (const [drugKey, passes] of Object.entries(drugPassMap)) {
+        if (passes.size >= 2) agreedDrugs.add(drugKey);
+      }
+
+      // Score matches
+      let scoredMatches = references.map((ref) => {
+        const { score, reasons } = calculateMatchScore(
+          { imprint: finalImprint, backImprint: null, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos: null },
+          { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
+        );
+        let finalScore = score;
+        const finalReasons = [...reasons];
+        const drugKey = ref.drug_name?.toLowerCase().trim();
+        if (drugKey && agreedDrugs.has(drugKey)) {
+          finalScore += CROSS_PASS_BONUS;
+          finalReasons.push("Corroborated across multiple search passes");
+        }
+        return { ...ref, score: finalScore, matchReasons: finalReasons };
+      })
+      .filter(m => m.score > 0)
+      .sort((a, b) => {
+        const scoreDelta = b.score - a.score;
+        if (scoreDelta !== 0) return scoreDelta;
+        return (SOURCE_PRIORITY[b.source || ""] || 0) - (SOURCE_PRIORITY[a.source || ""] || 0);
+      })
+      .slice(0, 3);
+
+      // Determine confidence
+      const topMatch = scoredMatches[0] || null;
+      let matchConfidence: "low" | "medium" | "high" = "low";
+      if (topMatch) {
+        if (topMatch.score >= CONFIDENCE_THRESHOLDS.high) matchConfidence = "high";
+        else if (topMatch.score >= CONFIDENCE_THRESHOLDS.medium) matchConfidence = "medium";
+      }
+
+      // Simple risk for quick check (no image quality or visual mismatch factors)
+      const riskReasons: string[] = [];
+      let riskLevel: "low" | "medium" | "high" = "medium";
+      if (matchConfidence === "high") {
+        riskLevel = "low";
+        riskReasons.push("Pill closely matches a known reference");
+      } else if (matchConfidence === "low") {
+        riskLevel = "high";
+        riskReasons.push("Unable to confidently match this pill to known references");
+      } else {
+        riskReasons.push("Match confidence is moderate, not definitive");
+      }
+      riskReasons.push("Quick check mode — no photo analysis performed. Upload a photo for more accurate results.");
+
+      // Counterfeit cross-reference
+      let counterfeitAlerts: Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }> = [];
+      if (scoredMatches.length > 0) {
+        const matchedDrugNames = [...new Set(scoredMatches.map(m => m.drug_name))];
+        try {
+          const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+          const { data: cfReports } = await supabase
+            .from("counterfeit_reports")
+            .select("drug_name, state, city, risk_level, created_at")
+            .gte("created_at", ninetyDaysAgo)
+            .in("drug_name", matchedDrugNames)
+            .limit(100);
+
+          if (cfReports && cfReports.length > 0) {
+            const grouped: Record<string, any> = {};
+            for (const r of cfReports) {
+              const key = `${r.drug_name}|${r.state || "unknown"}`;
+              if (!grouped[key]) {
+                grouped[key] = { drug_name: r.drug_name || "", state: r.state || "Unknown", city: r.city, risk_level: r.risk_level, count: 0, latest: r.created_at };
+              }
+              grouped[key].count++;
+              if (r.created_at > grouped[key].latest) {
+                grouped[key].latest = r.created_at;
+                if (r.city) grouped[key].city = r.city;
+                if (r.risk_level === "high") grouped[key].risk_level = "high";
+              }
+            }
+            counterfeitAlerts = Object.values(grouped).sort((a: any, b: any) => b.count - a.count);
+          }
+        } catch (e) {
+          console.error("Counterfeit cross-reference failed:", e);
+        }
+      }
+
+      // Persist report
+      const { data: report, error: reportError } = await supabase
+        .from("reports")
+        .insert({
+          imprint_text: finalImprint,
+          shape: finalShape,
+          color: finalColor,
+          scoring: finalScoring,
+          estimated_size_mm: finalSizeMm,
+          image_quality: "fair", // no image = default fair
+          risk_level: riskLevel,
+          has_reference_object: false,
+          match_confidence: matchConfidence,
+          anomaly_score: topMatch ? 0 : 25,
+          anomaly_reasons: topMatch ? [] : ["No matching pill found in reference database"],
+          risk_reasons: riskReasons,
+          notes: "Quick check (text-only, no photo)",
+          user_id: userId || null,
+        })
+        .select()
+        .single();
+
+      if (reportError) throw reportError;
+
+      if (scoredMatches.length > 0) {
+        const matchInserts = scoredMatches.map((m, i) => ({
+          report_id: report.id,
+          rank: i + 1,
+          drug_name: m.drug_name,
+          matched_imprint: m.imprint,
+          matched_shape: m.shape,
+          matched_color: m.color,
+          confidence: m.score >= CONFIDENCE_THRESHOLDS.high ? "high" :
+                     m.score >= CONFIDENCE_THRESHOLDS.medium ? "medium" : "low",
+          explanation: m.notes || "",
+          match_reasons: m.matchReasons.join("; "),
+        }));
+        await supabase.from("matches").insert(matchInserts);
+      }
+
+      console.log("Quick check complete, report:", report.id);
+
+      return new Response(JSON.stringify({
+        reportId: report.id,
+        imageQuality: "fair",
+        qualityIssues: [],
+        overallRecommendation: null,
+        counterfeitAlerts: counterfeitAlerts.length > 0 ? counterfeitAlerts : null,
+        quickCheck: true,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FULL ANALYSIS MODE — with AI vision
+    // ═══════════════════════════════════════════════════════════════════════
+    const { image, backImage, imprint, shape, color, scoring: inputScoring, estimatedSizeMm, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data as z.infer<typeof FullInputSchema>;
+    console.log("Full analysis mode — input validated successfully");
 
     // ─── Step 1: AI feature extraction ──────────────────────────────────────
     console.log("Analyzing pill image with AI...");

@@ -24,7 +24,10 @@ import {
   Image as ImageIcon,
   AlertTriangle,
   Lightbulb,
-  RefreshCw
+  RefreshCw,
+  Type,
+  Search,
+  Zap
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -101,6 +104,7 @@ export default function CheckPill() {
   const [qualityFeedback, setQualityFeedback] = useState<QualityFeedback | null>(null);
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<string | null>(null);
+  const [mode, setMode] = useState<"photo" | "quick">("photo");
 
   const handleFileSelect = useCallback((file: File, side: "front" | "back" = "front") => {
     if (!file.type.startsWith("image/")) {
@@ -164,17 +168,62 @@ export default function CheckPill() {
     }
   };
 
-  const ANALYSIS_STEPS = [
+  const ANALYSIS_STEPS = mode === "photo" ? [
     { label: "Uploading image…", icon: Upload },
     { label: "Extracting features…", icon: Camera },
-    { label: "Searching database…", icon: AlertCircle },
+    { label: "Searching database…", icon: Search },
     { label: "Comparing visually…", icon: ImageIcon },
+    { label: "Generating report…", icon: CheckCircle },
+  ] : [
+    { label: "Searching database…", icon: Search },
+    { label: "Matching references…", icon: Zap },
     { label: "Generating report…", icon: CheckCircle },
   ];
 
   const clearStepTimers = () => {
     stepTimersRef.current.forEach(clearTimeout);
     stepTimersRef.current = [];
+  };
+
+  const handleQuickCheck = async () => {
+    if (!imprint.trim()) {
+      toast.error("Please enter an imprint / marking for quick check");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisStep(0);
+    clearStepTimers();
+
+    try {
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(1), 800));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(2), 1600));
+
+      const { data, error } = await supabase.functions.invoke("analyze-pill", {
+        body: {
+          quickCheck: true,
+          imprint: imprint.trim(),
+          shape: shape || null,
+          color: color || null,
+          scoring: scoring || null,
+          estimatedSizeMm: sizeMm ? parseFloat(sizeMm) : null,
+        },
+      });
+
+      clearStepTimers();
+      setAnalysisStep(2);
+
+      if (error) throw error;
+
+      navigate(`/results/${data.reportId}`);
+    } catch (error) {
+      console.error("Quick check error:", error);
+      toast.error("Failed to check pill. Please try again.");
+    } finally {
+      clearStepTimers();
+      setIsAnalyzing(false);
+      setAnalysisStep(0);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -206,6 +255,7 @@ export default function CheckPill() {
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
           body: {
+            quickCheck: false,
             image: imagePreview,
             backImage: backImagePreview || null,
             imprint: imprint || null,
@@ -264,13 +314,60 @@ export default function CheckPill() {
           <div className="mb-8 text-center">
             <h1 className="mb-2 text-3xl font-bold md:text-4xl">Check a Pill</h1>
             <p className="text-muted-foreground font-sans normal-case">
-              Upload a clear photo for analysis. Include a reference object like a coin for better accuracy.
+              {mode === "photo" 
+                ? "Upload a clear photo for analysis. Include a reference object like a coin for better accuracy."
+                : "No photo? Type the imprint and pick the shape/color for instant database matches."}
             </p>
+          </div>
+
+          {/* Mode Toggle */}
+          <div className="mb-8 flex rounded-xl border border-border bg-muted/30 p-1">
+            <button
+              type="button"
+              onClick={() => setMode("photo")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                mode === "photo"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              disabled={isAnalyzing}
+            >
+              <Camera className="h-4 w-4" />
+              Photo Analysis
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("quick")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                mode === "quick"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              disabled={isAnalyzing}
+            >
+              <Type className="h-4 w-4" />
+              Quick Check
+            </button>
           </div>
 
           <Disclaimer variant="compact" className="mb-8" />
 
           <div className="space-y-8">
+            {/* Quick Check Info Banner */}
+            {mode === "quick" && (
+              <div className="flex items-start gap-3 rounded-xl border border-accent bg-accent/50 p-4">
+                <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-foreground" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground font-sans normal-case">
+                    Quick check matches by text only — no AI vision analysis.
+                  </p>
+                  <p className="text-xs text-muted-foreground font-sans normal-case">
+                    For more accurate results, switch to Photo Analysis when you can.
+                  </p>
+                </div>
+              </div>
+            )}
+            {mode === "photo" && (<>
             {/* Image Upload */}
             <div className="space-y-3">
               <Label className="text-base font-semibold">Pill Photo</Label>
@@ -487,15 +584,16 @@ export default function CheckPill() {
                 </div>
               )}
             </div>
+            </>)}
 
-            {/* Optional Fields */}
+            {/* Fields — required in quick mode, optional in photo mode */}
             <div className="space-y-4">
               <p className="text-sm font-medium text-muted-foreground">
-                Optional: Add details to improve matching accuracy
+                {mode === "quick" ? "Describe the pill" : "Optional: Add details to improve matching accuracy"}
               </p>
 
               <div className="space-y-2">
-                <Label htmlFor="imprint">Imprint / Markings</Label>
+                <Label htmlFor="imprint">Imprint / Markings {mode === "quick" && <span className="text-danger text-sm">*</span>}</Label>
                 <Input
                   id="imprint"
                   placeholder="e.g., M30, XANAX 2, G3722"
@@ -573,6 +671,7 @@ export default function CheckPill() {
                 </div>
               </div>
 
+              {mode === "photo" && (
               <div className="flex items-center space-x-3 rounded-lg bg-muted/50 p-4">
                 <Checkbox
                   id="reference"
@@ -588,6 +687,7 @@ export default function CheckPill() {
                   </p>
                 </div>
               </div>
+              )}
             </div>
 
             {/* Analysis Progress */}
@@ -645,13 +745,18 @@ export default function CheckPill() {
               variant="hero"
               size="xl"
               className="w-full"
-              onClick={handleAnalyze}
-              disabled={!imagePreview || isAnalyzing}
+              onClick={mode === "quick" ? handleQuickCheck : handleAnalyze}
+              disabled={mode === "photo" ? (!imagePreview || isAnalyzing) : (!imprint.trim() || isAnalyzing)}
             >
               {isAnalyzing ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Analyzing...
+                  {mode === "quick" ? "Checking…" : "Analyzing…"}
+                </>
+              ) : mode === "quick" ? (
+                <>
+                  <Zap className="h-5 w-5" />
+                  Quick Check
                 </>
               ) : (
                 <>Analyze Pill</>
