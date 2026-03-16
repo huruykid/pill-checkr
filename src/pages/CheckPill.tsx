@@ -95,6 +95,8 @@ export default function CheckPill() {
   const [sizeMm, setSizeMm] = useState("");
   const [hasReference, setHasReference] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0);
+  const stepTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
   const [qualityFeedback, setQualityFeedback] = useState<QualityFeedback | null>(null);
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
