@@ -391,10 +391,10 @@ export default function CheckPill() {
                   />
                   <ImageIcon className="mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="mb-2 text-center font-medium text-foreground">
-                    Drop image here or click to upload
+                    {t("check.dropImage")}
                   </p>
                   <p className="text-center text-sm text-muted-foreground">
-                    Supports JPEG, PNG, WEBP (max 10MB)
+                    {t("check.supportedFormats")}
                   </p>
                   <div className="mt-4 flex gap-2">
                     <Button 
