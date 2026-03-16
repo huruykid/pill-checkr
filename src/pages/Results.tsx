@@ -602,7 +602,7 @@ export default function Results() {
               {report.image_quality === "poor" && (
                 <div className="flex items-center gap-2 rounded-lg bg-warning-light px-3 py-2 text-sm text-warning">
                   <ImageOff className="h-4 w-4" />
-                  Image quality is poor - results may be less accurate
+                  {t("results.poorImage")}
                 </div>
               )}
             </CardContent>
