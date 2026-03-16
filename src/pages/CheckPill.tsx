@@ -638,10 +638,10 @@ export default function CheckPill() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Scoring / Break Lines <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Label>{t("check.scoring")} <span className="text-muted-foreground font-normal text-sm">({t("common.optional")})</span></Label>
                   <Select value={scoring} onValueChange={setScoring}>
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select scoring pattern" />
+                      <SelectValue placeholder={t("check.selectScoring")} />
                     </SelectTrigger>
                     <SelectContent>
                       {SCORINGS.map((s) => (
