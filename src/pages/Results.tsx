@@ -253,7 +253,7 @@ export default function Results() {
   const anomalyInfo = getAnomalyDescription(anomalyScore);
 
   return (
-    <Layout>
+    <Layout urgentEmergency={riskLevel === "high"}>
       <SEOHead
         title="Pill Analysis Results | Fent Finder"
         description="View your pill analysis results including visual matching, consistency scoring, and harm reduction guidance."
