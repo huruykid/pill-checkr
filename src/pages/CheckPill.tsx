@@ -592,10 +592,10 @@ export default function CheckPill() {
               </p>
 
               <div className="space-y-2">
-                <Label htmlFor="imprint">Imprint / Markings {mode === "quick" && <span className="text-danger text-sm">*</span>}</Label>
+                <Label htmlFor="imprint">{t("check.imprint")} {mode === "quick" && <span className="text-danger text-sm">*</span>}</Label>
                 <Input
                   id="imprint"
-                  placeholder="e.g., M30, XANAX 2, G3722"
+                  placeholder={t("check.imprintPlaceholder")}
                   value={imprint}
                   onChange={(e) => setImprint(e.target.value)}
                   className="h-12"
