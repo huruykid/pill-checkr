@@ -665,7 +665,7 @@ export default function Results() {
               <Link to="/nearby-help" className="mb-8 block">
                 <Button variant="outline" className="w-full gap-2">
                   <MapPin className="h-4 w-4" />
-                  Open Full Map — Find Treatment Centers & Naloxone Near You
+                  {t("results.openFullMap")}
                 </Button>
               </Link>
             </>
