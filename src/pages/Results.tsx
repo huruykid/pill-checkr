@@ -272,6 +272,51 @@ export default function Results() {
             <RiskBadge level={riskLevel} size="lg" />
           </div>
 
+          {/* Plain-language risk summary */}
+          {(() => {
+            const topDrug = matches.length > 0 ? matches[0].drug_name : null;
+            const isLow = riskLevel === "low" && matchConfidence !== "low" && matches.length > 0;
+            const isHigh = riskLevel === "high" || matches.length === 0;
+
+            const config = isLow
+              ? {
+                  icon: <CheckCircle className="h-6 w-6 text-success shrink-0 mt-0.5" />,
+                  border: "border-l-success",
+                  bg: "bg-success-light",
+                  message: `This pill looks consistent with ${topDrug}. Our reference database found matching characteristics.`,
+                }
+              : isHigh
+                ? {
+                    icon: <AlertTriangle className="h-6 w-6 text-danger shrink-0 mt-0.5" />,
+                    border: "border-l-danger",
+                    bg: "bg-danger-light",
+                    message: topDrug
+                      ? `This pill has inconsistencies with known ${topDrug} references. Treat it as high risk and do not consume without further testing.`
+                      : "We couldn't confidently match this pill to any known reference. Treat it as high risk and do not consume without further testing.",
+                  }
+                : {
+                    icon: <AlertCircle className="h-6 w-6 text-warning shrink-0 mt-0.5" />,
+                    border: "border-l-warning",
+                    bg: "bg-warning-light",
+                    message: `This pill partially matches ${topDrug || "a known reference"}, but some characteristics are inconsistent. Exercise caution.`,
+                  };
+
+            return (
+              <div className={cn("mb-6 rounded-xl border-l-4 p-4 md:p-5", config.border, config.bg)}>
+                <div className="flex items-start gap-3">
+                  {config.icon}
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-foreground leading-snug">{config.message}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <AlertTriangle className="h-3 w-3 shrink-0" />
+                      This is not lab testing. Always use fentanyl test strips.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Emergency Bar for high-risk results */}
           {riskLevel === "high" && <EmergencyBar className="mb-6" />}
 
