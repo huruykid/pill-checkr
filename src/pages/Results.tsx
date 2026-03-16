@@ -709,7 +709,7 @@ export default function Results() {
                     }}
                   >
                     <LinkIcon className="mr-1.5 h-3.5 w-3.5" />
-                    {(data.report as any).shared ? "Unshare" : "Share"}
+                    {(data.report as any).shared ? t("results.unshare") : t("results.share")}
                   </Button>
                 </div>
                 {(data.report as any).shared && (
