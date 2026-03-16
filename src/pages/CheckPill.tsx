@@ -367,6 +367,7 @@ export default function CheckPill() {
                 </div>
               </div>
             )}
+            {mode === "photo" && (<>
             {/* Image Upload */}
             <div className="space-y-3">
               <Label className="text-base font-semibold">Pill Photo</Label>
