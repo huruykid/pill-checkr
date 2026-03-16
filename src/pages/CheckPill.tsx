@@ -593,7 +593,7 @@ export default function CheckPill() {
               </p>
 
               <div className="space-y-2">
-                <Label htmlFor="imprint">Imprint / Markings</Label>
+                <Label htmlFor="imprint">Imprint / Markings {mode === "quick" && <span className="text-danger text-sm">*</span>}</Label>
                 <Input
                   id="imprint"
                   placeholder="e.g., M30, XANAX 2, G3722"
