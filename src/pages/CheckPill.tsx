@@ -95,6 +95,8 @@ export default function CheckPill() {
   const [sizeMm, setSizeMm] = useState("");
   const [hasReference, setHasReference] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0);
+  const stepTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
   const [qualityFeedback, setQualityFeedback] = useState<QualityFeedback | null>(null);
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
@@ -162,6 +164,19 @@ export default function CheckPill() {
     }
   };
 
+  const ANALYSIS_STEPS = [
+    { label: "Uploading image…", icon: Upload },
+    { label: "Extracting features…", icon: Camera },
+    { label: "Searching database…", icon: AlertCircle },
+    { label: "Comparing visually…", icon: ImageIcon },
+    { label: "Generating report…", icon: CheckCircle },
+  ];
+
+  const clearStepTimers = () => {
+    stepTimersRef.current.forEach(clearTimeout);
+    stepTimersRef.current = [];
+  };
+
   const handleAnalyze = async () => {
     if (!imagePreview || !imageFile) {
       toast.error("Please upload an image first");
@@ -169,14 +184,24 @@ export default function CheckPill() {
     }
 
     setIsAnalyzing(true);
+    setAnalysisStep(0);
+    clearStepTimers();
 
     try {
-      // Upload images to storage
+      // Step 0: Uploading image
       const photoUrl = await uploadImage(imageFile);
       let backPhotoUrl: string | null = null;
       if (backImageFile && backImagePreview) {
         backPhotoUrl = await uploadImage(backImageFile, "back");
       }
+
+      // Step 1: Extracting features (real call starts)
+      setAnalysisStep(1);
+
+      // Schedule simulated progress steps during the edge function call
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(2), 2000));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(3), 4500));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(4), 7000));
 
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
@@ -194,6 +219,9 @@ export default function CheckPill() {
           },
       });
 
+      clearStepTimers();
+      setAnalysisStep(4); // Jump to final step on completion
+
       if (error) throw error;
 
       const feedback: QualityFeedback = {
@@ -208,6 +236,7 @@ export default function CheckPill() {
         setShowRetakePrompt(true);
         toast.warning("Image quality is low. Consider retaking the photo for better results.");
         setIsAnalyzing(false);
+        setAnalysisStep(0);
         return;
       }
 
@@ -216,7 +245,9 @@ export default function CheckPill() {
       console.error("Analysis error:", error);
       toast.error("Failed to analyze pill. Please try again.");
     } finally {
+      clearStepTimers();
       setIsAnalyzing(false);
+      setAnalysisStep(0);
     }
   };
 
@@ -558,6 +589,56 @@ export default function CheckPill() {
                 </div>
               </div>
             </div>
+
+            {/* Analysis Progress */}
+            {isAnalyzing && (
+              <div className="rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-foreground">Analyzing your pill…</span>
+                    <span className="text-muted-foreground">{Math.round(((analysisStep + 1) / ANALYSIS_STEPS.length) * 100)}%</span>
+                  </div>
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+                      style={{ width: `${((analysisStep + 1) / ANALYSIS_STEPS.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {ANALYSIS_STEPS.map((step, idx) => {
+                    const isCompleted = idx < analysisStep;
+                    const isCurrent = idx === analysisStep;
+                    const StepIcon = step.icon;
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ${
+                          isCurrent
+                            ? "bg-primary/10 border border-primary/20"
+                            : isCompleted
+                            ? "opacity-70"
+                            : "opacity-30"
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="h-4 w-4 flex-shrink-0 text-success" />
+                        ) : isCurrent ? (
+                          <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-primary" />
+                        ) : (
+                          <StepIcon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                        )}
+                        <span className={`text-sm font-sans normal-case ${
+                          isCurrent ? "font-medium text-foreground" : "text-muted-foreground"
+                        }`}>
+                          {step.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Submit Button */}
             <Button
