@@ -344,7 +344,7 @@ export default function Results() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Pill className="h-5 w-5 text-primary" />
-                Possible Matches
+                {t("results.possibleMatches")}
               </CardTitle>
             </CardHeader>
             <CardContent>
