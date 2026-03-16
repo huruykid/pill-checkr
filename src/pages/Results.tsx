@@ -739,7 +739,7 @@ export default function Results() {
             <Link to="/check" className="flex-1">
               <Button variant="default" className="w-full">
                 <RotateCcw className="mr-2 h-4 w-4" />
-                Check Another Pill
+                {t("results.checkAnother")}
               </Button>
             </Link>
           </div>
