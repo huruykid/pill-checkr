@@ -520,7 +520,7 @@ export default function CheckPill() {
                   <div className="flex gap-3 pt-2">
                     <Button variant="outline" onClick={() => clearImage("front")} className="flex-1">
                       <RefreshCw className="mr-2 h-4 w-4" />
-                      Retake Photo
+                      {t("check.retakePhoto")}
                     </Button>
                     <Button
                       variant="secondary"
