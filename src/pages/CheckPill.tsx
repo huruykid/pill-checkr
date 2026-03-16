@@ -54,6 +54,7 @@ const SCORING_KEYS = ["none","single","double","quad","other"] as const;
 export default function CheckPill() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backFileInputRef = useRef<HTMLInputElement>(null);
   
