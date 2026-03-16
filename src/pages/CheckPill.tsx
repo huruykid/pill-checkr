@@ -604,10 +604,10 @@ export default function CheckPill() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Shape</Label>
+                  <Label>{t("check.shape")}</Label>
                   <Select value={shape} onValueChange={setShape}>
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select shape" />
+                      <SelectValue placeholder={t("check.selectShape")} />
                     </SelectTrigger>
                     <SelectContent>
                       {SHAPES.map((s) => (
