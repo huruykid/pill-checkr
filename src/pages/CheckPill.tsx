@@ -764,7 +764,7 @@ export default function CheckPill() {
 
             {!user && (
               <p className="text-center text-sm text-muted-foreground">
-                <a href="/auth" className="text-primary hover:underline">Sign in</a> to save your check history automatically.
+                <a href="/auth" className="text-primary hover:underline">{t("common.signInPrompt")}</a> {t("check.signInSave")}
               </p>
             )}
           </div>
