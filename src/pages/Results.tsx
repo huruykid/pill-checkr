@@ -285,7 +285,7 @@ export default function Results() {
                   icon: <CheckCircle className="h-6 w-6 text-success shrink-0 mt-0.5" />,
                   border: "border-l-success",
                   bg: "bg-success-light",
-                  message: `This pill looks consistent with ${topDrug}. Our reference database found matching characteristics.`,
+                  message: t("results.summary.lowRisk").replace("{drug}", topDrug || ""),
                 }
               : isHigh
                 ? {
@@ -293,8 +293,8 @@ export default function Results() {
                     border: "border-l-danger",
                     bg: "bg-danger-light",
                     message: topDrug
-                      ? `This pill has inconsistencies with known ${topDrug} references. Treat it as high risk and do not consume without further testing.`
-                      : "We couldn't confidently match this pill to any known reference. Treat it as high risk and do not consume without further testing.",
+                      ? t("results.summary.highRiskDrug").replace("{drug}", topDrug)
+                      : t("results.summary.highRiskNone"),
                   }
                 : {
                     icon: <AlertCircle className="h-6 w-6 text-warning shrink-0 mt-0.5" />,
