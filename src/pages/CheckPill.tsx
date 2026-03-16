@@ -203,7 +203,7 @@ export default function CheckPill() {
 
   const handleAnalyze = async () => {
     if (!imagePreview || !imageFile) {
-      toast.error("Please upload an image first");
+      toast.error(t("check.uploadError"));
       return;
     }
 
