@@ -654,14 +654,14 @@ export default function CheckPill() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sizeMm">Size (mm) <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+                  <Label htmlFor="sizeMm">{t("check.sizeMm")} <span className="text-muted-foreground font-normal text-sm">({t("common.optional")})</span></Label>
                   <Input
                     id="sizeMm"
                     type="number"
                     step="0.5"
                     min="1"
                     max="50"
-                    placeholder="e.g., 8.5"
+                    placeholder={t("check.sizePlaceholder")}
                     value={sizeMm}
                     onChange={(e) => setSizeMm(e.target.value)}
                     className="h-12"
