@@ -620,10 +620,10 @@ export default function CheckPill() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Color</Label>
+                  <Label>{t("check.color")}</Label>
                   <Select value={color} onValueChange={setColor}>
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select color" />
+                      <SelectValue placeholder={t("check.selectColor")} />
                     </SelectTrigger>
                     <SelectContent>
                       {COLORS.map((c) => (
