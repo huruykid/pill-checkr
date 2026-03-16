@@ -539,7 +539,7 @@ export default function CheckPill() {
 
             {/* Back Image Upload (Optional) */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Back of Pill <span className="text-muted-foreground font-normal text-sm">(optional)</span></Label>
+              <Label className="text-base font-semibold">{t("check.backOfPill")} <span className="text-muted-foreground font-normal text-sm">({t("common.optional")})</span></Label>
               
               {!backImagePreview ? (
                 <div
