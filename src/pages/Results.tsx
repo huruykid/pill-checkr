@@ -534,7 +534,7 @@ export default function Results() {
 
               <div className="rounded-lg bg-muted/50 p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-medium text-foreground">Inconsistency Score</span>
+                  <span className="font-medium text-foreground">{t("results.inconsistencyScore")}</span>
                   <span className={`font-bold text-lg ${anomalyInfo.color}`}>
                     {anomalyScore}/100
                   </span>
