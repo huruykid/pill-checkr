@@ -67,6 +67,27 @@ serve(async (req) => {
       });
     }
 
+    // Validate webhook URL to prevent SSRF
+    const parsed = new URL(webhook.url);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return new Response(JSON.stringify({ error: "Invalid webhook URL protocol" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const hostname = parsed.hostname.toLowerCase();
+    const privatePatterns = [
+      /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./,
+      /^169\.254\./, /^0\./, /^localhost$/i, /^metadata\.google\.internal$/i,
+      /^\[::1\]$/, /^\[fc/, /^\[fd/, /^\[fe80/,
+    ];
+    if (privatePatterns.some(re => re.test(hostname))) {
+      return new Response(JSON.stringify({ error: "Webhook URLs pointing to private/internal networks are not allowed" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Send test payload
     const testPayload = {
       event: "high_risk_analysis",
