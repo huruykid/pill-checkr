@@ -697,12 +697,12 @@ export default function Results() {
                         setData({ ...data, report: { ...data.report, shared: newShared } as any });
                         if (newShared) {
                           await navigator.clipboard.writeText(window.location.href);
-                          toast.success("Link copied! Anyone with this link can view the results.");
+                          toast.success(t("results.shareCopied"));
                         } else {
-                          toast.success("Link unshared — only you can view this report now.");
+                          toast.success(t("results.unshareMsg"));
                         }
                       } catch {
-                        toast.error("Failed to update sharing");
+                        toast.error(t("results.shareError"));
                       } finally {
                         setSharing(false);
                       }
