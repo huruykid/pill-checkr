@@ -104,6 +104,7 @@ export default function CheckPill() {
   const [qualityFeedback, setQualityFeedback] = useState<QualityFeedback | null>(null);
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<string | null>(null);
+  const [mode, setMode] = useState<"photo" | "quick">("photo");
 
   const handleFileSelect = useCallback((file: File, side: "front" | "back" = "front") => {
     if (!file.type.startsWith("image/")) {
