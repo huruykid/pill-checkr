@@ -431,7 +431,7 @@ export default function Results() {
                                   ) : (
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                       <ImageIcon className="h-4 w-4" />
-                                      <span className="text-xs">No reference image — visual comparison not available</span>
+                                      <span className="text-xs">{t("results.noRefImage")}</span>
                                     </div>
                                   )}
                                 </div>
