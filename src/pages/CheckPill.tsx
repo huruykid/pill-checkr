@@ -193,7 +193,7 @@ export default function CheckPill() {
       navigate(`/results/${data.reportId}`);
     } catch (error) {
       console.error("Quick check error:", error);
-      toast.error("Failed to check pill. Please try again.");
+      toast.error(t("check.failedCheck"));
     } finally {
       clearStepTimers();
       setIsAnalyzing(false);
