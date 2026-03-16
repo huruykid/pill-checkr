@@ -47,40 +47,9 @@ interface QualityFeedback {
   recommendation: string | null;
 }
 
-const SHAPES = [
-  { value: "round", label: "Round" },
-  { value: "oval", label: "Oval" },
-  { value: "capsule", label: "Capsule" },
-  { value: "diamond", label: "Diamond" },
-  { value: "triangle", label: "Triangle" },
-  { value: "hexagon", label: "Hexagon" },
-  { value: "rectangle", label: "Rectangle/Bar" },
-  { value: "other", label: "Other" },
-];
-
-const COLORS = [
-  { value: "white", label: "White" },
-  { value: "blue", label: "Blue" },
-  { value: "yellow", label: "Yellow" },
-  { value: "pink", label: "Pink" },
-  { value: "green", label: "Green" },
-  { value: "orange", label: "Orange" },
-  { value: "red", label: "Red" },
-  { value: "purple", label: "Purple" },
-  { value: "gray", label: "Gray" },
-  { value: "brown", label: "Brown" },
-  { value: "tan", label: "Tan" },
-  { value: "multicolor", label: "Multicolor" },
-  { value: "other", label: "Other" },
-];
-
-const SCORINGS = [
-  { value: "none", label: "None (no break line)" },
-  { value: "single", label: "Single line" },
-  { value: "double", label: "Cross / X pattern" },
-  { value: "quad", label: "Four-way split" },
-  { value: "other", label: "Other" },
-];
+const SHAPE_KEYS = ["round","oval","capsule","diamond","triangle","hexagon","rectangle","other"] as const;
+const COLOR_KEYS = ["white","blue","yellow","pink","green","orange","red","purple","gray","brown","tan","multicolor","other"] as const;
+const SCORING_KEYS = ["none","single","double","quad","other"] as const;
 
 export default function CheckPill() {
   const navigate = useNavigate();
