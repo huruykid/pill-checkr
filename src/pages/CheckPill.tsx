@@ -510,7 +510,7 @@ export default function CheckPill() {
                       <div className="flex items-start gap-2">
                         <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
                         <div>
-                          <h4 className="font-medium text-foreground mb-1">Top Recommendation</h4>
+                          <h4 className="font-medium text-foreground mb-1">{t("check.topRec")}</h4>
                           <p className="text-sm text-foreground">{qualityFeedback.recommendation}</p>
                         </div>
                       </div>
