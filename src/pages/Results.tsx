@@ -714,7 +714,7 @@ export default function Results() {
                 </div>
                 {(data.report as any).shared && (
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Anyone with the link can view this report. No personal info is shared.
+                    {t("results.shareNote")}
                   </p>
                 )}
               </CardContent>
