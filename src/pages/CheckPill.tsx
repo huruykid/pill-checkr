@@ -314,13 +314,59 @@ export default function CheckPill() {
           <div className="mb-8 text-center">
             <h1 className="mb-2 text-3xl font-bold md:text-4xl">Check a Pill</h1>
             <p className="text-muted-foreground font-sans normal-case">
-              Upload a clear photo for analysis. Include a reference object like a coin for better accuracy.
+              {mode === "photo" 
+                ? "Upload a clear photo for analysis. Include a reference object like a coin for better accuracy."
+                : "No photo? Type the imprint and pick the shape/color for instant database matches."}
             </p>
+          </div>
+
+          {/* Mode Toggle */}
+          <div className="mb-8 flex rounded-xl border border-border bg-muted/30 p-1">
+            <button
+              type="button"
+              onClick={() => setMode("photo")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                mode === "photo"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              disabled={isAnalyzing}
+            >
+              <Camera className="h-4 w-4" />
+              Photo Analysis
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("quick")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                mode === "quick"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              disabled={isAnalyzing}
+            >
+              <Type className="h-4 w-4" />
+              Quick Check
+            </button>
           </div>
 
           <Disclaimer variant="compact" className="mb-8" />
 
           <div className="space-y-8">
+            {/* Quick Check Info Banner */}
+            {mode === "quick" && (
+              <div className="flex items-start gap-3 rounded-xl border border-accent bg-accent/50 p-4">
+                <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-foreground" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground font-sans normal-case">
+                    Quick check matches by text only — no AI vision analysis.
+                  </p>
+                  <p className="text-xs text-muted-foreground font-sans normal-case">
+                    For more accurate results, switch to Photo Analysis when you can.
+                  </p>
+                </div>
+              </div>
+            )}
             {/* Image Upload */}
             <div className="space-y-3">
               <Label className="text-base font-semibold">Pill Photo</Label>
