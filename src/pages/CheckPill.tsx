@@ -268,7 +268,7 @@ export default function CheckPill() {
       navigate(`/results/${data.reportId}`);
     } catch (error) {
       console.error("Analysis error:", error);
-      toast.error("Failed to analyze pill. Please try again.");
+      toast.error(t("check.failedAnalyze"));
     } finally {
       clearStepTimers();
       setIsAnalyzing(false);
