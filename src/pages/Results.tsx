@@ -230,9 +230,9 @@ export default function Results() {
     return (
       <Layout>
         <div className="container py-12 text-center">
-          <p className="text-muted-foreground">No results found</p>
+          <p className="text-muted-foreground">{t("common.noResults")}</p>
           <Link to="/check">
-            <Button className="mt-4">Check Another Pill</Button>
+            <Button className="mt-4">{t("results.checkAnother")}</Button>
           </Link>
         </div>
       </Layout>
