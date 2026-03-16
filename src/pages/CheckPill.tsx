@@ -308,7 +308,7 @@ export default function CheckPill() {
               disabled={isAnalyzing}
             >
               <Camera className="h-4 w-4" />
-              Photo Analysis
+              {t("check.photoMode")}
             </button>
             <button
               type="button"
