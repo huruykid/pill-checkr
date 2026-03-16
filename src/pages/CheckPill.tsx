@@ -530,7 +530,7 @@ export default function CheckPill() {
                       className="flex-1"
                       disabled={!currentReportId}
                     >
-                      Continue Anyway
+                      {t("check.continueAnyway")}
                     </Button>
                   </div>
                 </div>
