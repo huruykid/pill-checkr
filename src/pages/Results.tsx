@@ -570,7 +570,7 @@ export default function Results() {
 
               {anomalyReasons.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Consistency notes:</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t("results.consistencyNotes")}</p>
                   <ul className="space-y-2">
                     {anomalyReasons.map((reason, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm">
