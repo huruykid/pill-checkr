@@ -247,9 +247,9 @@ export default function Results() {
   const matchConfidence = report.match_confidence as "low" | "medium" | "high" | null;
 
   const getAnomalyDescription = (score: number) => {
-    if (score >= 60) return { text: "High inconsistency", color: "text-danger" };
-    if (score >= 30) return { text: "Moderate inconsistency", color: "text-warning" };
-    return { text: "Low inconsistency", color: "text-success" };
+    if (score >= 60) return { text: t("results.highInconsistency"), color: "text-danger" };
+    if (score >= 30) return { text: t("results.moderateInconsistency"), color: "text-warning" };
+    return { text: t("results.lowInconsistency"), color: "text-success" };
   };
 
   const anomalyInfo = getAnomalyDescription(anomalyScore);
