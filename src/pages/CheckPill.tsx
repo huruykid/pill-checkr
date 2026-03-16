@@ -578,7 +578,7 @@ export default function CheckPill() {
                   </button>
                   <div className="absolute bottom-2 left-2 flex items-center gap-2 rounded-lg bg-success/90 px-3 py-1.5 text-sm text-success-foreground">
                     <CheckCircle className="h-4 w-4" />
-                    Back uploaded
+                    {t("check.backUploaded")}
                   </div>
                 </div>
               )}
