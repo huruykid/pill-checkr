@@ -745,13 +745,18 @@ export default function CheckPill() {
               variant="hero"
               size="xl"
               className="w-full"
-              onClick={handleAnalyze}
-              disabled={!imagePreview || isAnalyzing}
+              onClick={mode === "quick" ? handleQuickCheck : handleAnalyze}
+              disabled={mode === "photo" ? (!imagePreview || isAnalyzing) : (!imprint.trim() || isAnalyzing)}
             >
               {isAnalyzing ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Analyzing...
+                  {mode === "quick" ? "Checking…" : "Analyzing…"}
+                </>
+              ) : mode === "quick" ? (
+                <>
+                  <Zap className="h-5 w-5" />
+                  Quick Check
                 </>
               ) : (
                 <>Analyze Pill</>
