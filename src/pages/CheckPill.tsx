@@ -369,7 +369,7 @@ export default function CheckPill() {
 
             {/* Image Upload */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Pill Photo</Label>
+              <Label className="text-base font-semibold">{t("check.pillPhoto")}</Label>
               
               {!imagePreview ? (
                 <div
