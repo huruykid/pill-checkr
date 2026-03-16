@@ -20,8 +20,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
+  AlertCircle,
   CheckCircle,
   XCircle,
   ArrowLeft,
