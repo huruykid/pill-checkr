@@ -1049,6 +1049,9 @@ const translations: Record<Language, Record<string, string>> = {
     "results.scoringPattern": "Padrão de Corte",
     "results.sizeMatch": "Correspondência de Tamanho",
     "results.logoMatch": "Correspondência de Logo",
+    "results.narcan.title": "Encontre Narcan Perto de Você",
+    "results.narcan.description": "A naloxona pode reverter uma overdose de opioides. Encontre distribuição gratuita de Narcan perto de você.",
+    "results.narcan.button": "Encontrar Naloxona Próxima",
 
     // History
     "history.title": "Histórico de Verificações",

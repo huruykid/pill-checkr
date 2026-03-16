@@ -322,6 +322,25 @@ export default function Results() {
           {/* Emergency Bar for high-risk results */}
           {riskLevel === "high" && <EmergencyBar className="mb-6" />}
 
+          {/* Narcan locator CTA for high-risk or unmatched pills */}
+          {(riskLevel === "high" || matches.length === 0) && (
+            <div className="mb-6 rounded-xl border-2 border-danger/30 bg-danger/5 p-4 md:p-5">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-6 w-6 text-danger shrink-0 mt-0.5" />
+                <div className="space-y-2 flex-1">
+                  <h3 className="text-base font-semibold text-foreground">{t("results.narcan.title")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("results.narcan.description")}</p>
+                  <Button asChild variant="danger" size="sm">
+                    <Link to="/nearby-help?filter=naloxone">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {t("results.narcan.button")}
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Show pill photo if available */}
           {signedPhotoUrl && (
             <Card className="mb-6 overflow-hidden">
