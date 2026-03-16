@@ -680,7 +680,7 @@ export default function Results() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Share2 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Shareable Link</span>
+                    <span className="text-sm font-medium">{t("results.shareableLink")}</span>
                   </div>
                   <Button
                     variant={(data.report as any).shared ? "outline" : "default"}
