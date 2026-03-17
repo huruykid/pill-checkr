@@ -196,4 +196,4 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
       )}
     </header>
   );
-}
+});
