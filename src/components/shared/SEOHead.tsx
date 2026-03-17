@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { forwardRef, useEffect } from "react";
 
 const BASE_URL = "https://pill-checkr.lovable.app";
 const SITE_NAME = "Fent Finder";
@@ -10,7 +10,7 @@ interface SEOHeadProps {
   jsonLd?: Record<string, unknown>;
 }
 
-export function SEOHead({ title, description, path, jsonLd }: SEOHeadProps) {
+export const SEOHead = forwardRef<HTMLDivElement, SEOHeadProps>(function SEOHead({ title, description, path, jsonLd }, _ref) {
   useEffect(() => {
     document.title = title;
 
@@ -64,7 +64,7 @@ export function SEOHead({ title, description, path, jsonLd }: SEOHeadProps) {
   }, [title, description, path, jsonLd]);
 
   return null;
-}
+});
 
 // Pre-built JSON-LD helpers
 export const jsonLdWebSite = {

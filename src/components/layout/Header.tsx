@@ -1,11 +1,12 @@
+import { forwardRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp, Globe, Download } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n, LANGUAGES, LANGUAGE_LABELS, type Language } from "@/hooks/useI18n";
 
-export function Header() {
+export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
@@ -24,7 +25,7 @@ export function Header() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-4 border-secondary bg-foreground">
+    <header ref={ref} className="sticky top-0 z-50 w-full border-b-4 border-secondary bg-foreground">
       <div className="container flex h-14 items-center justify-between">
         <Link 
           to="/" 
@@ -195,4 +196,4 @@ export function Header() {
       )}
     </header>
   );
-}
+});

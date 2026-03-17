@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { AlertTriangle, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
@@ -7,12 +8,12 @@ interface DisclaimerProps {
   className?: string;
 }
 
-export function Disclaimer({ variant = "default", className }: DisclaimerProps) {
+export const Disclaimer = forwardRef<HTMLDivElement, DisclaimerProps>(function Disclaimer({ variant = "default", className }, ref) {
   const { t } = useI18n();
 
   if (variant === "emergency") {
     return (
-      <div className={cn(
+      <div ref={ref} className={cn(
         "rounded-xl border-2 border-danger/30 bg-danger-light p-4 md:p-6",
         className
       )}>
@@ -33,7 +34,7 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
 
   if (variant === "compact") {
     return (
-      <div className={cn(
+      <div ref={ref} className={cn(
         "flex items-center gap-2 rounded-lg bg-warning-light px-3 py-2 text-sm",
         className
       )}>
@@ -53,7 +54,7 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
   ];
 
   return (
-    <div className={cn(
+    <div ref={ref} className={cn(
       "rounded-xl border border-warning/30 bg-warning-light/50 p-4 md:p-6",
       className
     )}>
@@ -75,4 +76,4 @@ export function Disclaimer({ variant = "default", className }: DisclaimerProps) 
       </div>
     </div>
   );
-}
+});
