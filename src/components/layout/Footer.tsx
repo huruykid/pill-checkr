@@ -1,12 +1,13 @@
+import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { Shield, Heart } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 
-export function Footer() {
+export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
   const { t } = useI18n();
 
   return (
-    <footer className="border-t border-border/50 bg-muted/30">
+    <footer ref={ref} className="border-t border-border/50 bg-muted/30">
       <div className="container py-8 md:py-12">
         <div className="grid gap-8 md:grid-cols-3">
           {/* Brand */}
@@ -75,4 +76,4 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+});

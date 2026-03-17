@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { Phone, X, AlertTriangle, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
@@ -8,7 +8,7 @@ interface EmergencyFABProps {
   urgent?: boolean;
 }
 
-export function EmergencyFAB({ urgent = false }: EmergencyFABProps) {
+export const EmergencyFAB = forwardRef<HTMLDivElement, EmergencyFABProps>(function EmergencyFAB({ urgent = false }, ref) {
   const [open, setOpen] = useState(false);
   const { t } = useI18n();
 
@@ -20,7 +20,7 @@ export function EmergencyFAB({ urgent = false }: EmergencyFABProps) {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div ref={ref} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {/* Expanded panel */}
       {open && (
         <div className="w-72 rounded-xl border border-border bg-card shadow-xl animate-slide-up">
@@ -85,4 +85,4 @@ export function EmergencyFAB({ urgent = false }: EmergencyFABProps) {
       </button>
     </div>
   );
-}
+});
