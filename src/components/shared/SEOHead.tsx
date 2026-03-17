@@ -64,7 +64,7 @@ export const SEOHead = forwardRef<HTMLDivElement, SEOHeadProps>(function SEOHead
   }, [title, description, path, jsonLd]);
 
   return null;
-}
+});
 
 // Pre-built JSON-LD helpers
 export const jsonLdWebSite = {
