@@ -85,4 +85,4 @@ export const EmergencyFAB = forwardRef<HTMLDivElement, EmergencyFABProps>(functi
       </button>
     </div>
   );
-}
+});
