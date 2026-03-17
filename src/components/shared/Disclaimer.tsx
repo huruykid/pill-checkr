@@ -54,7 +54,7 @@ export const Disclaimer = forwardRef<HTMLDivElement, DisclaimerProps>(function D
   ];
 
   return (
-    <div className={cn(
+    <div ref={ref} className={cn(
       "rounded-xl border border-warning/30 bg-warning-light/50 p-4 md:p-6",
       className
     )}>
