@@ -380,7 +380,6 @@ export default function CheckPill() {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <GuidedCaptureOverlay />
-                >
                   <input
                     ref={fileInputRef}
                     type="file"
