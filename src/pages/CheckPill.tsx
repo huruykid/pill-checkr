@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { GuidedCaptureOverlay } from "@/components/check/GuidedCaptureOverlay";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { SEOHead, jsonLdWebApp } from "@/components/shared/SEOHead";
