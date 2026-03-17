@@ -13,7 +13,7 @@ export const Disclaimer = forwardRef<HTMLDivElement, DisclaimerProps>(function D
 
   if (variant === "emergency") {
     return (
-      <div className={cn(
+      <div ref={ref} className={cn(
         "rounded-xl border-2 border-danger/30 bg-danger-light p-4 md:p-6",
         className
       )}>
