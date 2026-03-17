@@ -76,4 +76,4 @@ export const Disclaimer = forwardRef<HTMLDivElement, DisclaimerProps>(function D
       </div>
     </div>
   );
-}
+});
