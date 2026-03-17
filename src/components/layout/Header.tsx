@@ -25,7 +25,7 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-4 border-secondary bg-foreground">
+    <header ref={ref} className="sticky top-0 z-50 w-full border-b-4 border-secondary bg-foreground">
       <div className="container flex h-14 items-center justify-between">
         <Link 
           to="/" 
