@@ -276,6 +276,48 @@ export type Database = {
         }
         Relationships: []
       }
+      match_feedback: {
+        Row: {
+          created_at: string
+          helpful: boolean
+          id: string
+          match_id: string | null
+          report_id: string
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          helpful: boolean
+          id?: string
+          match_id?: string | null
+          report_id: string
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          helpful?: boolean
+          id?: string
+          match_id?: string | null
+          report_id?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_feedback_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_feedback_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           confidence: Database["public"]["Enums"]["confidence_level"] | null

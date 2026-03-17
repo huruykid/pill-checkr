@@ -12,6 +12,7 @@ import { DrugInfoCard } from "@/components/results/DrugInfoCard";
 import { InteractionChecker } from "@/components/results/InteractionChecker";
 import { EmergencyBar } from "@/components/results/EmergencyBar";
 import { BuddyAlert } from "@/components/results/BuddyAlert";
+import { MatchFeedback } from "@/components/results/MatchFeedback";
 import { ReportPill } from "@/components/results/ReportPill";
 import { RegionalCounterfeitAlert } from "@/components/results/RegionalCounterfeitAlert";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
@@ -688,6 +689,15 @@ export default function Results() {
                 </Button>
               </Link>
             </>
+          )}
+
+          {/* Match Feedback */}
+          {matches.length > 0 && (
+            <MatchFeedback
+              reportId={report.id}
+              matchId={matches[0].id}
+              className="mb-6"
+            />
           )}
 
           <Disclaimer className="mb-8" />

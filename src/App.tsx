@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { I18nProvider } from "@/hooks/useI18n";
+import { DisclaimerGate, useDisclaimerAccepted } from "@/components/shared/DisclaimerGate";
+import { OnboardingWalkthrough, useOnboardingComplete } from "@/components/shared/OnboardingWalkthrough";
 import Index from "./pages/Index";
 import CheckPill from "./pages/CheckPill";
 import Results from "./pages/Results";
@@ -25,6 +27,23 @@ import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
+function AppGates({ children }: { children: React.ReactNode }) {
+  const disclaimerAccepted = useDisclaimerAccepted();
+  const onboardingComplete = useOnboardingComplete();
+  const [gateAccepted, setGateAccepted] = useState(disclaimerAccepted);
+  const [onboardingDone, setOnboardingDone] = useState(onboardingComplete);
+
+  if (!gateAccepted) {
+    return <DisclaimerGate onAccept={() => setGateAccepted(true)} />;
+  }
+
+  if (!onboardingDone) {
+    return <OnboardingWalkthrough onComplete={() => setOnboardingDone(true)} />;
+  }
+
+  return <>{children}</>;
+}
+
 const App = forwardRef(function App(_props, ref) {
   return (
   <QueryClientProvider client={queryClient}>
@@ -33,6 +52,7 @@ const App = forwardRef(function App(_props, ref) {
       <AuthProvider>
         <Toaster />
         <Sonner />
+        <AppGates>
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
@@ -54,6 +74,7 @@ const App = forwardRef(function App(_props, ref) {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </AppGates>
       </AuthProvider>
       </I18nProvider>
     </TooltipProvider>

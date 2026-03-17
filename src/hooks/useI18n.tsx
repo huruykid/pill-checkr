@@ -296,6 +296,39 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "Naloxone reverses opioid overdoses and can save lives. It's available without a prescription in most states. Carry it even if you don't use — you might save someone else.",
     "hr.freeByMail": "Free by Mail (NEXT Distro)",
     "hr.findNaloxone": "Find Naloxone Near Me",
+
+    // Guided Capture Overlay
+    "check.overlay.pill": "Pill",
+    "check.overlay.coin": "Coin",
+    "check.overlay.center": "Center pill here",
+
+    // Match Feedback
+    "feedback.question": "Was this match helpful?",
+    "feedback.yes": "Yes",
+    "feedback.no": "No",
+    "feedback.thanks": "Thanks for your feedback!",
+    "feedback.error": "Couldn't save feedback",
+    "feedback.submitted": "Thanks — your feedback helps improve results.",
+
+    // Onboarding Walkthrough
+    "onboarding.step1Title": "THIS IS NOT A LAB TEST",
+    "onboarding.step1Desc": "This tool uses visual comparison and AI to check pills against known references. It cannot detect fentanyl or confirm what's inside a pill. Only lab testing can do that.",
+    "onboarding.step2Title": "WHAT WE DO",
+    "onboarding.step2Desc": "We compare your pill's photo, shape, color, and imprint against a database of known legitimate pills. We flag inconsistencies that may indicate counterfeiting.",
+    "onboarding.step3Title": "STAY SAFE",
+    "onboarding.step3Desc": "Always use fentanyl test strips. Never use alone. Have naloxone (Narcan) ready. If someone is overdosing, call 911 immediately.",
+    "onboarding.next": "Next",
+    "onboarding.getStarted": "I Understand — Get Started",
+    "onboarding.skip": "Skip intro",
+
+    // Disclaimer Gate
+    "gate.title": "IMPORTANT SAFETY NOTICE",
+    "gate.item1": "This tool is <strong>not</strong> medical advice and <strong>not</strong> lab-grade testing",
+    "gate.item2": "This tool <strong>cannot</strong> confirm fentanyl or guarantee any pill is safe to consume",
+    "gate.item3": "If a pill <strong>cannot be confidently matched</strong>, treat it as higher risk",
+    "gate.item4": "If you suspect an overdose, <strong>call 911 immediately</strong>",
+    "gate.checkbox": "I understand that this tool cannot guarantee safety and is for educational and harm reduction purposes only.",
+    "gate.accept": "I Accept — Continue",
   },
   es: {
     // Nav
