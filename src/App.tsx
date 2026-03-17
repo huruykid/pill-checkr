@@ -25,7 +25,8 @@ import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = forwardRef(function App(_props, ref) {
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <I18nProvider>
@@ -57,6 +58,7 @@ const App = () => (
       </I18nProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+});
 
 export default App;
