@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { AlertTriangle, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
@@ -7,7 +8,7 @@ interface DisclaimerProps {
   className?: string;
 }
 
-export function Disclaimer({ variant = "default", className }: DisclaimerProps) {
+export const Disclaimer = forwardRef<HTMLDivElement, DisclaimerProps>(function Disclaimer({ variant = "default", className }, ref) {
   const { t } = useI18n();
 
   if (variant === "emergency") {
