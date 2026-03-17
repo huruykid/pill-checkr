@@ -12,6 +12,7 @@ import { DrugInfoCard } from "@/components/results/DrugInfoCard";
 import { InteractionChecker } from "@/components/results/InteractionChecker";
 import { EmergencyBar } from "@/components/results/EmergencyBar";
 import { BuddyAlert } from "@/components/results/BuddyAlert";
+import { MatchFeedback } from "@/components/results/MatchFeedback";
 import { ReportPill } from "@/components/results/ReportPill";
 import { RegionalCounterfeitAlert } from "@/components/results/RegionalCounterfeitAlert";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
