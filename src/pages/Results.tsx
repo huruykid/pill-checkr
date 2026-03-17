@@ -691,6 +691,15 @@ export default function Results() {
             </>
           )}
 
+          {/* Match Feedback */}
+          {matches.length > 0 && (
+            <MatchFeedback
+              reportId={report.id}
+              matchId={matches[0].id}
+              className="mb-6"
+            />
+          )}
+
           <Disclaimer className="mb-8" />
 
           {/* Share Toggle */}

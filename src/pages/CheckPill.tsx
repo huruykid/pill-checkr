@@ -376,8 +376,10 @@ export default function CheckPill() {
                 <div
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
-                  className="relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 transition-colors hover:border-primary/50 hover:bg-accent/50"
+                  className="relative flex min-h-[240px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 transition-colors hover:border-primary/50 hover:bg-accent/50"
                   onClick={() => fileInputRef.current?.click()}
+                >
+                  <GuidedCaptureOverlay />
                 >
                   <input
                     ref={fileInputRef}
