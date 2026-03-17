@@ -34,7 +34,7 @@ export const Disclaimer = forwardRef<HTMLDivElement, DisclaimerProps>(function D
 
   if (variant === "compact") {
     return (
-      <div className={cn(
+      <div ref={ref} className={cn(
         "flex items-center gap-2 rounded-lg bg-warning-light px-3 py-2 text-sm",
         className
       )}>
