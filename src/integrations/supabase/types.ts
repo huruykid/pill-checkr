@@ -377,6 +377,7 @@ export type Database = {
           logo_description: string | null
           ndc_code: string | null
           notes: string | null
+          requires_higher_confidence: boolean
           scoring: Database["public"]["Enums"]["pill_scoring"] | null
           shape: Database["public"]["Enums"]["pill_shape"]
           size_mm: number | null
@@ -394,6 +395,7 @@ export type Database = {
           logo_description?: string | null
           ndc_code?: string | null
           notes?: string | null
+          requires_higher_confidence?: boolean
           scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"]
           size_mm?: number | null
@@ -411,6 +413,7 @@ export type Database = {
           logo_description?: string | null
           ndc_code?: string | null
           notes?: string | null
+          requires_higher_confidence?: boolean
           scoring?: Database["public"]["Enums"]["pill_scoring"] | null
           shape?: Database["public"]["Enums"]["pill_shape"]
           size_mm?: number | null
@@ -673,6 +676,14 @@ export type Database = {
           size_mm: number
           source: string
           thickness_mm: number
+        }[]
+      }
+      get_feedback_stats: {
+        Args: { days_back?: number }
+        Returns: {
+          drug_name: string
+          helpful_count: number
+          unhelpful_count: number
         }[]
       }
       has_role: {
