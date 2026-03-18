@@ -22,6 +22,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.signIn": "Sign In",
     "nav.signOut": "Sign Out",
     "nav.language": "EN",
+    "nav.more": "More",
 
     // Common
     "common.loading": "Loading...",
