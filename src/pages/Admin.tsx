@@ -352,11 +352,19 @@ export default function Admin() {
                   {pills.map((pill) => (
                     <Card key={pill.id} className="overflow-hidden">
                       <CardContent className="flex items-center justify-between p-4">
-                        <div>
-                          <p className="font-semibold text-foreground">{pill.drug_name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {pill.imprint} • {pill.shape} • {pill.color}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          {(pill as any).requires_higher_confidence && (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-xs font-semibold text-warning">
+                              <AlertTriangle className="h-3 w-3" />
+                              Flagged
+                            </span>
+                          )}
+                          <div>
+                            <p className="font-semibold text-foreground">{pill.drug_name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {pill.imprint} • {pill.shape} • {pill.color}
+                            </p>
+                          </div>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => deletePill(pill.id)} className="text-muted-foreground hover:text-danger">
                           <Trash2 className="h-4 w-4" />
