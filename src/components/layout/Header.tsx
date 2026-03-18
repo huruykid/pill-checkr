@@ -1,10 +1,12 @@
 import { forwardRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp, Globe, Download } from "lucide-react";
+import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp, Globe, Download, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n, LANGUAGES, LANGUAGE_LABELS, type Language } from "@/hooks/useI18n";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,11 +14,26 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
   const { user, signOut } = useAuth();
   const { lang, setLang, t } = useI18n();
 
-  const navLinks = [
+  // All nav links for mobile menu
+  const allNavLinks = [
     { to: "/check", label: t("nav.checkPill"), icon: Search },
     { to: "/history", label: t("nav.history"), icon: History },
     { to: "/education", label: t("nav.learn"), icon: BookOpen },
     { to: "/nearby-help", label: t("nav.findHelp"), icon: MapPin },
+    { to: "/contribute", label: t("nav.contribute"), icon: Users },
+    { to: "/api-docs", label: t("nav.api"), icon: Code },
+    { to: "/trends", label: t("nav.trends"), icon: TrendingUp },
+  ];
+
+  // Desktop: main nav (excluding CTA and "More" items)
+  const mainNavLinks = [
+    { to: "/history", label: t("nav.history"), icon: History },
+    { to: "/education", label: t("nav.learn"), icon: BookOpen },
+    { to: "/nearby-help", label: t("nav.findHelp"), icon: MapPin },
+  ];
+
+  // Desktop: items inside "More" dropdown
+  const moreNavLinks = [
     { to: "/contribute", label: t("nav.contribute"), icon: Users },
     { to: "/api-docs", label: t("nav.api"), icon: Code },
     { to: "/trends", label: t("nav.trends"), icon: TrendingUp },
@@ -40,8 +57,22 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
+        <nav className="hidden items-center gap-1 md:flex flex-1 ml-6">
+          {/* CTA Button */}
+          <Link to="/check">
+            <Button
+              size="sm"
+              className={`gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md ${
+                isActive("/check") ? "ring-2 ring-secondary" : ""
+              }`}
+            >
+              <Search className="h-4 w-4" />
+              {t("nav.checkPill")}
+            </Button>
+          </Link>
+
+          {/* Main Nav Links */}
+          {mainNavLinks.map((link) => (
             <Link key={link.to} to={link.to}>
               <Button
                 variant="ghost"
@@ -55,21 +86,63 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
               </Button>
             </Link>
           ))}
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-background/80 hover:text-background hover:bg-background/10 font-mono text-xs"
-              onClick={() => {
-                const idx = LANGUAGES.indexOf(lang as Language);
-                setLang(LANGUAGES[(idx + 1) % LANGUAGES.length]);
-              }}
-              title={LANGUAGE_LABELS[lang as Language]}
+
+          {/* More Dropdown */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`gap-1.5 text-background/80 hover:text-background hover:bg-background/10 ${
+                  moreNavLinks.some((l) => isActive(l.to)) ? "text-secondary bg-background/10" : ""
+                }`}
+              >
+                {t("nav.more")}
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              sideOffset={8}
+              className="w-48 bg-foreground border-background/20 p-1"
             >
-              <Globe className="h-3.5 w-3.5" />
-              {lang.toUpperCase()}
-            </Button>
-          </div>
+              {moreNavLinks.map((link) => (
+                <Link key={link.to} to={link.to} className="block">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`w-full justify-start gap-2.5 text-background/80 hover:text-background hover:bg-background/10 ${
+                      isActive(link.to) ? "text-secondary" : ""
+                    }`}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                  </Button>
+                </Link>
+              ))}
+            </PopoverContent>
+          </Popover>
+
+          {/* Spacer + Divider + Utility Section */}
+          <div className="flex-1" />
+          <Separator orientation="vertical" className="mx-2 h-6 bg-background/20" />
+
+          {/* Language Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-background/80 hover:text-background hover:bg-background/10 font-mono text-xs"
+            onClick={() => {
+              const idx = LANGUAGES.indexOf(lang as Language);
+              setLang(LANGUAGES[(idx + 1) % LANGUAGES.length]);
+            }}
+            title={LANGUAGE_LABELS[lang as Language]}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {lang.toUpperCase()}
+          </Button>
+
+          {/* Auth Links */}
           {user ? (
             <>
               <Link to="/settings">
@@ -130,7 +203,7 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
       {mobileMenuOpen && (
         <div className="border-t border-background/20 bg-foreground md:hidden animate-fade-in">
           <nav className="container flex flex-col gap-1 py-4">
-            {navLinks.map((link) => (
+            {allNavLinks.map((link) => (
               <Link 
                 key={link.to} 
                 to={link.to}

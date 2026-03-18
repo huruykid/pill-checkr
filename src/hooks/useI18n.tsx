@@ -22,6 +22,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.signIn": "Sign In",
     "nav.signOut": "Sign Out",
     "nav.language": "EN",
+    "nav.more": "More",
 
     // Common
     "common.loading": "Loading...",
@@ -343,6 +344,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.signIn": "Iniciar Sesión",
     "nav.signOut": "Cerrar Sesión",
     "nav.language": "ES",
+    "nav.more": "Más",
 
     // Common
     "common.loading": "Cargando...",
@@ -627,6 +629,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.signIn": "Connexion",
     "nav.signOut": "Déconnexion",
     "nav.language": "FR",
+    "nav.more": "Plus",
 
     // Common
     "common.loading": "Chargement...",
@@ -911,6 +914,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.signIn": "Entrar",
     "nav.signOut": "Sair",
     "nav.language": "PT",
+    "nav.more": "Mais",
 
     // Common
     "common.loading": "Carregando...",
