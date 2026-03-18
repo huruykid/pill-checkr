@@ -914,6 +914,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.signIn": "Entrar",
     "nav.signOut": "Sair",
     "nav.language": "PT",
+    "nav.more": "Mais",
 
     // Common
     "common.loading": "Carregando...",
