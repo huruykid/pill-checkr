@@ -105,6 +105,26 @@ serve(async (req) => {
       },
     };
 
+    // Compute HMAC signature if webhook has a secret
+    const payloadString = JSON.stringify(testPayload);
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+    if (webhook.secret) {
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(webhook.secret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+      );
+      const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(payloadString));
+      const hexSig = Array.from(new Uint8Array(sig))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      headers["X-Hub-Signature-256"] = `sha256=${hexSig}`;
+    }
+
     let statusCode = 0;
     let responseBody = "";
     let success = false;
@@ -112,8 +132,8 @@ serve(async (req) => {
     try {
       const res = await fetch(webhook.url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(testPayload),
+        headers,
+        body: payloadString,
       });
       statusCode = res.status;
       responseBody = (await res.text()).substring(0, 1000);
