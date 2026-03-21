@@ -683,7 +683,7 @@ export default function Results() {
             <>
               <NearbyHelp className="mb-4" />
               <Link to="/nearby-help" className="mb-8 block">
-                <Button variant="outline" className="w-full gap-2">
+                <Button variant="outline" className="w-full gap-2 whitespace-normal h-auto py-3 text-center">
                   <MapPin className="h-4 w-4" />
                   {t("results.openFullMap")}
                 </Button>

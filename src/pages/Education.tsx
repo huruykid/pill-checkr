@@ -218,7 +218,7 @@ export default function Education() {
 
           {/* Link to full map */}
           <Link to="/nearby-help" className="mb-6 block">
-            <Button variant="outline" className="w-full gap-2">
+            <Button variant="outline" className="w-full gap-2 whitespace-normal h-auto py-3 text-center">
               <MapPin className="h-4 w-4" />
               {t("edu.openFullMap")}
             </Button>
