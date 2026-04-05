@@ -565,8 +565,22 @@ serve(async (req) => {
       })
       .slice(0, 3);
 
-      // Determine confidence
+      // ─── One-strike safety threshold (quick-check path) ─────────────────
       const topMatch = scoredMatches[0] || null;
+      let oneStrikeTriggered = false;
+      let oneStrikeReasons: string[] = [];
+      if (topMatch?.metricRatios) {
+        const dominated = Object.entries(topMatch.metricRatios)
+          .filter(([_, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
+        if (dominated.length > 0) {
+          topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
+          oneStrikeTriggered = true;
+          oneStrikeReasons = dominated.map(([k, v]) => `${k} metric (${Math.round(v * 100)}%) below safety floor`);
+          console.log(`⚠ ONE-STRIKE triggered (quick-check): ${oneStrikeReasons.join(", ")}`);
+        }
+      }
+
+      // Determine confidence
       let matchConfidence: "low" | "medium" | "high" = "low";
       if (topMatch) {
         if (topMatch.score >= CONFIDENCE_THRESHOLDS.high) matchConfidence = "high";
