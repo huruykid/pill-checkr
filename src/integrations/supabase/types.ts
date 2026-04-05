@@ -553,6 +553,47 @@ export type Database = {
         }
         Relationships: []
       }
+      test_strip_results: {
+        Row: {
+          created_at: string
+          id: string
+          report_id: string
+          result: string
+          session_id: string | null
+          strip_brand: string | null
+          test_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          report_id: string
+          result: string
+          session_id?: string | null
+          strip_brand?: string | null
+          test_type?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          report_id?: string
+          result?: string
+          session_id?: string | null
+          strip_brand?: string | null
+          test_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_strip_results_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
