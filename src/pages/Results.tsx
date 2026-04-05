@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { SafetyThresholdModal } from "@/components/results/SafetyThresholdModal";
 import {
   AlertTriangle,
   AlertCircle,
