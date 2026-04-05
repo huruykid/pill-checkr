@@ -653,6 +653,7 @@ serve(async (req) => {
           risk_reasons: riskReasons,
           notes: "Quick check (text-only, no photo)",
           user_id: userId || null,
+          shared: !userId,
         })
         .select()
         .single();
@@ -1273,6 +1274,7 @@ Respond with JSON only:
         photo_url: photoUrl || null,
         back_photo_url: backPhotoUrl || null,
         user_id: userId || null,
+        shared: !userId,
       })
       .select()
       .single();
