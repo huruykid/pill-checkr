@@ -1020,6 +1020,7 @@ const translations: Record<Language, Record<string, string>> = {
     "check.step.compare": "Comparando visualmente…",
     "check.step.report": "Gerando relatório…",
     "check.step.match": "Buscando correspondências…",
+    "check.step.preprocess": "Pré-processando imagem…",
     "shape.round": "Redondo",
     "shape.oval": "Oval",
     "shape.capsule": "Cápsula",
