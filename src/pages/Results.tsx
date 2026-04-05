@@ -272,7 +272,14 @@ export default function Results() {
         path={`/results/${reportId}`}
         jsonLd={makeWebPage("Pill Analysis Results", `/results/${reportId}`, "Pill analysis results with visual matching and safety guidance.")}
       />
-      <div className="container py-8 md:py-12">
+      <SafetyThresholdModal
+        open={safetyModalOpen}
+        onDismiss={() => {
+          setSafetyModalOpen(false);
+          localStorage.setItem(`ff_safety_modal_${reportId}`, "1");
+        }}
+      />
+      <div className={cn("container py-8 md:py-12 transition-all duration-300", safetyModalOpen && "blur-xl pointer-events-none select-none")}>
         <div className="mx-auto max-w-3xl">
           <Link to="/check" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />

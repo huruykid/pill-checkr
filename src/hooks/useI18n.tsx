@@ -1247,6 +1247,13 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "A naloxona reverte overdoses de opioides e pode salvar vidas. Está disponível sem receita na maioria dos estados. Leve-a mesmo que não use — você pode salvar alguém.",
     "hr.freeByMail": "Grátis pelo Correio (NEXT Distro)",
     "hr.findNaloxone": "Encontrar Naloxona Perto de Mim",
+
+    "safety.modal.title": "⚠️ Antes de Ver Estes Resultados",
+    "safety.modal.bullet1": "A análise visual NÃO é um teste de laboratório.",
+    "safety.modal.bullet2": "Falsificações letais podem parecer idênticas aos comprimidos reais.",
+    "safety.modal.bullet3": "Sempre tenha Narcan pronto e nunca use sozinho.",
+    "safety.modal.button_wait": "Aguarde ({seconds})…",
+    "safety.modal.button_ready": "Eu Entendo — Ver Resultados",
   },
 };
 
