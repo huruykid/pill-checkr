@@ -13,17 +13,30 @@ const DEFAULT_DRUG_NAMES = [
 ];
 
 const DAILYMED_BASE = "https://dailymed.nlm.nih.gov/dailymed";
+const RXNAV_BASE = "https://rxnav.nlm.nih.gov/REST";
 const RXIMAGE_CDN = "https://rximage.nlm.nih.gov/image/images/gallery/original";
 const API_TIMEOUT = 10_000;
 
-// Map DailyMed shape strings to our enum
-const SHAPE_MAP: Record<string, string> = {
-  ROUND: "round", OVAL: "oval", CAPSULE: "capsule", DIAMOND: "diamond",
-  TRIANGLE: "triangle", HEXAGON: "hexagon", RECTANGLE: "rectangle",
-  SQUARE: "rectangle", PENTAGON: "other", FREEFORM: "other",
+// DailyMed SHAPE codes (FDA SPL) → our enum
+const SHAPE_CODE_MAP: Record<string, string> = {
+  C48345: "oval",       // OVAL
+  C48348: "round",      // ROUND
+  C48336: "capsule",    // CAPSULE
+  C48335: "capsule",    // CAPSULE (alt)
+  C48340: "hexagon",    // HEXAGON
+  C48338: "diamond",    // DIAMOND
+  C48344: "other",      // PENTAGON
+  C48346: "rectangle",  // RECTANGLE
+  C48347: "rectangle",  // SQUARE
+  C48349: "triangle",   // TRIANGLE
+  C48337: "other",      // D SHAPE
+  C48339: "other",      // FREEFORM
+  C48341: "other",      // KIDNEY BEAN
+  C48342: "other",      // MODIFIED RECTANGLE
+  C48343: "other",      // OCTAGON
 };
 
-// Map DailyMed color strings to our enum
+// DailyMed COLOR text → our enum
 const COLOR_MAP: Record<string, string> = {
   WHITE: "white", BLUE: "blue", YELLOW: "yellow", PINK: "pink",
   GREEN: "green", ORANGE: "orange", RED: "red", PURPLE: "purple",
@@ -31,12 +44,11 @@ const COLOR_MAP: Record<string, string> = {
   BLACK: "gray", TURQUOISE: "blue", BEIGE: "tan",
 };
 
-// Map DailyMed score count to our enum
-function mapScoring(splScore: number | null): string | null {
-  if (splScore === null || splScore === undefined) return null;
-  if (splScore <= 1) return "none";
-  if (splScore === 2) return "single";
-  if (splScore === 4) return "quad";
+function mapScoring(score: number | null): string | null {
+  if (score === null || score === undefined) return null;
+  if (score <= 1) return "none";
+  if (score === 2) return "single";
+  if (score === 4) return "quad";
   return "other";
 }
 
@@ -48,14 +60,16 @@ function parseSizeMm(raw: string | null): number | null {
 
 function normalizeColor(raw: string | null): string {
   if (!raw) return "white";
-  const parts = raw.toUpperCase().split(/[;,\s]+/);
+  // Strip parenthetical content like "white(110)"
+  const cleaned = raw.replace(/\(.*?\)/g, "").trim().toUpperCase();
+  const parts = cleaned.split(/[;,\s\/]+/).filter(Boolean);
   if (parts.length > 1) return "multicolor";
   return COLOR_MAP[parts[0]] || "other";
 }
 
-function normalizeShape(raw: string | null): string {
-  if (!raw) return "round";
-  return SHAPE_MAP[raw.toUpperCase()] || "other";
+function normalizeShape(code: string | null): string {
+  if (!code) return "round";
+  return SHAPE_CODE_MAP[code.toUpperCase()] || "other";
 }
 
 async function fetchJson(url: string): Promise<any> {
@@ -72,6 +86,14 @@ async function fetchJson(url: string): Promise<any> {
 
 function dedupeKey(imprint: string, shape: string, color: string): string {
   return `${(imprint || "").toLowerCase().trim()}|${shape}|${color}`;
+}
+
+function extractProps(propertyConcepts: any[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const pc of propertyConcepts || []) {
+    map[pc.propName] = pc.propValue;
+  }
+  return map;
 }
 
 Deno.serve(async (req) => {
@@ -97,9 +119,9 @@ Deno.serve(async (req) => {
       if (totalRecords >= rLimit) break;
 
       try {
-        // Step 1: Get SPL setids for this drug
+        // Step 1: Get SPL setids from DailyMed
         const splData = await fetchJson(
-          `${DAILYMED_BASE}/services/v2/spls.json?drug_name=${encodeURIComponent(drugName)}&pagesize=100`
+          `${DAILYMED_BASE}/services/v2/spls.json?drug_name=${encodeURIComponent(drugName)}&pagesize=50`
         );
         const spls = splData?.data || [];
 
@@ -109,108 +131,130 @@ Deno.serve(async (req) => {
           if (!setId) continue;
 
           try {
-            // Step 2: Get NDCs for this setid
+            // Step 2: Get NDCs from DailyMed (ndcs is under data.ndcs)
             const ndcData = await fetchJson(
               `${DAILYMED_BASE}/services/v2/spls/${setId}/ndcs.json`
             );
-            const ndcs = ndcData?.data || [];
+            const ndcs = ndcData?.data?.ndcs || [];
 
             for (const ndcEntry of ndcs) {
               if (totalRecords >= rLimit) break;
-              const ndc = ndcEntry.ndc_number || ndcEntry.product_ndc || ndcEntry;
+              const ndc = ndcEntry.ndc || ndcEntry;
               if (typeof ndc !== "string" || !ndc) continue;
 
               try {
-                // Step 3: Get imprint data for this NDC
-                const imprintData = await fetchJson(
-                  `${DAILYMED_BASE}/services/v2/ndc/${ndc}/imprintdata.json`
+                // Step 3: Get pill properties from RxNav
+                const propsData = await fetchJson(
+                  `${RXNAV_BASE}/ndcproperties.json?id=${encodeURIComponent(ndc)}`
                 );
-                const pills = imprintData?.data || [];
+                const ndcProps = propsData?.ndcPropertyList?.ndcProperty;
+                if (!ndcProps || ndcProps.length === 0) continue;
 
-                for (const pill of pills) {
-                  if (totalRecords >= rLimit) break;
+                const prop = ndcProps[0];
+                const concepts = extractProps(
+                  prop.propertyConceptList?.propertyConcept || []
+                );
 
-                  const imprint = (pill.splimprint || "").trim();
-                  if (!imprint) continue;
+                const imprintRaw = concepts.IMPRINT_CODE || "";
+                const imprint = imprintRaw.replace(/;/g, " ").trim();
+                if (!imprint) continue;
 
-                  const shape = normalizeShape(pill.splshape);
-                  const color = normalizeColor(pill.splcolor);
-                  const key = dedupeKey(imprint, shape, color);
+                const shape = normalizeShape(concepts.SHAPE);
+                const color = normalizeColor(concepts.COLORTEXT);
+                const key = dedupeKey(imprint, shape, color);
 
-                  if (seenKeys.has(key)) {
-                    stats.skipped++;
-                    continue;
-                  }
-                  seenKeys.add(key);
-
-                  const record = {
-                    drug_name: pill.name || drugName,
-                    imprint,
-                    shape,
-                    color,
-                    size_mm: parseSizeMm(pill.splsize),
-                    scoring: mapScoring(pill.splscore ? parseInt(pill.splscore, 10) : null),
-                    ndc_code: ndc,
-                    source: "dailymed",
-                    last_synced: new Date().toISOString(),
-                  };
-
-                  // Check if record exists (dedupe on imprint+shape+color)
-                  const { data: existing } = await supabase
-                    .from("pill_reference")
-                    .select("id")
-                    .eq("imprint", imprint.toLowerCase())
-                    .eq("shape", shape)
-                    .eq("color", color)
-                    .limit(1)
-                    .maybeSingle();
-
-                  if (existing) {
-                    const { error } = await supabase
-                      .from("pill_reference")
-                      .update({ ...record, imprint: imprint.toLowerCase() })
-                      .eq("id", existing.id);
-                    if (!error) stats.updated++;
-                    else stats.apiErrors++;
-                  } else {
-                    const { data: inserted, error } = await supabase
-                      .from("pill_reference")
-                      .insert({ ...record, imprint: imprint.toLowerCase() })
-                      .select("id")
-                      .single();
-                    if (!error && inserted) {
-                      stats.inserted++;
-
-                      // Step 5: Try RxImage CDN for a reference image
-                      try {
-                        const rxUrl = `${RXIMAGE_CDN}/${ndc}.jpg`;
-                        const imgRes = await fetch(rxUrl, {
-                          method: "HEAD",
-                          signal: AbortSignal.timeout(5000),
-                        });
-                        if (imgRes.ok) {
-                          const { error: imgErr } = await supabase
-                            .from("pill_reference_images")
-                            .insert({
-                              pill_reference_id: inserted.id,
-                              image_url: rxUrl,
-                              source: "rximage_cdn",
-                            });
-                          if (!imgErr) stats.imagesAdded++;
-                        }
-                      } catch {
-                        // CDN unavailable — graceful skip
-                      }
-                    } else {
-                      stats.apiErrors++;
-                    }
-                  }
-
-                  totalRecords++;
-                  stats.totalProcessed++;
+                if (seenKeys.has(key)) {
+                  stats.skipped++;
+                  continue;
                 }
+                seenKeys.add(key);
+
+                // Get drug name from RxCUI
+                let resolvedDrugName = drugName;
+                const rxcui = prop.rxcui;
+                if (rxcui) {
+                  try {
+                    const rxProps = await fetchJson(
+                      `${RXNAV_BASE}/rxcui/${rxcui}/properties.json`
+                    );
+                    const rxName = rxProps?.properties?.name;
+                    if (rxName) {
+                      // Extract just the drug name (before dosage info)
+                      resolvedDrugName = rxName.split(/\s+\d/)[0].trim() || drugName;
+                    }
+                  } catch {
+                    // Use search term as fallback
+                  }
+                }
+
+                const record = {
+                  drug_name: resolvedDrugName,
+                  imprint: imprint.toLowerCase(),
+                  shape,
+                  color,
+                  size_mm: parseSizeMm(concepts.SIZE),
+                  scoring: mapScoring(concepts.SCORE ? parseInt(concepts.SCORE, 10) : null),
+                  ndc_code: ndc,
+                  source: "dailymed",
+                  last_synced: new Date().toISOString(),
+                };
+
+                // Upsert: check existing by imprint+shape+color
+                const { data: existing } = await supabase
+                  .from("pill_reference")
+                  .select("id")
+                  .eq("imprint", record.imprint)
+                  .eq("shape", shape)
+                  .eq("color", color)
+                  .limit(1)
+                  .maybeSingle();
+
+                if (existing) {
+                  const { error } = await supabase
+                    .from("pill_reference")
+                    .update(record)
+                    .eq("id", existing.id);
+                  if (!error) stats.updated++;
+                  else stats.apiErrors++;
+                } else {
+                  const { data: inserted, error } = await supabase
+                    .from("pill_reference")
+                    .insert(record)
+                    .select("id")
+                    .single();
+
+                  if (!error && inserted) {
+                    stats.inserted++;
+
+                    // Step 5: Try RxImage CDN for a reference image
+                    try {
+                      const rxUrl = `${RXIMAGE_CDN}/${ndc.replace(/-/g, "")}.jpg`;
+                      const imgRes = await fetch(rxUrl, {
+                        method: "HEAD",
+                        signal: AbortSignal.timeout(5000),
+                      });
+                      if (imgRes.ok) {
+                        const { error: imgErr } = await supabase
+                          .from("pill_reference_images")
+                          .insert({
+                            pill_reference_id: inserted.id,
+                            image_url: rxUrl,
+                            source: "rximage_cdn",
+                          });
+                        if (!imgErr) stats.imagesAdded++;
+                      }
+                    } catch {
+                      // CDN unavailable — graceful skip
+                    }
+                  } else {
+                    stats.apiErrors++;
+                  }
+                }
+
+                totalRecords++;
+                stats.totalProcessed++;
               } catch (e) {
-                console.warn(`Imprint fetch failed for NDC ${ndc}:`, e.message);
+                console.warn(`Props fetch failed for NDC ${ndc}:`, e.message);
                 stats.apiErrors++;
               }
             }
