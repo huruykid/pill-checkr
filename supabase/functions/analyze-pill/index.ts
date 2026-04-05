@@ -1198,6 +1198,21 @@ Respond with JSON only:
 
     // ─── Step 4: Scoring and risk assessment ────────────────────────────────
     const topMatch = scoredMatches.length > 0 ? scoredMatches[0] : null;
+
+    // ─── One-strike safety threshold (full-analysis path) ─────────────────
+    let oneStrikeTriggered = false;
+    let oneStrikeReasons: string[] = [];
+    if (topMatch?.metricRatios) {
+      const dominated = Object.entries(topMatch.metricRatios)
+        .filter(([_, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
+      if (dominated.length > 0) {
+        topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
+        oneStrikeTriggered = true;
+        oneStrikeReasons = dominated.map(([k, v]) => `${k} metric (${Math.round(v * 100)}%) below safety floor`);
+        console.log(`⚠ ONE-STRIKE triggered (full-analysis): ${oneStrikeReasons.join(", ")}`);
+      }
+    }
+
     let matchConfidence: "low" | "medium" | "high" = "low";
     if (topMatch) {
       if (topMatch.score >= CONFIDENCE_THRESHOLDS.high) {
@@ -1212,12 +1227,18 @@ Respond with JSON only:
       m.notes?.includes("Schedule II") || m.notes?.includes("CII")
     );
 
-    const { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
+    let { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
       extracted,
       topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color, scoring: topMatch.scoring, size_mm: topMatch.size_mm } : null,
       analysis.image_quality,
       visualMismatchDetected,
     );
+
+    // Apply one-strike anomaly spike
+    if (oneStrikeTriggered) {
+      anomalyScore = Math.max(anomalyScore, ONE_STRIKE_MIN_ANOMALY);
+      anomalyReasons.push(...oneStrikeReasons, "One-strike safety threshold activated");
+    }
 
     const { level: riskLevel, reasons: riskReasons } = deriveRiskLevel(
       matchConfidence,
@@ -1230,7 +1251,7 @@ Respond with JSON only:
       riskReasons.push("Matched to a Schedule II controlled substance — higher counterfeit risk");
     }
 
-    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}, Visual mismatch: ${visualMismatchDetected}, Schedule II: ${isScheduleII}`);
+    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}, Visual mismatch: ${visualMismatchDetected}, Schedule II: ${isScheduleII}, One-strike: ${oneStrikeTriggered}`);
 
     // ─── Step 5: Persist report and matches ─────────────────────────────────
     const { data: report, error: reportError } = await supabase
