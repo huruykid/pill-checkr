@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { Badge } from "@/components/ui/badge";
 
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 
