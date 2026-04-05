@@ -81,45 +81,62 @@ const CONFIDENCE_THRESHOLDS = {
   medium: 55,
 };
 
+// One-strike safety threshold: if any critical metric falls below the floor,
+// cap the overall score and spike anomaly to trigger high-risk warnings
+const ONE_STRIKE_FLOOR = 0.65;
+const ONE_STRIKE_MAX_SCORE = 40;
+const ONE_STRIKE_MIN_ANOMALY = 80;
+
 const SOURCE_PRIORITY: Record<string, number> = {
   manual: 3,
   rximage: 2,
   dailymed: 1,
 };
 
+// Metric ratios for one-strike safety threshold (0–1 scale, null = no data to compare)
+type MetricRatios = { imprint: number | null; shape: number | null; color: number | null; scoring: number | null };
+
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
   extracted: { imprint: string | null; backImprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
   reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null; logo_description: string | null }
-): { score: number; reasons: string[] } {
+): { score: number; reasons: string[]; metricRatios: MetricRatios } {
   let score = 0;
   const reasons: string[] = [];
+  const metricRatios: MetricRatios = { imprint: null, shape: null, color: null, scoring: null };
 
   if (reference.imprint) {
     const refNorm = reference.imprint.toLowerCase().replace(/\s+/g, "");
     const frontNorm = extracted.imprint?.toLowerCase().replace(/\s+/g, "") || "";
     const backNorm = extracted.backImprint?.toLowerCase().replace(/\s+/g, "") || "";
     
+    let imprintEarned = 0;
     // Check front imprint
     if (frontNorm && frontNorm === refNorm) {
-      score += MATCH_WEIGHTS.imprintExact;
+      imprintEarned = MATCH_WEIGHTS.imprintExact;
       reasons.push("Imprint matches exactly");
     } else if (frontNorm && (refNorm.includes(frontNorm) || frontNorm.includes(refNorm))) {
-      score += MATCH_WEIGHTS.imprintPartial;
+      imprintEarned = MATCH_WEIGHTS.imprintPartial;
       reasons.push("Imprint partially matches");
     } else if (backNorm && backNorm === refNorm) {
-      // Back imprint exact match
-      score += MATCH_WEIGHTS.imprintExact;
+      imprintEarned = MATCH_WEIGHTS.imprintExact;
       reasons.push("Back imprint matches exactly");
     } else if (backNorm && (refNorm.includes(backNorm) || backNorm.includes(refNorm))) {
-      score += MATCH_WEIGHTS.imprintPartial;
+      imprintEarned = MATCH_WEIGHTS.imprintPartial;
       reasons.push("Back imprint partially matches");
     }
+    score += imprintEarned;
+    metricRatios.imprint = imprintEarned / MATCH_WEIGHTS.imprintExact;
   }
 
-  if (extracted.shape && reference.shape && extracted.shape === reference.shape) {
-    score += MATCH_WEIGHTS.shape;
-    reasons.push("Shape matches");
+  if (extracted.shape && reference.shape) {
+    if (extracted.shape === reference.shape) {
+      score += MATCH_WEIGHTS.shape;
+      reasons.push("Shape matches");
+      metricRatios.shape = 1;
+    } else {
+      metricRatios.shape = 0;
+    }
   }
 
   if (extracted.color && reference.color) {
@@ -127,9 +144,14 @@ function calculateMatchScore(
     if (proximity === 1) {
       score += MATCH_WEIGHTS.color;
       reasons.push("Color matches");
+      metricRatios.color = 1;
     } else if (proximity > 0) {
-      score += Math.round(MATCH_WEIGHTS.color * proximity);
+      const earned = Math.round(MATCH_WEIGHTS.color * proximity);
+      score += earned;
       reasons.push(`Color similar (${extracted.color} ≈ ${reference.color})`);
+      metricRatios.color = proximity;
+    } else {
+      metricRatios.color = 0;
     }
   }
 
@@ -138,6 +160,9 @@ function calculateMatchScore(
     if (extracted.scoring === reference.scoring) {
       score += MATCH_WEIGHTS.scoring;
       reasons.push("Scoring pattern matches");
+      metricRatios.scoring = 1;
+    } else {
+      metricRatios.scoring = 0;
     }
   }
 
@@ -153,12 +178,6 @@ function calculateMatchScore(
     }
   }
 
-  // Thickness match (when reference has thickness data)
-  // Note: thickness_mm is not yet extracted from images, but if reference data has it
-  // and the extracted size is available, we can compare thickness between top reference candidates
-  // to boost matches with consistent physical dimensions. This will be fully utilized once
-  // AI extraction includes thickness estimation.
-
   // Logo match
   if (extracted.detectedLogos && extracted.detectedLogos.length > 0 && reference.logo_description) {
     const refLogoLower = reference.logo_description.toLowerCase();
@@ -171,7 +190,7 @@ function calculateMatchScore(
     }
   }
 
-  return { score, reasons };
+  return { score, reasons, metricRatios };
 }
 
 // Calculate anomaly score based on inconsistencies
@@ -525,7 +544,7 @@ serve(async (req) => {
 
       // Score matches
       let scoredMatches = references.map((ref) => {
-        const { score, reasons } = calculateMatchScore(
+        const { score, reasons, metricRatios } = calculateMatchScore(
           { imprint: finalImprint, backImprint: null, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos: null },
           { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
         );
@@ -536,7 +555,7 @@ serve(async (req) => {
           finalScore += CROSS_PASS_BONUS;
           finalReasons.push("Corroborated across multiple search passes");
         }
-        return { ...ref, score: finalScore, matchReasons: finalReasons };
+        return { ...ref, score: finalScore, matchReasons: finalReasons, metricRatios };
       })
       .filter(m => m.score > 0)
       .sort((a, b) => {
@@ -546,8 +565,22 @@ serve(async (req) => {
       })
       .slice(0, 3);
 
-      // Determine confidence
+      // ─── One-strike safety threshold (quick-check path) ─────────────────
       const topMatch = scoredMatches[0] || null;
+      let oneStrikeTriggered = false;
+      let oneStrikeReasons: string[] = [];
+      if (topMatch?.metricRatios) {
+        const dominated = Object.entries(topMatch.metricRatios)
+          .filter(([_, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
+        if (dominated.length > 0) {
+          topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
+          oneStrikeTriggered = true;
+          oneStrikeReasons = dominated.map(([k, v]) => `${k} metric (${Math.round(v * 100)}%) below safety floor`);
+          console.log(`⚠ ONE-STRIKE triggered (quick-check): ${oneStrikeReasons.join(", ")}`);
+        }
+      }
+
+      // Determine confidence
       let matchConfidence: "low" | "medium" | "high" = "low";
       if (topMatch) {
         if (topMatch.score >= CONFIDENCE_THRESHOLDS.high) matchConfidence = "high";
@@ -615,8 +648,8 @@ serve(async (req) => {
           risk_level: riskLevel,
           has_reference_object: false,
           match_confidence: matchConfidence,
-          anomaly_score: topMatch ? 0 : 25,
-          anomaly_reasons: topMatch ? [] : ["No matching pill found in reference database"],
+          anomaly_score: oneStrikeTriggered ? Math.max(ONE_STRIKE_MIN_ANOMALY, topMatch ? 0 : 25) : (topMatch ? 0 : 25),
+          anomaly_reasons: oneStrikeTriggered ? [...oneStrikeReasons, "One-strike safety threshold activated"] : (topMatch ? [] : ["No matching pill found in reference database"]),
           risk_reasons: riskReasons,
           notes: "Quick check (text-only, no photo)",
           user_id: userId || null,
@@ -978,7 +1011,7 @@ Respond with JSON only:
     const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos };
     
     let scoredMatches = (references || []).map((ref) => {
-      const { score, reasons } = calculateMatchScore(
+      const { score, reasons, metricRatios } = calculateMatchScore(
         { imprint: finalImprint, backImprint: finalBackImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos },
         { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
       );
@@ -992,7 +1025,7 @@ Respond with JSON only:
         finalReasons.push("Corroborated across multiple search passes");
       }
 
-      return { ...ref, score: finalScore, matchReasons: finalReasons };
+      return { ...ref, score: finalScore, matchReasons: finalReasons, metricRatios };
     })
     .filter(m => m.score > 0)
     .sort((a, b) => {
@@ -1165,6 +1198,21 @@ Respond with JSON only:
 
     // ─── Step 4: Scoring and risk assessment ────────────────────────────────
     const topMatch = scoredMatches.length > 0 ? scoredMatches[0] : null;
+
+    // ─── One-strike safety threshold (full-analysis path) ─────────────────
+    let oneStrikeTriggered = false;
+    let oneStrikeReasons: string[] = [];
+    if (topMatch?.metricRatios) {
+      const dominated = Object.entries(topMatch.metricRatios)
+        .filter(([_, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
+      if (dominated.length > 0) {
+        topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
+        oneStrikeTriggered = true;
+        oneStrikeReasons = dominated.map(([k, v]) => `${k} metric (${Math.round(v * 100)}%) below safety floor`);
+        console.log(`⚠ ONE-STRIKE triggered (full-analysis): ${oneStrikeReasons.join(", ")}`);
+      }
+    }
+
     let matchConfidence: "low" | "medium" | "high" = "low";
     if (topMatch) {
       if (topMatch.score >= CONFIDENCE_THRESHOLDS.high) {
@@ -1179,12 +1227,18 @@ Respond with JSON only:
       m.notes?.includes("Schedule II") || m.notes?.includes("CII")
     );
 
-    const { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
+    let { score: anomalyScore, reasons: anomalyReasons } = calculateAnomalyScore(
       extracted,
       topMatch ? { imprint: topMatch.imprint, shape: topMatch.shape, color: topMatch.color, scoring: topMatch.scoring, size_mm: topMatch.size_mm } : null,
       analysis.image_quality,
       visualMismatchDetected,
     );
+
+    // Apply one-strike anomaly spike
+    if (oneStrikeTriggered) {
+      anomalyScore = Math.max(anomalyScore, ONE_STRIKE_MIN_ANOMALY);
+      anomalyReasons.push(...oneStrikeReasons, "One-strike safety threshold activated");
+    }
 
     const { level: riskLevel, reasons: riskReasons } = deriveRiskLevel(
       matchConfidence,
@@ -1197,7 +1251,7 @@ Respond with JSON only:
       riskReasons.push("Matched to a Schedule II controlled substance — higher counterfeit risk");
     }
 
-    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}, Visual mismatch: ${visualMismatchDetected}, Schedule II: ${isScheduleII}`);
+    console.log(`Match confidence: ${matchConfidence}, Anomaly score: ${anomalyScore}, Risk level: ${riskLevel}, Visual mismatch: ${visualMismatchDetected}, Schedule II: ${isScheduleII}, One-strike: ${oneStrikeTriggered}`);
 
     // ─── Step 5: Persist report and matches ─────────────────────────────────
     const { data: report, error: reportError } = await supabase
