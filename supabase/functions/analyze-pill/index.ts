@@ -14,6 +14,8 @@ const FullInputSchema = z.object({
     .min(1, "Image data is required")
     .max(15 * 1024 * 1024, "Image data exceeds maximum size of 15MB"),
   backImage: z.string().max(15 * 1024 * 1024).optional().nullable(),
+  processedImage: z.string().max(15 * 1024 * 1024).optional().nullable(),
+  processedBackImage: z.string().max(15 * 1024 * 1024).optional().nullable(),
   imprint: z.string().max(50, "Imprint must be 50 characters or less").optional().nullable(),
   shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
   color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
@@ -657,7 +659,7 @@ serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════════
     // FULL ANALYSIS MODE — with AI vision
     // ═══════════════════════════════════════════════════════════════════════
-    const { image, backImage, imprint, shape, color, scoring: inputScoring, estimatedSizeMm, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data as z.infer<typeof FullInputSchema>;
+    const { image, backImage, processedImage, processedBackImage, imprint, shape, color, scoring: inputScoring, estimatedSizeMm, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data as z.infer<typeof FullInputSchema>;
     console.log("Full analysis mode — input validated successfully");
 
     // ─── Step 1: AI feature extraction ──────────────────────────────────────
@@ -733,9 +735,23 @@ Respond with JSON only:
           {
             role: "user",
             content: [
-              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}${backImage ? ". A back-side photo is also provided — use both sides for more accurate imprint extraction and analysis." : ""}` },
+              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}${backImage ? ". A back-side photo is also provided — use both sides for more accurate imprint extraction and analysis." : ""}${processedImage ? "\n\nIMPORTANT: A high-contrast grayscale version of the image is provided specifically for OCR/imprint reading. Use it for text extraction. Use the original color image for color analysis." : ""}` },
+              // Send processed image first (for OCR) if available, then original (for color)
+              ...(processedImage
+                ? [
+                    { type: "text" as const, text: "HIGH-CONTRAST GRAYSCALE (use for imprint OCR):" },
+                    { type: "image_url" as const, image_url: { url: processedImage } },
+                    { type: "text" as const, text: "ORIGINAL COLOR IMAGE (use for color analysis):" },
+                  ]
+                : []),
               { type: "image_url", image_url: { url: image } },
-              ...(backImage ? [{ type: "image_url" as const, image_url: { url: backImage } }] : []),
+              ...(processedBackImage
+                ? [
+                    { type: "text" as const, text: "HIGH-CONTRAST GRAYSCALE BACK (use for back imprint OCR):" },
+                    { type: "image_url" as const, image_url: { url: processedBackImage } },
+                  ]
+                : []),
+              ...(backImage ? [{ type: "text" as const, text: "ORIGINAL BACK IMAGE:" }, { type: "image_url" as const, image_url: { url: backImage } }] : []),
             ]
           }
         ],
