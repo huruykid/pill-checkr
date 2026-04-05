@@ -649,6 +649,9 @@ export default function Results() {
             </CardContent>
           </Card>
 
+          {/* Test Strip Result Logger */}
+          <TestStripLogger reportId={report.id} className="mb-6" />
+
           {/* Official FDA Drug Information */}
           {matches.length > 0 && (
             <DrugInfoCard drugName={matches[0].drug_name} className="mb-6" />
