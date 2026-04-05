@@ -1,52 +1,45 @@
 
 
-## Test Results: Bugs Found
+## Plan: Forced-Friction Safety Modal
 
-### Testing Summary
-I ran an end-to-end quick check with imprint "M30", shape "Round", color "Blue". The analysis completed and a report was created in the database (`aef42c43...`), but the app showed **"Report not found"** and redirected back to the Check page.
+### New File: `src/components/results/SafetyThresholdModal.tsx`
 
-### Root Cause: Anonymous Reports Are Invisible (Pre-existing Bug)
+A modal component with:
+- Darkened backdrop (`bg-black/80 backdrop-blur-sm`)
+- Warning-styled card with amber/yellow header and `AlertTriangle` icon
+- Three bullet points (translated): not a lab test, lethal fakes look identical, always have Narcan
+- "I Understand & View Results" button **disabled for 3 seconds** with countdown text ("Wait (3)…", "Wait (2)…", etc.)
+- After 3s, button activates with final text
+- Calls `onDismiss()` when clicked
+- Props: `{ open: boolean; onDismiss: () => void }`
 
-The `reports` table RLS SELECT policies require either:
-- `auth.uid() = user_id` (authenticated user owns it), OR
-- `user_id IS NULL AND shared = true` (anonymous + shared)
+### Update: `src/pages/Results.tsx`
 
-But both report insert paths in `analyze-pill/index.ts` (quick-check at line 641 and full-analysis at line 1259) **never set `shared`**, so it defaults to `false`. This means:
-- Anonymous reports are created successfully ✅
-- Anonymous reports can never be read back ❌ → "Report not found"
+- Add state: `const [safetyModalOpen, setSafetyModalOpen] = useState(false)`
+- On data load (after `fetchResults` succeeds), check `localStorage` for `ff_safety_modal_${reportId}`. If not set, show modal.
+- When dismissed: set localStorage flag, hide modal.
+- While modal is open, wrap the main results content with a `blur-xl pointer-events-none` class so content is obscured.
+- Render `<SafetyThresholdModal open={safetyModalOpen} onDismiss={...} />` inside the Layout.
 
-This blocks testing the test strip logging flow entirely, since you can't reach the Results page.
+### Update: `src/hooks/useI18n.tsx`
 
-### Fix Plan
-
-**1. `supabase/functions/analyze-pill/index.ts`** — Set `shared: true` for anonymous reports
-
-In both insert blocks (lines ~641 and ~1259), add:
-```
-shared: !userId,  // anonymous reports must be shared to be readable
-```
-
-This ensures anonymous reports are visible via the existing `user_id IS NULL AND shared = true` RLS policy while authenticated users' reports remain private by default.
-
-**2. Fix existing orphaned report** — Update the report we just created so we can proceed with testing:
-```sql
-UPDATE reports SET shared = true WHERE user_id IS NULL AND shared = false;
-```
-
-### After the Fix
-Once anonymous reports are readable, the full test strip flow can be tested:
-1. Quick check → Results page loads ✅
-2. Click test strip button (Negative/Positive/Invalid) → writes to `test_strip_results` ✅  
-3. Navigate to History → see the indicator ✅
+Add keys for all 4 locales:
+- `safety.modal.title` — "⚠️ Before You View These Results"
+- `safety.modal.bullet1` — "Visual analysis is NOT a lab test."
+- `safety.modal.bullet2` — "Lethal counterfeits can look identical to real pills."
+- `safety.modal.bullet3` — "Always have Narcan ready and never use alone."
+- `safety.modal.button_wait` — "Wait ({seconds})…"
+- `safety.modal.button_ready` — "I Understand — View Results"
 
 ### Files Changed
 
 | File | Action |
 |---|---|
-| `supabase/functions/analyze-pill/index.ts` | Add `shared: !userId` to both insert blocks |
+| `src/components/results/SafetyThresholdModal.tsx` | New component |
+| `src/pages/Results.tsx` | Add modal state, blur gate, render modal |
+| `src/hooks/useI18n.tsx` | Add 6 translation keys × 4 locales |
 
 ### Scope
-- 1 file, 2 lines changed
-- 1 SQL update for existing data
-- No schema changes
+- 1 new file (~60 lines), 2 files modified
+- No database changes, no new dependencies
 
