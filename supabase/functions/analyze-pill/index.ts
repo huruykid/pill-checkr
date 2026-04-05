@@ -659,7 +659,7 @@ serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════════
     // FULL ANALYSIS MODE — with AI vision
     // ═══════════════════════════════════════════════════════════════════════
-    const { image, backImage, imprint, shape, color, scoring: inputScoring, estimatedSizeMm, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data as z.infer<typeof FullInputSchema>;
+    const { image, backImage, processedImage, processedBackImage, imprint, shape, color, scoring: inputScoring, estimatedSizeMm, hasReferenceObject, photoUrl, backPhotoUrl } = validationResult.data as z.infer<typeof FullInputSchema>;
     console.log("Full analysis mode — input validated successfully");
 
     // ─── Step 1: AI feature extraction ──────────────────────────────────────
