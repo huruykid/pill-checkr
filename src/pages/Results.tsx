@@ -14,6 +14,7 @@ import { EmergencyBar } from "@/components/results/EmergencyBar";
 import { BuddyAlert } from "@/components/results/BuddyAlert";
 import { MatchFeedback } from "@/components/results/MatchFeedback";
 import { ReportPill } from "@/components/results/ReportPill";
+import { TestStripLogger } from "@/components/results/TestStripLogger";
 import { RegionalCounterfeitAlert } from "@/components/results/RegionalCounterfeitAlert";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import { Button } from "@/components/ui/button";
