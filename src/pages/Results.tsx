@@ -134,6 +134,12 @@ export default function Results() {
       if (matchesError) throw matchesError;
       setData({ report, matches: matches || [] });
 
+      // Show safety modal if not yet dismissed for this report
+      const modalKey = `ff_safety_modal_${reportId}`;
+      if (!localStorage.getItem(modalKey)) {
+        setSafetyModalOpen(true);
+      }
+
       // Fetch regional counterfeit alerts for matched drug names
       if (matches && matches.length > 0) {
         const drugNames = [...new Set(matches.map(m => m.drug_name))];
