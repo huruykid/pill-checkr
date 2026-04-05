@@ -81,6 +81,12 @@ const CONFIDENCE_THRESHOLDS = {
   medium: 55,
 };
 
+// One-strike safety threshold: if any critical metric falls below the floor,
+// cap the overall score and spike anomaly to trigger high-risk warnings
+const ONE_STRIKE_FLOOR = 0.65;
+const ONE_STRIKE_MAX_SCORE = 40;
+const ONE_STRIKE_MIN_ANOMALY = 80;
+
 const SOURCE_PRIORITY: Record<string, number> = {
   manual: 3,
   rximage: 2,
