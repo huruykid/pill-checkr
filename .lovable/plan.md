@@ -1,66 +1,106 @@
+## Plan: Automated DailyMed Reference Pipeline
 
+### Important Discovery
 
-## Plan: "One-Strike" Safety Threshold
+The RxImage API was **officially discontinued in December 2021**. The image CDN URLs may still resolve for cached entries (and the existing `fetchRxImageUrl` already handles this gracefully with fallback), but the bulk listing endpoint is gone.
 
-### Problem
-Currently, `calculateMatchScore` returns a single aggregate `score` via weighted addition. A pill with a perfect shape/color/size match but a badly mismatched imprint can still score "medium" or even "high" confidence because the other weights compensate. This is dangerous — a single weak critical metric should veto a high confidence result.
+The replacement is the **DailyMed v2 API**, which is actively maintained by NLM and provides pill identification data (imprint, shape, color, size, score) via the `/ndc/{ndc}/imprintdata` endpoint.
 
 ### Architecture
 
-The one-strike logic applies in **two places**: the full-analysis path (line ~1166) and the quick-check path (line ~549). Both follow the same pattern.
+```text
+Weekly cron (Wed 2AM UTC)
+        │
+        ▼
+[sync-rximage-data edge function]
+        │
+        ├── Step 1: Fetch NDC list from DailyMed v2
+        │   GET /services/v2/drugnames.json?drug_name=oxycodone&pagesize=100
+        │   → get setids → GET /spls/{setid}/ndcs → collect NDC codes
+        │
+        ├── Step 2: For each NDC, fetch imprint data
+        │   GET /ndc/{ndc}/imprintdata.json
+        │   → returns: name, splimprint, splshape, splcolor, splsize, splscore
+        │
+        ├── Step 3: Map DailyMed fields → pill_reference schema
+        │   Normalize shape/color enums, parse size_mm
+        │
+        ├── Step 4: Upsert into pill_reference
+        │   Dedupe on imprint+shape+color key (existing pattern)
+        │
+        ├── Step 5: Attempt RxImage CDN fetch for reference images
+        │   (graceful fallback if CDN is down)
+        │
+        └── Return summary JSON
+```
 
 ### Changes
 
-**`supabase/functions/analyze-pill/index.ts`**
+**1. New file: `supabase/functions/sync-rximage-data/index.ts**`
 
-1. **Expand `calculateMatchScore` return type** — Track individual metric ratios alongside the aggregate score:
-   ```
-   return { score, reasons, metricRatios: { imprint, shape, color, scoring } }
-   ```
-   Each ratio is 0–1: imprint earned / imprintExact weight, shape earned / shape weight, color earned / color weight, scoring earned / scoring weight. If a metric has no data to compare (e.g., no reference scoring), it returns `null` (not penalised).
+- Uses service role key (no auth required — called by cron)
+- Accepts optional body params: `{ drugNames?: string[], rLimit?: number }` with sensible defaults
+- Default drug list: high-priority counterfeited medications (oxycodone, alprazolam, adderall, hydrocodone, etc. — ~15 names)
+- For each drug name:
+  - Calls DailyMed v2 `/services/v2/spls.json?drug_name=X&pagesize=100` to get setids
+  - For each setid, calls `/spls/{setid}/ndcs.json` to get NDC codes
+  - For each NDC, calls v1 `/ndc/{ndc}/imprintdata.json` to get pill details
+  - Maps DailyMed fields to our schema (SPLSHAPE→pill_shape, SPLCOLOR→pill_color, etc.)
+  - Deduplicates using the existing `imprint+shape+color` key pattern
+  - Upserts into `pill_reference` with `source: 'dailymed'`
+  - Attempts RxImage CDN image fetch per NDC (existing pattern, graceful failure)
+  - Stores images in `pill_reference_images`
+- Returns JSON: `{ inserted, updated, skipped, imagesAdded, apiErrors, drugNames }`
+- Timeout-safe: caps total processing at `rLimit` (default 50) records per run
+- All DailyMed API calls have 10s timeout with try/catch
 
-2. **Add constants** at the top:
-   ```
-   const ONE_STRIKE_FLOOR = 0.65;    // any critical metric below this triggers the cap
-   const ONE_STRIKE_MAX_SCORE = 40;  // hard cap on aggregate score (below "medium" threshold of 55)
-   const ONE_STRIKE_MIN_ANOMALY = 80; // anomaly floor when triggered
-   ```
+**2. Update `supabase/config.toml**`
 
-3. **Apply one-strike logic after scoring, before confidence assignment** — In both the full-analysis path (~line 1167) and quick-check path (~line 549):
-   ```
-   if (topMatch && topMatch.metricRatios) {
-     const dominated = Object.entries(topMatch.metricRatios)
-       .filter(([_, v]) => v !== null && v < ONE_STRIKE_FLOOR);
-     if (dominated.length > 0) {
-       topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
-       oneStrikeTriggered = true;
-       oneStrikeReasons = dominated.map(([k, v]) => `${k} metric (${Math.round(v*100)}%) below safety floor`);
-     }
-   }
-   ```
+Add:
 
-4. **Anomaly spike** — In the full-analysis path, after `calculateAnomalyScore` (line ~1182), if `oneStrikeTriggered`:
-   ```
-   anomalyScore = Math.max(anomalyScore, ONE_STRIKE_MIN_ANOMALY);
-   anomalyReasons.push(...oneStrikeReasons, "One-strike safety threshold activated");
-   ```
-   In quick-check path, same logic for the inline anomaly values (line ~618).
+```toml
+[functions.sync-rximage-data]
+verify_jwt = false
+```
 
-5. **Confidence and risk cascade** — Because the score is capped at 40 (below the medium threshold of 55), `matchConfidence` will automatically resolve to `"low"`, and `deriveRiskLevel` with anomaly ≥ 80 will return `"high"` risk. No changes needed to those functions.
+**3. SQL insert (not migration) for pg_cron schedule**
 
-6. **Log the trigger** — Add a console.log when one-strike fires so it's visible in edge function logs.
+Schedule the function to run every Wednesday at 2:00 AM UTC using pg_net, matching the existing cron pattern for tune-confidence-scores.
 
-### Effect on UI
-- `matchConfidence: "low"` + `anomalyScore: ≥80` + `riskLevel: "high"` will trigger the existing high-risk/inconclusive warnings, red badges, and Narcan locator on the Results page. No front-end changes needed.
+### Field Mapping
+
+
+| DailyMed Field          | pill_reference Column                         |
+| ----------------------- | --------------------------------------------- |
+| NAME                    | drug_name                                     |
+| SPLIMPRINT              | imprint                                       |
+| SPLSHAPE (e.g. "ROUND") | shape (lowercase enum)                        |
+| SPLCOLOR (e.g. "BLUE")  | color (lowercase enum)                        |
+| SPLSIZE (e.g. "13 mm")  | size_mm (parse numeric)                       |
+| SPLSCORE (e.g. 1, 2)    | scoring (map: 1→"none", 2→"single", 4→"quad") |
+| PRODUCT_CODE            | ndc_code                                      |
+
 
 ### Files Changed
 
-| File | Action |
-|---|---|
-| `supabase/functions/analyze-pill/index.ts` | Add constants, expand `calculateMatchScore`, apply one-strike cap in both paths |
+
+| File                                            | Action                            |
+| ----------------------------------------------- | --------------------------------- |
+| `supabase/functions/sync-rximage-data/index.ts` | New edge function                 |
+| `supabase/config.toml`                          | Add function config               |
+| pg_cron via insert tool                         | Schedule weekly Wednesday 2AM UTC |
+
 
 ### Scope
-- 1 file, ~40 lines added
-- No database changes
-- No new dependencies
 
+- 1 new edge function (~200 lines)
+- 1 config update
+- 1 cron schedule (insert, not migration)
+- No frontend changes
+- No schema changes needed  
+  
+  
+One minor thing to keep an eye on:
+  Because the DailyMed API requires a "waterfall" of requests (Search Drug -> Get SetID -> Get NDCs -> Get Imprint Data), it takes multiple network calls just to process one pill.
+  - Lovable smartly added an `rLimit` (default 50) to prevent the edge function from timing out.
+  - **Tip:** If you see the cron job failing in your Supabase logs next week, it likely means the edge function is timing out before it finishes the 50 items. You can simply lower the `rLimit` to 25 or 20 so it processes smaller chunks every Wednesday.
