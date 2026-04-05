@@ -1011,7 +1011,7 @@ Respond with JSON only:
     const extracted = { imprint: finalImprint, shape: finalShape, color: finalColor, imprintConfidence, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos };
     
     let scoredMatches = (references || []).map((ref) => {
-      const { score, reasons } = calculateMatchScore(
+      const { score, reasons, metricRatios } = calculateMatchScore(
         { imprint: finalImprint, backImprint: finalBackImprint, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos },
         { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
       );
@@ -1025,7 +1025,7 @@ Respond with JSON only:
         finalReasons.push("Corroborated across multiple search passes");
       }
 
-      return { ...ref, score: finalScore, matchReasons: finalReasons };
+      return { ...ref, score: finalScore, matchReasons: finalReasons, metricRatios };
     })
     .filter(m => m.score > 0)
     .sort((a, b) => {
