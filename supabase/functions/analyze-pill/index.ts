@@ -14,6 +14,8 @@ const FullInputSchema = z.object({
     .min(1, "Image data is required")
     .max(15 * 1024 * 1024, "Image data exceeds maximum size of 15MB"),
   backImage: z.string().max(15 * 1024 * 1024).optional().nullable(),
+  processedImage: z.string().max(15 * 1024 * 1024).optional().nullable(),
+  processedBackImage: z.string().max(15 * 1024 * 1024).optional().nullable(),
   imprint: z.string().max(50, "Imprint must be 50 characters or less").optional().nullable(),
   shape: z.enum(['round', 'oval', 'capsule', 'diamond', 'triangle', 'hexagon', 'rectangle', 'other']).optional().nullable(),
   color: z.enum(['white', 'blue', 'yellow', 'pink', 'green', 'orange', 'red', 'purple', 'gray', 'brown', 'tan', 'multicolor', 'other']).optional().nullable(),
