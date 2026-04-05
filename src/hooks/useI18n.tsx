@@ -522,6 +522,18 @@ const translations: Record<Language, Record<string, string>> = {
     "results.narcan.description": "La naloxona puede revertir una sobredosis de opioides. Encuentra distribución gratuita de Narcan cerca de ti.",
     "results.narcan.button": "Encontrar Naloxona Cercana",
 
+    // Test Strip Logger
+    "testStrip.title": "¿Probaste químicamente esta pastilla?",
+    "testStrip.subtitle": "Registra el resultado de tu tira de fentanilo.",
+    "testStrip.negative": "Negativo (Sin Fentanilo)",
+    "testStrip.positive": "Positivo (Fentanilo Detectado)",
+    "testStrip.invalid": "Inválido / Repetir",
+    "testStrip.logged": "Resultado registrado",
+    "testStrip.error": "Error al registrar resultado",
+    "testStrip.recorded": "Resultado registrado",
+    "testStrip.indicator.positive": "Fentanilo +",
+    "testStrip.indicator.negative": "Fentanilo −",
+
     // History
     "history.title": "Historial de Verificaciones",
     "history.savedChecks": "Tus verificaciones guardadas",
