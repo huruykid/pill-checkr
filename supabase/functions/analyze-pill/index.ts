@@ -653,6 +653,7 @@ serve(async (req) => {
           risk_reasons: riskReasons,
           notes: "Quick check (text-only, no photo)",
           user_id: userId || null,
+          shared: !userId,
         })
         .select()
         .single();
