@@ -651,6 +651,13 @@ export type Database = {
             referencedRelation: "webhooks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "webhooks_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       webhooks: {
@@ -691,7 +698,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      webhooks_safe: {
+        Row: {
+          created_at: string | null
+          events: string[] | null
+          id: string | null
+          is_active: boolean | null
+          label: string | null
+          updated_at: string | null
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          events?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          label?: string | null
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          events?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          label?: string | null
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       fuzzy_imprint_search: {
