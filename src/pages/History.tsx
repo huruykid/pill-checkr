@@ -7,7 +7,7 @@ import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
-import { History as HistoryIcon, Search, Trash2, AlertCircle, Gauge, Loader2 } from "lucide-react";
+import { History as HistoryIcon, Search, Trash2, AlertCircle, Gauge, Loader2, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
