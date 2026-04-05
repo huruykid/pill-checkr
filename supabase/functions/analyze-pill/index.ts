@@ -735,9 +735,23 @@ Respond with JSON only:
           {
             role: "user",
             content: [
-              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}${backImage ? ". A back-side photo is also provided — use both sides for more accurate imprint extraction and analysis." : ""}` },
+              { type: "text", text: `Analyze this pill image. User provided info - Imprint: ${imprint || "not provided"}, Shape: ${shape || "not provided"}, Color: ${color || "not provided"}, Has reference object: ${hasReferenceObject}${backImage ? ". A back-side photo is also provided — use both sides for more accurate imprint extraction and analysis." : ""}${processedImage ? "\n\nIMPORTANT: A high-contrast grayscale version of the image is provided specifically for OCR/imprint reading. Use it for text extraction. Use the original color image for color analysis." : ""}` },
+              // Send processed image first (for OCR) if available, then original (for color)
+              ...(processedImage
+                ? [
+                    { type: "text" as const, text: "HIGH-CONTRAST GRAYSCALE (use for imprint OCR):" },
+                    { type: "image_url" as const, image_url: { url: processedImage } },
+                    { type: "text" as const, text: "ORIGINAL COLOR IMAGE (use for color analysis):" },
+                  ]
+                : []),
               { type: "image_url", image_url: { url: image } },
-              ...(backImage ? [{ type: "image_url" as const, image_url: { url: backImage } }] : []),
+              ...(processedBackImage
+                ? [
+                    { type: "text" as const, text: "HIGH-CONTRAST GRAYSCALE BACK (use for back imprint OCR):" },
+                    { type: "image_url" as const, image_url: { url: processedBackImage } },
+                  ]
+                : []),
+              ...(backImage ? [{ type: "text" as const, text: "ORIGINAL BACK IMAGE:" }, { type: "image_url" as const, image_url: { url: backImage } }] : []),
             ]
           }
         ],

@@ -222,13 +222,26 @@ export default function CheckPill() {
         backPhotoUrl = await uploadImage(backImageFile, "back");
       }
 
-      // Step 1: Extracting features (real call starts)
+      // Step 1: Pre-processing image for OCR
       setAnalysisStep(1);
+      let processedImage: string | null = null;
+      let processedBackImage: string | null = null;
+      try {
+        processedImage = await preprocessForOCR(imagePreview);
+        if (backImagePreview) {
+          processedBackImage = await preprocessForOCR(backImagePreview);
+        }
+      } catch (preprocessErr) {
+        console.warn("Image pre-processing failed, using originals:", preprocessErr);
+      }
+
+      // Step 2: Extracting features (real call starts)
+      setAnalysisStep(2);
 
       // Schedule simulated progress steps during the edge function call
-      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(2), 2000));
-      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(3), 4500));
-      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(4), 7000));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(3), 2000));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(4), 4500));
+      stepTimersRef.current.push(setTimeout(() => setAnalysisStep(5), 7000));
 
       // Call the edge function for analysis
       const { data, error } = await supabase.functions.invoke("analyze-pill", {
@@ -236,6 +249,8 @@ export default function CheckPill() {
             quickCheck: false,
             image: imagePreview,
             backImage: backImagePreview || null,
+            processedImage: processedImage || null,
+            processedBackImage: processedBackImage || null,
             imprint: imprint || null,
             shape: shape || null,
             color: color || null,
@@ -248,7 +263,7 @@ export default function CheckPill() {
       });
 
       clearStepTimers();
-      setAnalysisStep(4); // Jump to final step on completion
+      setAnalysisStep(5); // Jump to final step on completion
 
       if (error) throw error;
 
