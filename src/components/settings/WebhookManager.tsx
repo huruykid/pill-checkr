@@ -58,7 +58,7 @@ export function WebhookManager() {
     try {
       const { data, error } = await supabase
         .from("webhooks" as any)
-        .select("*")
+        .select("id, url, label, is_active, events, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setWebhooks((data as any[]) || []);
