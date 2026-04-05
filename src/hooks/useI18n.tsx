@@ -331,6 +331,14 @@ const translations: Record<Language, Record<string, string>> = {
     "gate.item4": "If you suspect an overdose, <strong>call 911 immediately</strong>",
     "gate.checkbox": "I understand that this tool cannot guarantee safety and is for educational and harm reduction purposes only.",
     "gate.accept": "I Accept — Continue",
+
+    // Safety Threshold Modal
+    "safety.modal.title": "⚠️ Before You View These Results",
+    "safety.modal.bullet1": "Visual analysis is NOT a lab test.",
+    "safety.modal.bullet2": "Lethal counterfeits can look identical to real pills.",
+    "safety.modal.bullet3": "Always have Narcan ready and never use alone.",
+    "safety.modal.button_wait": "Wait ({seconds})…",
+    "safety.modal.button_ready": "I Understand — View Results",
   },
   es: {
     // Nav
