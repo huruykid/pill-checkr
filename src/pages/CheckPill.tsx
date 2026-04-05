@@ -147,6 +147,7 @@ export default function CheckPill() {
 
   const ANALYSIS_STEPS = mode === "photo" ? [
     { label: t("check.step.upload"), icon: Upload },
+    { label: t("check.step.preprocess"), icon: Zap },
     { label: t("check.step.extract"), icon: Camera },
     { label: t("check.step.search"), icon: Search },
     { label: t("check.step.compare"), icon: ImageIcon },
