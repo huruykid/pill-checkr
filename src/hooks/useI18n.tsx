@@ -942,6 +942,13 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "La naloxone inverse les surdoses d'opioïdes et peut sauver des vies. Elle est disponible sans ordonnance dans la plupart des États. Portez-la même si vous n'utilisez pas — vous pourriez sauver quelqu'un.",
     "hr.freeByMail": "Gratuit par Courrier (NEXT Distro)",
     "hr.findNaloxone": "Trouver de la Naloxone Près de Moi",
+
+    "safety.modal.title": "⚠️ Avant de Voir Ces Résultats",
+    "safety.modal.bullet1": "L'analyse visuelle N'EST PAS un test en laboratoire.",
+    "safety.modal.bullet2": "Les contrefaçons mortelles peuvent être visuellement identiques aux vrais comprimés.",
+    "safety.modal.bullet3": "Ayez toujours du Narcan prêt et n'utilisez jamais seul.",
+    "safety.modal.button_wait": "Attendez ({seconds})…",
+    "safety.modal.button_ready": "Je Comprends — Voir les Résultats",
   },
   pt: {
     // Nav
