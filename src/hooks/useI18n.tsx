@@ -637,6 +637,13 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "La naloxona revierte sobredosis de opioides y puede salvar vidas. Está disponible sin receta en la mayoría de los estados. Llévala aunque no uses — podrías salvar a alguien.",
     "hr.freeByMail": "Gratis por Correo (NEXT Distro)",
     "hr.findNaloxone": "Encontrar Naloxona Cerca",
+
+    "safety.modal.title": "⚠️ Antes de Ver Estos Resultados",
+    "safety.modal.bullet1": "El análisis visual NO es una prueba de laboratorio.",
+    "safety.modal.bullet2": "Las falsificaciones letales pueden verse idénticas a las pastillas reales.",
+    "safety.modal.bullet3": "Siempre tenga Narcan listo y nunca use solo.",
+    "safety.modal.button_wait": "Espere ({seconds})…",
+    "safety.modal.button_ready": "Entiendo — Ver Resultados",
   },
   fr: {
     // Nav
