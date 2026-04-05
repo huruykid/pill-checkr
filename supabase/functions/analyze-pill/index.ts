@@ -544,7 +544,7 @@ serve(async (req) => {
 
       // Score matches
       let scoredMatches = references.map((ref) => {
-        const { score, reasons } = calculateMatchScore(
+        const { score, reasons, metricRatios } = calculateMatchScore(
           { imprint: finalImprint, backImprint: null, shape: finalShape, color: finalColor, scoring: finalScoring, sizeMm: finalSizeMm, detectedLogos: null },
           { imprint: ref.imprint, shape: ref.shape, color: ref.color, scoring: ref.scoring, size_mm: ref.size_mm, logo_description: ref.logo_description }
         );
@@ -555,7 +555,7 @@ serve(async (req) => {
           finalScore += CROSS_PASS_BONUS;
           finalReasons.push("Corroborated across multiple search passes");
         }
-        return { ...ref, score: finalScore, matchReasons: finalReasons };
+        return { ...ref, score: finalScore, matchReasons: finalReasons, metricRatios };
       })
       .filter(m => m.score > 0)
       .sort((a, b) => {
