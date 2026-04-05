@@ -93,39 +93,50 @@ const SOURCE_PRIORITY: Record<string, number> = {
   dailymed: 1,
 };
 
+// Metric ratios for one-strike safety threshold (0–1 scale, null = no data to compare)
+type MetricRatios = { imprint: number | null; shape: number | null; color: number | null; scoring: number | null };
+
 // Calculate match score between extracted features and reference pill
 function calculateMatchScore(
   extracted: { imprint: string | null; backImprint: string | null; shape: string | null; color: string | null; scoring: string | null; sizeMm: number | null; detectedLogos: Array<{ name: string; confidence: string; description: string }> | null },
   reference: { imprint: string; shape: string; color: string; scoring: string | null; size_mm: number | null; logo_description: string | null }
-): { score: number; reasons: string[] } {
+): { score: number; reasons: string[]; metricRatios: MetricRatios } {
   let score = 0;
   const reasons: string[] = [];
+  const metricRatios: MetricRatios = { imprint: null, shape: null, color: null, scoring: null };
 
   if (reference.imprint) {
     const refNorm = reference.imprint.toLowerCase().replace(/\s+/g, "");
     const frontNorm = extracted.imprint?.toLowerCase().replace(/\s+/g, "") || "";
     const backNorm = extracted.backImprint?.toLowerCase().replace(/\s+/g, "") || "";
     
+    let imprintEarned = 0;
     // Check front imprint
     if (frontNorm && frontNorm === refNorm) {
-      score += MATCH_WEIGHTS.imprintExact;
+      imprintEarned = MATCH_WEIGHTS.imprintExact;
       reasons.push("Imprint matches exactly");
     } else if (frontNorm && (refNorm.includes(frontNorm) || frontNorm.includes(refNorm))) {
-      score += MATCH_WEIGHTS.imprintPartial;
+      imprintEarned = MATCH_WEIGHTS.imprintPartial;
       reasons.push("Imprint partially matches");
     } else if (backNorm && backNorm === refNorm) {
-      // Back imprint exact match
-      score += MATCH_WEIGHTS.imprintExact;
+      imprintEarned = MATCH_WEIGHTS.imprintExact;
       reasons.push("Back imprint matches exactly");
     } else if (backNorm && (refNorm.includes(backNorm) || backNorm.includes(refNorm))) {
-      score += MATCH_WEIGHTS.imprintPartial;
+      imprintEarned = MATCH_WEIGHTS.imprintPartial;
       reasons.push("Back imprint partially matches");
     }
+    score += imprintEarned;
+    metricRatios.imprint = imprintEarned / MATCH_WEIGHTS.imprintExact;
   }
 
-  if (extracted.shape && reference.shape && extracted.shape === reference.shape) {
-    score += MATCH_WEIGHTS.shape;
-    reasons.push("Shape matches");
+  if (extracted.shape && reference.shape) {
+    if (extracted.shape === reference.shape) {
+      score += MATCH_WEIGHTS.shape;
+      reasons.push("Shape matches");
+      metricRatios.shape = 1;
+    } else {
+      metricRatios.shape = 0;
+    }
   }
 
   if (extracted.color && reference.color) {
@@ -133,9 +144,14 @@ function calculateMatchScore(
     if (proximity === 1) {
       score += MATCH_WEIGHTS.color;
       reasons.push("Color matches");
+      metricRatios.color = 1;
     } else if (proximity > 0) {
-      score += Math.round(MATCH_WEIGHTS.color * proximity);
+      const earned = Math.round(MATCH_WEIGHTS.color * proximity);
+      score += earned;
       reasons.push(`Color similar (${extracted.color} ≈ ${reference.color})`);
+      metricRatios.color = proximity;
+    } else {
+      metricRatios.color = 0;
     }
   }
 
@@ -144,6 +160,9 @@ function calculateMatchScore(
     if (extracted.scoring === reference.scoring) {
       score += MATCH_WEIGHTS.scoring;
       reasons.push("Scoring pattern matches");
+      metricRatios.scoring = 1;
+    } else {
+      metricRatios.scoring = 0;
     }
   }
 
@@ -159,12 +178,6 @@ function calculateMatchScore(
     }
   }
 
-  // Thickness match (when reference has thickness data)
-  // Note: thickness_mm is not yet extracted from images, but if reference data has it
-  // and the extracted size is available, we can compare thickness between top reference candidates
-  // to boost matches with consistent physical dimensions. This will be fully utilized once
-  // AI extraction includes thickness estimation.
-
   // Logo match
   if (extracted.detectedLogos && extracted.detectedLogos.length > 0 && reference.logo_description) {
     const refLogoLower = reference.logo_description.toLowerCase();
@@ -177,7 +190,7 @@ function calculateMatchScore(
     }
   }
 
-  return { score, reasons };
+  return { score, reasons, metricRatios };
 }
 
 // Calculate anomaly score based on inconsistencies
