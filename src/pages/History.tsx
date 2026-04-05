@@ -186,6 +186,25 @@ export default function History() {
                           {report.shape && <span>{report.shape}</span>}
                           {report.color && <span>• {report.color}</span>}
                           <span>• {format(new Date(report.created_at), "MMM d, yyyy")}</span>
+                          {testStripResults[report.id] && (
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-[10px] gap-1 px-1.5 py-0",
+                                testStripResults[report.id] === "positive"
+                                  ? "border-danger/50 text-danger"
+                                  : testStripResults[report.id] === "negative"
+                                    ? "border-success/50 text-success"
+                                    : "border-muted-foreground/50 text-muted-foreground"
+                              )}
+                            >
+                              {testStripResults[report.id] === "positive" ? (
+                                <><ShieldAlert className="h-3 w-3" />{t("testStrip.indicator.positive")}</>
+                              ) : testStripResults[report.id] === "negative" ? (
+                                <><ShieldCheck className="h-3 w-3" />{t("testStrip.indicator.negative")}</>
+                              ) : "Invalid"}
+                            </Badge>
+                          )}
                         </div>
                         {(report.anomaly_score !== null || report.match_confidence) && (
                           <div className="flex items-center gap-3 mt-1">
