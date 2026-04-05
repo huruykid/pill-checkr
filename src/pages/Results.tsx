@@ -94,6 +94,7 @@ export default function Results() {
   const { t } = useI18n();
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [safetyModalOpen, setSafetyModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
