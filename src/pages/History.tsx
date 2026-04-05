@@ -73,6 +73,20 @@ export default function History() {
           })
         );
         setSignedUrls(urlMap);
+
+        // Fetch test strip results for all reports
+        const reportIds = reports.map(r => r.id);
+        if (reportIds.length > 0) {
+          const { data: strips } = await supabase
+            .from("test_strip_results")
+            .select("report_id, result")
+            .in("report_id", reportIds);
+          if (strips) {
+            const stripMap: Record<string, string> = {};
+            for (const s of strips) stripMap[s.report_id] = s.result;
+            setTestStripResults(stripMap);
+          }
+        }
       } catch {}
     }
 
