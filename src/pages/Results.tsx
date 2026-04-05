@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { SafetyThresholdModal } from "@/components/results/SafetyThresholdModal";
 import {
   AlertTriangle,
   AlertCircle,
@@ -94,6 +95,7 @@ export default function Results() {
   const { t } = useI18n();
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [safetyModalOpen, setSafetyModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
@@ -132,6 +134,12 @@ export default function Results() {
 
       if (matchesError) throw matchesError;
       setData({ report, matches: matches || [] });
+
+      // Show safety modal if not yet dismissed for this report
+      const modalKey = `ff_safety_modal_${reportId}`;
+      if (!localStorage.getItem(modalKey)) {
+        setSafetyModalOpen(true);
+      }
 
       // Fetch regional counterfeit alerts for matched drug names
       if (matches && matches.length > 0) {
@@ -264,7 +272,14 @@ export default function Results() {
         path={`/results/${reportId}`}
         jsonLd={makeWebPage("Pill Analysis Results", `/results/${reportId}`, "Pill analysis results with visual matching and safety guidance.")}
       />
-      <div className="container py-8 md:py-12">
+      <SafetyThresholdModal
+        open={safetyModalOpen}
+        onDismiss={() => {
+          setSafetyModalOpen(false);
+          localStorage.setItem(`ff_safety_modal_${reportId}`, "1");
+        }}
+      />
+      <div className={cn("container py-8 md:py-12 transition-all duration-300", safetyModalOpen && "blur-xl pointer-events-none select-none")}>
         <div className="mx-auto max-w-3xl">
           <Link to="/check" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />

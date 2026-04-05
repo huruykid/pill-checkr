@@ -331,6 +331,14 @@ const translations: Record<Language, Record<string, string>> = {
     "gate.item4": "If you suspect an overdose, <strong>call 911 immediately</strong>",
     "gate.checkbox": "I understand that this tool cannot guarantee safety and is for educational and harm reduction purposes only.",
     "gate.accept": "I Accept — Continue",
+
+    // Safety Threshold Modal
+    "safety.modal.title": "⚠️ Before You View These Results",
+    "safety.modal.bullet1": "Visual analysis is NOT a lab test.",
+    "safety.modal.bullet2": "Lethal counterfeits can look identical to real pills.",
+    "safety.modal.bullet3": "Always have Narcan ready and never use alone.",
+    "safety.modal.button_wait": "Wait ({seconds})…",
+    "safety.modal.button_ready": "I Understand — View Results",
   },
   es: {
     // Nav
@@ -629,6 +637,13 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "La naloxona revierte sobredosis de opioides y puede salvar vidas. Está disponible sin receta en la mayoría de los estados. Llévala aunque no uses — podrías salvar a alguien.",
     "hr.freeByMail": "Gratis por Correo (NEXT Distro)",
     "hr.findNaloxone": "Encontrar Naloxona Cerca",
+
+    "safety.modal.title": "⚠️ Antes de Ver Estos Resultados",
+    "safety.modal.bullet1": "El análisis visual NO es una prueba de laboratorio.",
+    "safety.modal.bullet2": "Las falsificaciones letales pueden verse idénticas a las pastillas reales.",
+    "safety.modal.bullet3": "Siempre tenga Narcan listo y nunca use solo.",
+    "safety.modal.button_wait": "Espere ({seconds})…",
+    "safety.modal.button_ready": "Entiendo — Ver Resultados",
   },
   fr: {
     // Nav
@@ -927,6 +942,13 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "La naloxone inverse les surdoses d'opioïdes et peut sauver des vies. Elle est disponible sans ordonnance dans la plupart des États. Portez-la même si vous n'utilisez pas — vous pourriez sauver quelqu'un.",
     "hr.freeByMail": "Gratuit par Courrier (NEXT Distro)",
     "hr.findNaloxone": "Trouver de la Naloxone Près de Moi",
+
+    "safety.modal.title": "⚠️ Avant de Voir Ces Résultats",
+    "safety.modal.bullet1": "L'analyse visuelle N'EST PAS un test en laboratoire.",
+    "safety.modal.bullet2": "Les contrefaçons mortelles peuvent être visuellement identiques aux vrais comprimés.",
+    "safety.modal.bullet3": "Ayez toujours du Narcan prêt et n'utilisez jamais seul.",
+    "safety.modal.button_wait": "Attendez ({seconds})…",
+    "safety.modal.button_ready": "Je Comprends — Voir les Résultats",
   },
   pt: {
     // Nav
@@ -1225,6 +1247,13 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.naloxoneDesc": "A naloxona reverte overdoses de opioides e pode salvar vidas. Está disponível sem receita na maioria dos estados. Leve-a mesmo que não use — você pode salvar alguém.",
     "hr.freeByMail": "Grátis pelo Correio (NEXT Distro)",
     "hr.findNaloxone": "Encontrar Naloxona Perto de Mim",
+
+    "safety.modal.title": "⚠️ Antes de Ver Estes Resultados",
+    "safety.modal.bullet1": "A análise visual NÃO é um teste de laboratório.",
+    "safety.modal.bullet2": "Falsificações letais podem parecer idênticas aos comprimidos reais.",
+    "safety.modal.bullet3": "Sempre tenha Narcan pronto e nunca use sozinho.",
+    "safety.modal.button_wait": "Aguarde ({seconds})…",
+    "safety.modal.button_ready": "Eu Entendo — Ver Resultados",
   },
 };
 
