@@ -29,7 +29,7 @@ export function CounterfeitHotspots({ className }: CounterfeitHotspotsProps) {
   const fetchHotspots = async () => {
     try {
       const { data, error } = await supabase
-        .from("counterfeit_reports")
+        .from("counterfeit_reports_public")
         .select("city, state, drug_name, risk_level, created_at")
         .order("created_at", { ascending: false })
         .limit(500);

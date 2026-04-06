@@ -81,7 +81,7 @@ export default function Trends() {
           .lte("created_at", dateTo + "T23:59:59Z")
           .order("created_at", { ascending: true }),
         supabase
-          .from("counterfeit_reports")
+          .from("counterfeit_reports_public")
           .select("created_at, risk_level, drug_name, city, state")
           .gte("created_at", dateFrom + "T00:00:00Z")
           .lte("created_at", dateTo + "T23:59:59Z")
