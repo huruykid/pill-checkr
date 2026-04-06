@@ -698,6 +698,33 @@ export type Database = {
       }
     }
     Views: {
+      counterfeit_reports_public: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          drug_name: string | null
+          id: string | null
+          risk_level: string | null
+          state: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          drug_name?: string | null
+          id?: string | null
+          risk_level?: string | null
+          state?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          drug_name?: string | null
+          id?: string | null
+          risk_level?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
       webhooks_safe: {
         Row: {
           created_at: string | null

@@ -146,7 +146,7 @@ export default function Results() {
         const drugNames = [...new Set(matches.map(m => m.drug_name))];
         const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
         const { data: cfReports } = await supabase
-          .from("counterfeit_reports")
+          .from("counterfeit_reports_public")
           .select("drug_name, state, city, risk_level, created_at")
           .gte("created_at", ninetyDaysAgo)
           .in("drug_name", drugNames)
