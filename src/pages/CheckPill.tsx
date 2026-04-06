@@ -129,12 +129,14 @@ export default function CheckPill() {
     try {
       const ext = file.name.split(".").pop() || "jpg";
       const base = crypto.randomUUID();
-      const fileName = suffix ? `${base}_${suffix}.${ext}` : `${base}.${ext}`;
+      const name = suffix ? `${base}_${suffix}.${ext}` : `${base}.${ext}`;
+      const folder = user ? user.id : "anon";
+      const filePath = `${folder}/${name}`;
       const { error } = await supabase.storage
         .from("pill-images")
-        .upload(fileName, file, { contentType: file.type });
+        .upload(filePath, file, { contentType: file.type });
       if (error) throw error;
-      return fileName;
+      return filePath;
     } catch (err) {
       console.error("Image upload failed:", err);
       return null;
