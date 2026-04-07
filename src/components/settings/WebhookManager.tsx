@@ -57,7 +57,7 @@ export function WebhookManager() {
   const fetchWebhooks = async () => {
     try {
       const { data, error } = await supabase
-        .from("webhooks" as any)
+        .from("webhooks_safe" as any)
         .select("id, url, label, is_active, events, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
