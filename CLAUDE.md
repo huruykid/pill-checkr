@@ -42,3 +42,17 @@ I test it?" The home screen answers it above the fold.
 - localStorage keys are `pc_*` (renamed from `ff_*`); API keys are `pc_*`.
 - Anonymous uploads land in `pill-images/anon/` — needs a purge job.
 - `tune-confidence-scores` edge fn is legacy admin tooling; safe to delete.
+
+## Community Alerts (the loop, on screen)
+- `/trends` = CommunityAlerts.tsx feed (both targets). Old charts page lives
+  at `/analytics`, web only.
+- Data: `counterfeit_reports_public` view (id, city, state, risk_level,
+  drug_name, imprint, strip_result, created_at). notes/photo/GPS never leave
+  the base table. Migration 20260821000000_community_alerts.sql.
+- Writes: ReportFoundSheet inserts to `counterfeit_reports` as guest or user.
+  Results → TestStripLogger `onLogged` → nudge → same sheet, prefilled with
+  imprint, drug, strip result and report_id (source='results').
+- "Near me" = ilike(state) + same-city sorted first. Location is city/state
+  only, cached in `pc_alert_location`. No coordinates are ever sent.
+- TODO before launch: rate-limit anonymous inserts (edge fn or pg trigger by
+  session), and an admin "hide" flag on counterfeit_reports for spam.

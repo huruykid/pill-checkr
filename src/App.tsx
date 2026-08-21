@@ -22,6 +22,7 @@ import NearbyHelpMap from "./pages/NearbyHelpMap";
 import Contribute from "./pages/Contribute";
 import ApiDocs from "./pages/ApiDocs";
 import Trends from "./pages/Trends";
+import CommunityAlerts from "./pages/CommunityAlerts";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
@@ -67,7 +68,7 @@ const App = forwardRef(function App(_props, ref) {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/nearby-help" element={<NearbyHelpMap />} />
-            <Route path="/trends" element={<Trends />} />
+            <Route path="/trends" element={<CommunityAlerts />} />
             {/* Web-only surfaces. The native build redirects instead of 404ing. */}
             {IS_NATIVE_BUILD ? (
               <>
@@ -75,6 +76,7 @@ const App = forwardRef(function App(_props, ref) {
                 <Route path="/contribute" element={<Navigate to="/trends" replace />} />
                 <Route path="/api-docs" element={<Navigate to="/" replace />} />
                 <Route path="/install" element={<Navigate to="/" replace />} />
+                <Route path="/analytics" element={<Navigate to="/trends" replace />} />
               </>
             ) : (
               <>
@@ -82,6 +84,7 @@ const App = forwardRef(function App(_props, ref) {
                 <Route path="/contribute" element={<Contribute />} />
                 <Route path="/api-docs" element={<ApiDocs />} />
                 <Route path="/install" element={<Install />} />
+                <Route path="/analytics" element={<Trends />} />
               </>
             )}
             <Route path="*" element={<NotFound />} />

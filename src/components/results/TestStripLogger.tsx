@@ -11,11 +11,13 @@ import { cn } from "@/lib/utils";
 interface TestStripLoggerProps {
   reportId: string;
   className?: string;
+  /** Fired after a result is saved; Results uses it to offer "warn people near you". */
+  onLogged?: (result: "positive" | "negative" | "invalid") => void;
 }
 
 type TestResult = "positive" | "negative" | "invalid";
 
-export function TestStripLogger({ reportId, className }: TestStripLoggerProps) {
+export function TestStripLogger({ reportId, className, onLogged }: TestStripLoggerProps) {
   const { t } = useI18n();
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
@@ -62,6 +64,7 @@ export function TestStripLogger({ reportId, className }: TestStripLoggerProps) {
 
       setSavedResult(result);
       toast.success(t("testStrip.logged"));
+      onLogged?.(result);
     } catch (error) {
       console.error("Error logging test strip result:", error);
       toast.error(t("testStrip.error"));

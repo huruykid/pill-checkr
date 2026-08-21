@@ -14,6 +14,7 @@ import { BuddyAlert } from "@/components/results/BuddyAlert";
 import { MatchFeedback } from "@/components/results/MatchFeedback";
 import { ReportPill } from "@/components/results/ReportPill";
 import { TestStripLogger } from "@/components/results/TestStripLogger";
+import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { RegionalCounterfeitAlert } from "@/components/results/RegionalCounterfeitAlert";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import {
   Loader2,
   Info,
   ShieldAlert,
+  Radio,
   Eye,
   ImageIcon,
   MapPin,
@@ -97,6 +99,8 @@ export default function Results() {
   const [saving, setSaving] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
+  const [loggedStrip, setLoggedStrip] = useState<"positive" | "negative" | null>(null);
+  const [warnOpen, setWarnOpen] = useState(false);
   const [counterfeitAlerts, setCounterfeitAlerts] = useState<Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }>>([]);
 
   const hasCounterfeitRisk = useMemo(() => {
@@ -519,7 +523,27 @@ export default function Results() {
           </Card>
 
           {/* PRIMARY ACTION: log the test strip result. This is the moat interaction. */}
-          <TestStripLogger reportId={report.id} className="mb-6" />
+          <TestStripLogger
+            reportId={report.id}
+            className="mb-3"
+            onLogged={(r) => { if (r !== "invalid") { setLoggedStrip(r); setWarnOpen(r === "positive"); } }}
+          />
+          {loggedStrip && (
+            <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="text-sm">
+                <p className="font-semibold">Warn people near you</p>
+                <p className="text-muted-foreground">Post this result to Community Alerts. Anonymous, city-level.</p>
+              </div>
+              <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setWarnOpen(true)}>
+                <Radio className="h-4 w-4" />Post
+              </Button>
+            </div>
+          )}
+          <ReportFoundSheet
+            open={warnOpen}
+            onOpenChange={setWarnOpen}
+            prefill={{ imprint: report.imprint_text, drug: matches[0]?.drug_name, strip: loggedStrip, reportId: report.id }}
+          />
 
           {/* Section C: What To Do Next */}
           <Card className="mb-8">

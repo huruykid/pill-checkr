@@ -145,6 +145,7 @@ export type Database = {
           created_at: string
           drug_name: string | null
           id: string
+          imprint: string | null
           is_anonymous: boolean
           location_lat: number | null
           location_lng: number | null
@@ -159,6 +160,9 @@ export type Database = {
           created_at?: string
           drug_name?: string | null
           id?: string
+          imprint?: string | null
+          strip_result?: string
+          source?: string
           is_anonymous?: boolean
           location_lat?: number | null
           location_lng?: number | null
@@ -704,8 +708,10 @@ export type Database = {
           created_at: string | null
           drug_name: string | null
           id: string | null
+          imprint: string | null
           risk_level: string | null
           state: string | null
+          strip_result: string | null
         }
         Insert: {
           city?: string | null
