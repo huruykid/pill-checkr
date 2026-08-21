@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, AlertCircle, CheckCircle } from "lucide-react";
+import { AlertTriangle, AlertCircle } from "lucide-react";
 
 type RiskLevel = "low" | "medium" | "high";
 
@@ -12,10 +12,11 @@ interface RiskBadgeProps {
 }
 
 const riskConfig = {
+  // MVP: no green/"safe" state. A visual match is still an unverified pill.
   low: {
-    label: "Low Risk",
-    variant: "risk-low" as const,
-    icon: CheckCircle,
+    label: "Unverified — Test It",
+    variant: "risk-medium" as const,
+    icon: AlertCircle,
   },
   medium: {
     label: "Medium Risk",

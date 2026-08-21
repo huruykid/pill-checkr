@@ -5,7 +5,6 @@ import { Layout } from "@/components/layout/Layout";
 import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Disclaimer } from "@/components/shared/Disclaimer";
 import { RiskBadge } from "@/components/shared/RiskBadge";
-import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
 import { CounterfeitWarning } from "@/components/shared/CounterfeitWarning";
 import { HarmReductionResources } from "@/components/shared/HarmReductionResources";
 import { DrugInfoCard } from "@/components/results/DrugInfoCard";
@@ -36,8 +35,7 @@ import {
   ImageOff,
   Loader2,
   Info,
-  HelpCircle,
-  Gauge,
+  ShieldAlert,
   Eye,
   ImageIcon,
   MapPin,
@@ -209,8 +207,6 @@ export default function Results() {
           imprint: data.report.imprint_text,
           shape: data.report.shape,
           color: data.report.color,
-          anomalyScore: data.report.anomaly_score,
-          matchConfidence: data.report.match_confidence,
         });
         localStorage.setItem("pillCheckHistory", JSON.stringify(history.slice(0, 50)));
         toast.success("Saved to local history");
@@ -251,18 +247,9 @@ export default function Results() {
 
   const { report, matches } = data;
   const riskLevel = (report.risk_level || "medium") as "low" | "medium" | "high";
-  const anomalyScore = report.anomaly_score ?? 0;
   const anomalyReasons = report.anomaly_reasons ?? [];
   const riskReasons = report.risk_reasons ?? [];
-  const matchConfidence = report.match_confidence as "low" | "medium" | "high" | null;
 
-  const getAnomalyDescription = (score: number) => {
-    if (score >= 60) return { text: t("results.highInconsistency"), color: "text-danger" };
-    if (score >= 30) return { text: t("results.moderateInconsistency"), color: "text-warning" };
-    return { text: t("results.lowInconsistency"), color: "text-success" };
-  };
-
-  const anomalyInfo = getAnomalyDescription(anomalyScore);
 
   return (
     <Layout urgentEmergency={riskLevel === "high"}>
@@ -294,31 +281,22 @@ export default function Results() {
           {/* Plain-language risk summary */}
           {(() => {
             const topDrug = matches.length > 0 ? matches[0].drug_name : null;
-            const isLow = riskLevel === "low" && matchConfidence !== "low" && matches.length > 0;
-            const isHigh = riskLevel === "high" || matches.length === 0;
+            // MVP: never render a "looks legit" state. Visual matching cannot detect fentanyl.
+            const isUnidentified = matches.length === 0;
 
-            const config = isLow
+            const config = isUnidentified
               ? {
-                  icon: <CheckCircle className="h-6 w-6 text-success shrink-0 mt-0.5" />,
-                  border: "border-l-success",
-                  bg: "bg-success-light",
-                  message: t("results.summary.lowRisk").replace("{drug}", topDrug || ""),
+                  icon: <AlertTriangle className="h-6 w-6 text-danger shrink-0 mt-0.5" />,
+                  border: "border-l-danger",
+                  bg: "bg-danger-light",
+                  message: t("results.summary.highRiskNone"),
                 }
-              : isHigh
-                ? {
-                    icon: <AlertTriangle className="h-6 w-6 text-danger shrink-0 mt-0.5" />,
-                    border: "border-l-danger",
-                    bg: "bg-danger-light",
-                    message: topDrug
-                      ? t("results.summary.highRiskDrug").replace("{drug}", topDrug)
-                      : t("results.summary.highRiskNone"),
-                  }
-                : {
-                    icon: <AlertCircle className="h-6 w-6 text-warning shrink-0 mt-0.5" />,
-                    border: "border-l-warning",
-                    bg: "bg-warning-light",
-                    message: t("results.summary.medRisk").replace("{drug}", topDrug || t("results.noMatch")),
-                  };
+              : {
+                  icon: <AlertTriangle className="h-6 w-6 text-warning shrink-0 mt-0.5" />,
+                  border: "border-l-warning",
+                  bg: "bg-warning-light",
+                  message: t("results.summary.identified").replace("{drug}", topDrug || ""),
+                };
 
             return (
               <div className={cn("mb-6 rounded-xl border-l-4 p-4 md:p-5", config.border, config.bg)}>
@@ -475,7 +453,6 @@ export default function Results() {
                             })()}
                           </div>
                         </div>
-                        <ConfidenceBadge level={(match.confidence || "low") as "low" | "medium" | "high"} />
                       </div>
                     </div>
                   ))}
@@ -492,117 +469,38 @@ export default function Results() {
             <RegionalCounterfeitAlert alerts={counterfeitAlerts} className="mb-6" />
           )}
 
-          {/* Section B: Uncertainty & Consistency Check */}
-          <Card className="mb-6">
+          {/* Section B: What this check can and cannot tell you (categorical, no scores) */}
+          <Card className="mb-6 border-warning/40">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Gauge className="h-5 w-5 text-primary" />
-                {t("results.uncertaintyTitle")}
+                <ShieldAlert className="h-5 w-5 text-warning" />
+                {t("results.verdictTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Individual Match Confidence Bars */}
-              {matches.length > 0 && (() => {
-                const topMatch = matches[0];
-                const imprintMatch = (report.imprint_text && topMatch.matched_imprint)
-                  ? (report.imprint_text.toLowerCase().trim() === topMatch.matched_imprint.toLowerCase().trim() ? 100
-                    : report.imprint_text.toLowerCase().includes(topMatch.matched_imprint.toLowerCase()) || topMatch.matched_imprint.toLowerCase().includes(report.imprint_text.toLowerCase()) ? 65
-                    : 20)
-                  : 0;
-                const colorMatch = (report.color && topMatch.matched_color)
-                  ? (report.color === topMatch.matched_color ? 100 : 30)
-                  : 0;
-                const shapeMatch = (report.shape && topMatch.matched_shape)
-                  ? (report.shape === topMatch.matched_shape ? 100 : 25)
-                  : 0;
-
-                // Scoring match: parse from match_reasons
-                const scoringMatchText = topMatch.match_reasons?.includes("Scoring pattern matches");
-                const scoringValue = scoringMatchText ? 100 : (topMatch.match_reasons?.includes("scoring") ? 30 : 0);
-
-                // Size match: parse from match_reasons
-                const sizeExactMatch = topMatch.match_reasons?.match(/Size matches \(±([\d.]+)mm\)/);
-                const sizeCloseMatch = topMatch.match_reasons?.match(/Size close \(±([\d.]+)mm\)/);
-                const sizeValue = sizeExactMatch ? 100 : sizeCloseMatch ? 60 : 0;
-
-                // Size deviation: derive from anomaly score inversely
-                const sizeDeviation = Math.max(0, Math.min(100, 100 - anomalyScore * 1.2));
-
-                const bars = [
-                  { label: "Imprint Match", value: imprintMatch, icon: "🔤" },
-                  { label: "Color Similarity", value: colorMatch, icon: "🎨" },
-                  { label: "Shape Match", value: shapeMatch, icon: "🔷" },
-                  { label: "Scoring Pattern", value: scoringValue || sizeDeviation, icon: "➗", hide: !scoringMatchText && !topMatch.match_reasons?.includes("scoring") },
-                  { label: "Size Match", value: sizeValue || sizeDeviation, icon: "📏", hide: !sizeExactMatch && !sizeCloseMatch },
-                  { label: "Size Consistency", value: sizeDeviation, icon: "📏", hide: !!sizeExactMatch || !!sizeCloseMatch },
-                  { label: "Logo Match", value: topMatch.match_reasons?.includes("Logo matches") ? 100 : 0, icon: "🏷️", hide: !topMatch.match_reasons?.includes("Logo matches") },
-                ].filter(b => !b.hide);
-
-                const getBarColor = (v: number) =>
-                  v >= 70 ? "bg-success" : v >= 40 ? "bg-warning" : "bg-danger";
-                const getTextColor = (v: number) =>
-                  v >= 70 ? "text-success" : v >= 40 ? "text-warning" : "text-danger";
-
-                return (
-                  <div className="rounded-lg bg-muted/50 p-4 space-y-3">
-                    <p className="text-sm font-medium text-foreground mb-1">{t("results.matchBreakdown")}</p>
-                    {bars.map((bar) => (
-                      <div key={bar.label} className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <span>{bar.icon}</span> {bar.label}
-                          </span>
-                          <span className={`text-xs font-semibold ${getTextColor(bar.value)}`}>
-                            {bar.value}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${getBarColor(bar.value)}`}
-                            style={{ width: `${bar.value}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-
-              <div className="rounded-lg bg-muted/50 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-medium text-foreground">{t("results.inconsistencyScore")}</span>
-                  <span className={`font-bold text-lg ${anomalyInfo.color}`}>
-                    {anomalyScore}/100
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                  <div 
-                    className={`h-full transition-all ${
-                      anomalyScore >= 60 ? "bg-danger" : 
-                      anomalyScore >= 30 ? "bg-warning" : "bg-success"
-                    }`}
-                    style={{ width: `${anomalyScore}%` }}
-                  />
-                </div>
-                <p className={`text-sm mt-2 ${anomalyInfo.color}`}>
-                  {anomalyInfo.text}
+              <div className="rounded-lg bg-warning-light border border-warning/30 p-4">
+                <p className="font-semibold text-foreground">
+                  {matches.length > 0
+                    ? t("results.verdict.identified").replace("{drug}", matches[0].drug_name || "")
+                    : t("results.verdict.unidentified")}
                 </p>
+                <p className="mt-2 text-sm text-muted-foreground">{t("results.verdict.why")}</p>
               </div>
 
-              {matchConfidence && (
-                <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
-                  <HelpCircle className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <span className="text-sm text-muted-foreground">Match Confidence: </span>
-                    <span className={`font-medium ${
-                      matchConfidence === "high" ? "text-success" :
-                      matchConfidence === "medium" ? "text-warning" : "text-danger"
-                    }`}>
-                      {matchConfidence.charAt(0).toUpperCase() + matchConfidence.slice(1)}
-                    </span>
-                  </div>
-                </div>
-              )}
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
+                  <span className="text-muted-foreground">{t("results.verdict.step1")}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
+                  <span className="text-muted-foreground">{t("results.verdict.step2")}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
+                  <span className="text-muted-foreground">{t("results.verdict.step3")}</span>
+                </li>
+              </ul>
 
               {anomalyReasons.length > 0 && (
                 <div className="space-y-2">
@@ -615,30 +513,6 @@ export default function Results() {
                       </li>
                     ))}
                   </ul>
-                </div>
-              )}
-
-              {riskReasons.length > 0 && (
-                <div className="space-y-2 border-t border-border pt-4">
-                  <p className="text-sm font-medium text-muted-foreground">{t("results.riskNotes")}</p>
-                  <ul className="space-y-2">
-                    {riskReasons.map((reason, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm">
-                        <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${
-                          riskLevel === "high" ? "bg-danger" : 
-                          riskLevel === "medium" ? "bg-warning" : "bg-success"
-                        }`} />
-                        <span className="text-muted-foreground">{reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {report.image_quality === "poor" && (
-                <div className="flex items-center gap-2 rounded-lg bg-warning-light px-3 py-2 text-sm text-warning">
-                  <ImageOff className="h-4 w-4" />
-                  {t("results.poorImage")}
                 </div>
               )}
             </CardContent>

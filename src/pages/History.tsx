@@ -3,12 +3,11 @@ import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { RiskBadge } from "@/components/shared/RiskBadge";
-import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { History as HistoryIcon, Search, Trash2, AlertCircle, Gauge, Loader2, ShieldAlert, ShieldCheck } from "lucide-react";
+import { History as HistoryIcon, Search, Trash2, AlertCircle, Loader2, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +24,6 @@ interface LocalHistoryItem {
   shape: string | null;
   color: string | null;
   anomalyScore?: number;
-  matchConfidence?: "low" | "medium" | "high";
 }
 
 export default function History() {
@@ -207,19 +205,6 @@ export default function History() {
                             </Badge>
                           )}
                         </div>
-                        {(report.anomaly_score !== null || report.match_confidence) && (
-                          <div className="flex items-center gap-3 mt-1">
-                            {report.anomaly_score !== null && (
-                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Gauge className="h-3 w-3" />
-                                {t("history.inconsistency")}: {report.anomaly_score}/100
-                              </span>
-                            )}
-                            {report.match_confidence && (
-                              <ConfidenceBadge level={report.match_confidence} size="sm" />
-                            )}
-                          </div>
-                        )}
                       </div>
                     </Link>
                   </CardContent>
@@ -242,19 +227,6 @@ export default function History() {
                               {item.color && <span>• {item.color}</span>}
                               {item.date && <span>• {format(new Date(item.date), "MMM d, yyyy")}</span>}
                             </div>
-                            {(item.anomalyScore !== undefined || item.matchConfidence) && (
-                              <div className="flex items-center gap-3 mt-1">
-                                {item.anomalyScore !== undefined && (
-                                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Gauge className="h-3 w-3" />
-                                    {t("history.inconsistency")}: {item.anomalyScore}/100
-                                  </span>
-                                )}
-                                {item.matchConfidence && (
-                                  <ConfidenceBadge level={item.matchConfidence} size="sm" />
-                                )}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </Link>
