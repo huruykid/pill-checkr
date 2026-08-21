@@ -126,7 +126,7 @@ export function ApiKeyManager() {
           API Keys
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Generate API keys to integrate Fent Finder into your platform.
+          Generate API keys to integrate Pill Checkr into your platform.
           Keys are shown only once — store them securely.
         </p>
       </CardHeader>
@@ -186,7 +186,7 @@ export function ApiKeyManager() {
                 <Key className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground mb-1">No API keys yet</p>
                 <p className="text-xs text-muted-foreground">
-                  Generate a key to start integrating with the Fent Finder API
+                  Generate a key to start integrating with the Pill Checkr API
                 </p>
               </div>
             )}

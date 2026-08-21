@@ -31,7 +31,7 @@ interface BuddyAlertProps {
 }
 
 const ALERT_MESSAGE =
-  "I used Pill Checkr and a potentially dangerous substance was detected. Please check on me. — Sent via Fent Finder";
+  "I used Pill Checkr and a potentially dangerous substance was detected. Please check on me. — Sent via Pill Checkr";
 
 export function BuddyAlert({ reportId, drugName, riskLevel, className }: BuddyAlertProps) {
   const { user } = useAuth();

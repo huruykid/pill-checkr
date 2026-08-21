@@ -13,10 +13,10 @@ interface MatchFeedbackProps {
 }
 
 function getSessionId(): string {
-  let id = localStorage.getItem("ff_session_id");
+  let id = localStorage.getItem("pc_session_id");
   if (!id) {
     id = crypto.randomUUID();
-    localStorage.setItem("ff_session_id", id);
+    localStorage.setItem("pc_session_id", id);
   }
   return id;
 }

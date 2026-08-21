@@ -164,7 +164,7 @@ export default function Trends() {
   return (
     <Layout>
       <SEOHead
-        title="Trends & Analytics | Fent Finder"
+        title="Trends & Analytics | Pill Checkr"
         description="Anonymized pill check trends, risk distribution, and community alerts. Monitor counterfeit drug activity in your area."
         path="/trends"
         jsonLd={makeWebPage("Trends & Analytics", "/trends", "View anonymized pill check trends and community alerts.")}

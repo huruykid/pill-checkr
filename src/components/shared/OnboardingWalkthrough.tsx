@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
 
-const ONBOARDING_KEY = "ff_onboarding_complete";
+const ONBOARDING_KEY = "pc_onboarding_complete";
 
 interface OnboardingWalkthroughProps {
   onComplete: () => void;

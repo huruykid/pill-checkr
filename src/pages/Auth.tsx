@@ -95,10 +95,10 @@ export default function Auth() {
   return (
     <Layout>
       <SEOHead
-        title="Sign In | Fent Finder"
+        title="Sign In | Pill Checkr"
         description="Create an account or sign in to save your pill check history and manage emergency contacts."
         path="/auth"
-        jsonLd={makeWebPage("Sign In", "/auth", "Create an account or sign in to Fent Finder.")}
+        jsonLd={makeWebPage("Sign In", "/auth", "Create an account or sign in to Pill Checkr.")}
       />
       <div className="container flex min-h-[60vh] items-center justify-center py-12">
         <Card className="w-full max-w-md border-2 border-border">

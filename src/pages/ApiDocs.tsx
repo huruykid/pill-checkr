@@ -208,7 +208,7 @@ Headers:
           imprint: "M30",
           color: "blue",
           shape: "round",
-          image_url: "https://api.fentfinder.com/ref/img-001.jpg",
+          image_url: "https://api.pillcheckr.app/ref/img-001.jpg",
           source: "FDA",
           verified: true,
         },
@@ -218,7 +218,7 @@ Headers:
           imprint: "A51",
           color: "blue",
           shape: "round",
-          image_url: "https://api.fentfinder.com/ref/img-002.jpg",
+          image_url: "https://api.pillcheckr.app/ref/img-002.jpg",
           source: "DailyMed",
           verified: true,
         },
@@ -288,8 +288,8 @@ export default function ApiDocs() {
   return (
     <Layout>
       <SEOHead
-        title="API Documentation — Fent Finder"
-        description="Integrate pill identification, drug interaction checks, and harm reduction tools into your platform with the Fent Finder API."
+        title="API Documentation — Pill Checkr"
+        description="Integrate pill identification, drug interaction checks, and harm reduction tools into your platform with the Pill Checkr API."
         path="/api-docs"
       />
 
@@ -305,7 +305,7 @@ export default function ApiDocs() {
             </Badge>
           </div>
           <h1 className="text-4xl md:text-5xl font-display text-background mb-4">
-            FENT FINDER API
+            PILL CHECKR API
           </h1>
           <p className="text-lg text-background/70 max-w-2xl mb-8">
             Pill identification, drug interactions, and harm reduction data — built for
@@ -370,7 +370,7 @@ export default function ApiDocs() {
               Include your API key in the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">Authorization</code> header with every request:
             </p>
             <CodeBlock
-              code={`curl -X POST https://api.fentfinder.com/v1/check \\
+              code={`curl -X POST https://api.pillcheckr.app/v1/check \\
   -H "Authorization: Bearer ff_live_abc123..." \\
   -H "Content-Type: application/json" \\
   -d '{"imprint": "M30", "color": "blue", "shape": "round"}'`}
@@ -385,7 +385,7 @@ export default function ApiDocs() {
         <div className="container max-w-5xl">
           <h2 className="text-2xl font-display mb-2">API ENDPOINTS</h2>
           <p className="text-muted-foreground mb-8">
-            Base URL: <code className="bg-muted px-2 py-0.5 rounded text-sm">https://api.fentfinder.com</code>
+            Base URL: <code className="bg-muted px-2 py-0.5 rounded text-sm">https://api.pillcheckr.app</code>
           </p>
           <div className="space-y-6">
             {endpoints.map((ep) => (

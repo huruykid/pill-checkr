@@ -198,7 +198,7 @@ export default function Contribute() {
   return (
     <Layout>
       <SEOHead
-        title="Contribute to the Pill Database — Fent Finder"
+        title="Contribute to the Pill Database — Pill Checkr"
         description="Help build the community pill reference database. Submit pill details and photos to help keep others safe."
         path="/contribute"
       />

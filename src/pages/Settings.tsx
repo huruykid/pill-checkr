@@ -112,10 +112,10 @@ export default function Settings() {
   return (
     <Layout>
       <SEOHead
-        title="Settings | Fent Finder"
+        title="Settings | Pill Checkr"
         description="Manage your account settings, emergency contacts, and notification preferences."
         path="/settings"
-        jsonLd={makeWebPage("Settings", "/settings", "Manage your Fent Finder account settings.")}
+        jsonLd={makeWebPage("Settings", "/settings", "Manage your Pill Checkr account settings.")}
       />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">

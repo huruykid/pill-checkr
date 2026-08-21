@@ -127,7 +127,7 @@ export default function Education() {
     return (
       <Layout>
         <SEOHead
-          title={`${selectedPost.title} | Fent Finder`}
+          title={`${selectedPost.title} | Pill Checkr`}
           description={selectedPost.summary || selectedPost.title}
           path={`/education/${selectedPost.slug}`}
           jsonLd={makeArticle(selectedPost.title, selectedPost.slug, selectedPost.summary || selectedPost.title, selectedPost.created_at)}
@@ -165,7 +165,7 @@ export default function Education() {
   return (
     <Layout>
       <SEOHead
-        title="Drug Safety Education | Fent Finder"
+        title="Drug Safety Education | Pill Checkr"
         description="Learn about counterfeit pills, fentanyl risks, harm reduction strategies, and how to stay safer. Evidence-based drug safety information."
         path="/education"
         jsonLd={makeWebPage("Drug Safety Education", "/education", "Evidence-based drug safety education and harm reduction resources.")}

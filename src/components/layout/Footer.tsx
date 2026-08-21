@@ -16,7 +16,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Shield className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-display text-lg font-bold">Fent Finder</span>
+              <span className="font-display text-lg font-bold">Pill Checkr</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {t("footer.brand")}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useI18n } from "@/hooks/useI18n";
 
-const ACCEPTED_KEY = "ff_disclaimer_accepted";
+const ACCEPTED_KEY = "pc_disclaimer_accepted";
 
 export function useDisclaimerAccepted(): boolean {
   const [accepted, setAccepted] = useState(() => localStorage.getItem(ACCEPTED_KEY) === "true");

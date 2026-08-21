@@ -49,7 +49,7 @@ serve(async (req) => {
     // Generate a random API key
     const rawBytes = new Uint8Array(32);
     crypto.getRandomValues(rawBytes);
-    const rawKey = "ff_" + Array.from(rawBytes).map(b => b.toString(16).padStart(2, "0")).join("");
+    const rawKey = "pc_" + Array.from(rawBytes).map(b => b.toString(16).padStart(2, "0")).join("");
     const keyPrefix = rawKey.substring(0, 10);
 
     // Hash the key for storage

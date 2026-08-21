@@ -134,7 +134,7 @@ export default function Results() {
       setData({ report, matches: matches || [] });
 
       // Show safety modal if not yet dismissed for this report
-      const modalKey = `ff_safety_modal_${reportId}`;
+      const modalKey = `pc_safety_modal_${reportId}`;
       if (!localStorage.getItem(modalKey)) {
         setSafetyModalOpen(true);
       }
@@ -254,7 +254,7 @@ export default function Results() {
   return (
     <Layout urgentEmergency={riskLevel === "high"}>
       <SEOHead
-        title="Pill Analysis Results | Fent Finder"
+        title="Pill Analysis Results | Pill Checkr"
         description="View your pill analysis results including visual matching, consistency scoring, and harm reduction guidance."
         path={`/results/${reportId}`}
         jsonLd={makeWebPage("Pill Analysis Results", `/results/${reportId}`, "Pill analysis results with visual matching and safety guidance.")}
@@ -263,7 +263,7 @@ export default function Results() {
         open={safetyModalOpen}
         onDismiss={() => {
           setSafetyModalOpen(false);
-          localStorage.setItem(`ff_safety_modal_${reportId}`, "1");
+          localStorage.setItem(`pc_safety_modal_${reportId}`, "1");
         }}
       />
       <div className={cn("container py-8 md:py-12 transition-all duration-300", safetyModalOpen && "blur-xl pointer-events-none select-none")}>

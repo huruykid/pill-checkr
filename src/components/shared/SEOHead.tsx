@@ -1,7 +1,7 @@
 import { forwardRef, useEffect } from "react";
 
 const BASE_URL = "https://pill-checkr.lovable.app";
-const SITE_NAME = "Fent Finder";
+const SITE_NAME = "Pill Checkr";
 
 interface SEOHeadProps {
   title: string;

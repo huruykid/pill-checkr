@@ -109,7 +109,7 @@ export default function History() {
   return (
     <Layout>
       <SEOHead
-        title="Your Check History | Fent Finder"
+        title="Your Check History | Pill Checkr"
         description="View your past pill safety checks and analysis results. Track your history and revisit previous reports."
         path="/history"
         jsonLd={makeWebPage("Check History", "/history", "View past pill safety checks and analysis results.")}

@@ -299,7 +299,7 @@ export default function CheckPill() {
   return (
     <Layout>
       <SEOHead
-        title="Check a Pill | Fent Finder"
+        title="Check a Pill | Pill Checkr"
         description="Upload a photo of your pill to visually compare it against known reference images. Free, anonymous, and instant results."
         path="/check"
         jsonLd={jsonLdWebApp}

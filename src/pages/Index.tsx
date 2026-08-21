@@ -22,7 +22,7 @@ const Index = () => {
   return (
     <Layout>
       <SEOHead
-        title="Fent Finder — Free Pill Safety Check Tool"
+        title="Pill Checkr — Identify Pills, Find Test Strips & Naloxone"
         description="Free harm reduction tool to visually compare pills against known references. Upload a photo, get guidance, and find help near you."
         path="/"
         jsonLd={jsonLdWebSite}

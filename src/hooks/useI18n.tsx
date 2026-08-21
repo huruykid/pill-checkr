@@ -33,9 +33,9 @@ const translations: Record<Language, Record<string, string>> = {
     "common.signInPrompt": "Sign in",
 
     // Index
-    "index.heroTitle1": "THE REAL",
-    "index.heroTitle2": "RISK CHECK",
-    "index.heroSubtitle": "A free tool to help assess consistency with known reference pills using visual comparison and image analysis. Not a guarantee of safety.",
+    "index.heroTitle1": "KNOW THE PILL.",
+    "index.heroTitle2": "TEST THE PILL.",
+    "index.heroSubtitle": "Identify a pill by its imprint, learn if it's a type that's commonly faked, and find test strips, naloxone, and help nearby. A photo can't detect fentanyl — only a test can.",
     "index.checkPill": "Check a Pill",
     "index.getTheFacts": "Get the Facts",
     "index.safetyTitle": "PILL SAFETY 101",
@@ -265,7 +265,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "If you suspect an overdose:",
     "footer.call911": "Call 911 Immediately",
     "footer.administerNaloxone": "Administer naloxone if available",
-    "footer.copyright": "© {year} Fent Finder. For harm reduction purposes only.",
+    "footer.copyright": "© {year} Pill Checkr. For harm reduction purposes only.",
     "footer.madeWith": "Made with",
     "footer.forHR": "for harm reduction",
 
@@ -612,7 +612,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "Si sospechas una sobredosis:",
     "footer.call911": "Llama al 911 Inmediatamente",
     "footer.administerNaloxone": "Administra naloxona si está disponible",
-    "footer.copyright": "© {year} Fent Finder. Solo para reducción de daños.",
+    "footer.copyright": "© {year} Pill Checkr. Solo para reducción de daños.",
     "footer.madeWith": "Hecho con",
     "footer.forHR": "para reducción de daños",
 
@@ -917,7 +917,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "Si vous suspectez une surdose :",
     "footer.call911": "Appelez le 911 Immédiatement",
     "footer.administerNaloxone": "Administrez la naloxone si disponible",
-    "footer.copyright": "© {year} Fent Finder. Pour la réduction des risques uniquement.",
+    "footer.copyright": "© {year} Pill Checkr. Pour la réduction des risques uniquement.",
     "footer.madeWith": "Fait avec",
     "footer.forHR": "pour la réduction des risques",
 
@@ -1222,7 +1222,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "Se suspeitar de uma overdose:",
     "footer.call911": "Ligue 911 Imediatamente",
     "footer.administerNaloxone": "Administre naloxona se disponível",
-    "footer.copyright": "© {year} Fent Finder. Apenas para redução de danos.",
+    "footer.copyright": "© {year} Pill Checkr. Apenas para redução de danos.",
     "footer.madeWith": "Feito com",
     "footer.forHR": "para redução de danos",
 
@@ -1289,14 +1289,14 @@ const I18nContext = createContext<I18nContextType>({
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Language>(() => {
-    const saved = localStorage.getItem("ff_lang");
+    const saved = localStorage.getItem("pc_lang");
     if (saved && LANGUAGES.includes(saved as Language)) return saved as Language;
     return "en";
   });
 
   const handleSetLang = (newLang: Language) => {
     setLang(newLang);
-    localStorage.setItem("ff_lang", newLang);
+    localStorage.setItem("pc_lang", newLang);
   };
 
   const t = (key: string): string => {

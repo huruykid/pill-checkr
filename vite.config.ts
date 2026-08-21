@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
-        name: "Fent Finder - Pill Safety Check",
-        short_name: "Fent Finder",
-        description: "A harm reduction tool to help assess pill consistency with known references.",
+        name: "Pill Checkr - Pill ID & Harm Reduction",
+        short_name: "Pill Checkr",
+        description: "Identify any pill by its imprint, see if it's a commonly counterfeited type, and find fentanyl test strips, naloxone, and help near you. A free harm reduction tool — not a safety guarantee.",
         theme_color: "#0a0a0a",
         background_color: "#0a0a0a",
         display: "standalone",

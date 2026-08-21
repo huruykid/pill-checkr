@@ -44,7 +44,7 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
         try {
           const resp = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`,
-            { headers: { "User-Agent": "FentFinder-HarmReduction/1.0" } }
+            { headers: { "User-Agent": "PillCheckr-HarmReduction/1.0" } }
           );
           if (resp.ok) {
             const data = await resp.json();

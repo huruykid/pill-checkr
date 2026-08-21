@@ -206,7 +206,7 @@ export default function NearbyHelpMap() {
   return (
     <Layout>
       <SEOHead
-        title="Find Help Near You | Fent Finder"
+        title="Find Help Near You | Pill Checkr"
         description="Find naloxone, fentanyl test strips, treatment centers, and harm reduction services near your location."
         path="/nearby-help"
         jsonLd={makeWebPage("Find Help Near You", "/nearby-help", "Locate naloxone, testing services, and treatment centers nearby.")}

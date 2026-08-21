@@ -12,7 +12,7 @@ const NotFound = () => {
   return (
     <>
       <SEOHead
-        title="Page Not Found | Fent Finder"
+        title="Page Not Found | Pill Checkr"
         description="The page you're looking for doesn't exist."
         path={location.pathname}
       />

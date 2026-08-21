@@ -337,7 +337,7 @@ export function WebhookManager() {
                     <Label htmlFor="webhook-url">Endpoint URL *</Label>
                     <Input
                       id="webhook-url"
-                      placeholder="https://your-server.com/webhooks/fentfinder"
+                      placeholder="https://your-server.com/webhooks/pillcheckr"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       maxLength={500}
