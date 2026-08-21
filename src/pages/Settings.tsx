@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
 import { WebhookManager } from "@/components/settings/WebhookManager";
+import { DeleteAccount } from "@/components/settings/DeleteAccount";
 
 interface Contact {
   id: string;
@@ -292,6 +293,9 @@ export default function Settings() {
 
           {/* Webhook Configuration */}
           <WebhookManager />
+
+          {/* Account deletion — App Store 5.1.1(v) */}
+          <DeleteAccount />
         </div>
       </div>
     </Layout>
