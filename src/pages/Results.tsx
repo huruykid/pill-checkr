@@ -518,6 +518,9 @@ export default function Results() {
             </CardContent>
           </Card>
 
+          {/* PRIMARY ACTION: log the test strip result. This is the moat interaction. */}
+          <TestStripLogger reportId={report.id} className="mb-6" />
+
           {/* Section C: What To Do Next */}
           <Card className="mb-8">
             <CardHeader>
@@ -537,9 +540,6 @@ export default function Results() {
               </ul>
             </CardContent>
           </Card>
-
-          {/* Test Strip Result Logger */}
-          <TestStripLogger reportId={report.id} className="mb-6" />
 
           {/* Official FDA Drug Information */}
           {matches.length > 0 && (

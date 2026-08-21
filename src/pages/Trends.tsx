@@ -164,10 +164,10 @@ export default function Trends() {
   return (
     <Layout>
       <SEOHead
-        title="Trends & Analytics | Pill Checkr"
+        title="Community Alerts | Pill Checkr"
         description="Anonymized pill check trends, risk distribution, and community alerts. Monitor counterfeit drug activity in your area."
         path="/trends"
-        jsonLd={makeWebPage("Trends & Analytics", "/trends", "View anonymized pill check trends and community alerts.")}
+        jsonLd={makeWebPage("Community Alerts", "/trends", "See what counterfeit pills are being found near you, reported by the community.")}
       />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-6xl">
@@ -175,9 +175,9 @@ export default function Trends() {
           <div className="mb-8 text-center">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
               <TrendingUp className="h-4 w-4" />
-              Trends & Analytics
+              Community Alerts
             </div>
-            <h1 className="mb-2 text-3xl font-bold md:text-4xl">Community Trends</h1>
+            <h1 className="mb-2 text-3xl font-bold md:text-4xl">Community Alerts</h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Anonymized, aggregate data from pill checks across the platform.
               No personal information is ever shared.

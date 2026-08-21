@@ -20,7 +20,8 @@ export const EmergencyFAB = forwardRef<HTMLDivElement, EmergencyFABProps>(functi
   ];
 
   return (
-    <div ref={ref} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div ref={ref} className="fixed right-4 z-50 flex flex-col items-end gap-3 md:bottom-6 md:right-6"
+      style={{ bottom: "calc(var(--tab-bar-space, 56px) + env(safe-area-inset-bottom) + 12px)" }}>
       {/* Expanded panel */}
       {open && (
         <div className="w-72 rounded-xl border border-border bg-card shadow-xl animate-slide-up">

@@ -3,7 +3,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Disclaimer } from "@/components/shared/Disclaimer";
 import { SEOHead, jsonLdWebSite } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
-import { Shield, Search, BookOpen, ArrowRight, Heart, CheckCircle, ArrowDown } from "lucide-react";
+import { Shield, Search, BookOpen, ArrowRight, Heart, CheckCircle, ArrowDown, Radio, FlaskConical } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 
 const Index = () => {
@@ -23,7 +23,7 @@ const Index = () => {
     <Layout>
       <SEOHead
         title="Pill Checkr — Identify Pills, Find Test Strips & Naloxone"
-        description="Free harm reduction tool to visually compare pills against known references. Upload a photo, get guidance, and find help near you."
+        description="Identify a pill, test it with a fentanyl strip, log the result, and see what counterfeits are being found near you. Free harm reduction tool with naloxone and help nearby."
         path="/"
         jsonLd={jsonLdWebSite}
       />
@@ -48,9 +48,9 @@ const Index = () => {
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/education">
+              <Link to="/trends">
                 <Button variant="outline" size="xl" className="gap-2 w-full sm:w-auto">
-                  <BookOpen className="h-5 w-5" />
+                  <Radio className="h-5 w-5" />
                   {t("index.getTheFacts")}
                 </Button>
               </Link>
@@ -126,7 +126,7 @@ const Index = () => {
                 2
               </div>
               <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-sm bg-muted">
-                <Shield className="h-7 w-7 text-primary" />
+                <FlaskConical className="h-7 w-7 text-primary" />
               </div>
               <h3 className="mb-2 font-display text-xl">{t("index.step2Title")}</h3>
               <p className="text-sm text-muted-foreground font-sans">
@@ -139,7 +139,7 @@ const Index = () => {
                 3
               </div>
               <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-sm bg-muted">
-                <Heart className="h-7 w-7 text-primary" />
+                <Radio className="h-7 w-7 text-primary" />
               </div>
               <h3 className="mb-2 font-display text-xl">{t("index.step3Title")}</h3>
               <p className="text-sm text-muted-foreground font-sans">

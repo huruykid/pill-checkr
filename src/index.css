@@ -9,6 +9,9 @@
 */
 
 @layer base {
+  :root { --tab-bar-space: 56px; }
+  @media (min-width: 768px) { :root { --tab-bar-space: 0px; } }
+
   :root {
     /* Core palette - Bold and urgent */
     --background: 0 0% 95%;

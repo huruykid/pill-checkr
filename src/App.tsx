@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { IS_NATIVE_BUILD } from "@/lib/platform";
 import { AuthProvider } from "@/hooks/useAuth";
 import { I18nProvider } from "@/hooks/useI18n";
 import { DisclaimerGate, useDisclaimerAccepted } from "@/components/shared/DisclaimerGate";
@@ -64,13 +65,25 @@ const App = forwardRef(function App(_props, ref) {
             <Route path="/education/:slug" element={<Education />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/admin" element={<Admin />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/nearby-help" element={<NearbyHelpMap />} />
-            <Route path="/contribute" element={<Contribute />} />
-            <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/trends" element={<Trends />} />
-            <Route path="/install" element={<Install />} />
+            {/* Web-only surfaces. The native build redirects instead of 404ing. */}
+            {IS_NATIVE_BUILD ? (
+              <>
+                <Route path="/admin" element={<Navigate to="/" replace />} />
+                <Route path="/contribute" element={<Navigate to="/trends" replace />} />
+                <Route path="/api-docs" element={<Navigate to="/" replace />} />
+                <Route path="/install" element={<Navigate to="/" replace />} />
+              </>
+            ) : (
+              <>
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/contribute" element={<Contribute />} />
+                <Route path="/api-docs" element={<ApiDocs />} />
+                <Route path="/install" element={<Install />} />
+              </>
+            )}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

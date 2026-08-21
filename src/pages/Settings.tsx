@@ -22,6 +22,7 @@ import {
 import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
 import { WebhookManager } from "@/components/settings/WebhookManager";
 import { DeleteAccount } from "@/components/settings/DeleteAccount";
+import { isNative } from "@/lib/platform";
 
 interface Contact {
   id: string;
@@ -288,11 +289,13 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* API Key Management */}
-          <ApiKeyManager />
-
-          {/* Webhook Configuration */}
-          <WebhookManager />
+          {/* Developer platform — web only; not part of the App Store build */}
+          {!isNative() && (
+            <>
+              <ApiKeyManager />
+              <WebhookManager />
+            </>
+          )}
 
           {/* Account deletion — App Store 5.1.1(v) */}
           <DeleteAccount />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Menu, X, History, BookOpen, Search, User, LogOut, MapPin, Settings, Users, Code, TrendingUp, Globe, Download, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { isNative } from "@/lib/platform";
 import { useI18n, LANGUAGES, LANGUAGE_LABELS, type Language } from "@/hooks/useI18n";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
@@ -15,14 +16,17 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
   const { lang, setLang, t } = useI18n();
 
   // All nav links for mobile menu
+  const native = isNative();
   const allNavLinks = [
     { to: "/check", label: t("nav.checkPill"), icon: Search },
     { to: "/history", label: t("nav.history"), icon: History },
     { to: "/education", label: t("nav.learn"), icon: BookOpen },
     { to: "/nearby-help", label: t("nav.findHelp"), icon: MapPin },
-    { to: "/contribute", label: t("nav.contribute"), icon: Users },
-    { to: "/api-docs", label: t("nav.api"), icon: Code },
     { to: "/trends", label: t("nav.trends"), icon: TrendingUp },
+    ...(native ? [] : [
+      { to: "/contribute", label: t("nav.contribute"), icon: Users },
+      { to: "/api-docs", label: t("nav.api"), icon: Code },
+    ]),
   ];
 
   // Desktop: main nav (excluding CTA and "More" items)
@@ -34,15 +38,17 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
 
   // Desktop: items inside "More" dropdown
   const moreNavLinks = [
-    { to: "/contribute", label: t("nav.contribute"), icon: Users },
-    { to: "/api-docs", label: t("nav.api"), icon: Code },
     { to: "/trends", label: t("nav.trends"), icon: TrendingUp },
+    ...(native ? [] : [
+      { to: "/contribute", label: t("nav.contribute"), icon: Users },
+      { to: "/api-docs", label: t("nav.api"), icon: Code },
+    ]),
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header ref={ref} className="sticky top-0 z-50 w-full border-b-4 border-secondary bg-foreground">
+    <header ref={ref} className="sticky top-0 z-50 w-full border-b-4 border-secondary bg-foreground" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="container flex h-14 items-center justify-between">
         <Link 
           to="/" 
