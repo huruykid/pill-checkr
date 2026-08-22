@@ -56,3 +56,19 @@ I test it?" The home screen answers it above the fold.
   only, cached in `pc_alert_location`. No coordinates are ever sent.
 - TODO before launch: rate-limit anonymous inserts (edge fn or pg trigger by
   session), and an admin "hide" flag on counterfeit_reports for spam.
+
+## App Store record (created Aug 2026)
+- Apple ID 6804091193 · bundle `app.pillcheckr.ios` (PERMANENT) · SKU pillcheckr-ios
+- Store name "Pill Checkr: ID & Test" ("Pill Checkr" alone was taken)
+- Subtitle "Fentanyl Strips & Naloxone" · Medical / Health & Fitness
+- Age rating 18+ (17+ on OS < 26): UGC yes, drug refs Frequent,
+  medical/treatment info Frequent, health topics yes; no social/messaging/ads.
+- Bundle ID capabilities enabled: Push Notifications, Sign In with Apple.
+
+### Lesson from the Juice 1.0.0 rejection (same dev account)
+Rejected under **2.1 App Completeness**, NOT for content: dead taps on
+iPad Air 11-inch (iPadOS 18.6) — "Enable Location", "Privacy Policy & Terms",
+and "Report Content or User" all did nothing. Pill Checkr has the same three
+button archetypes (Near-me / Use my city, privacy links, report sheet).
+Before archiving: test every one of them on an **iPad** simulator, not just
+iPhone. Reviewers use iPad.
