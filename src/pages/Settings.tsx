@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Users,
   Plus,
@@ -18,6 +18,8 @@ import {
   Phone,
   Mail,
   UserPlus,
+  FileText,
+  ChevronRight,
 } from "lucide-react";
 import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
 import { WebhookManager } from "@/components/settings/WebhookManager";
@@ -296,6 +298,22 @@ export default function Settings() {
               <WebhookManager />
             </>
           )}
+
+          {/* Legal — reachable on native, where the footer is hidden. */}
+          <Card className="mt-6">
+            <CardContent className="py-2">
+              <Link
+                to="/privacy"
+                className="flex min-h-[52px] items-center justify-between gap-3 text-sm font-medium"
+              >
+                <span className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  Privacy Policy
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            </CardContent>
+          </Card>
 
           {/* Account deletion — App Store 5.1.1(v) */}
           <DeleteAccount />

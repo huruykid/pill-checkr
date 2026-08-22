@@ -24,6 +24,7 @@ import ApiDocs from "./pages/ApiDocs";
 import Trends from "./pages/Trends";
 import CommunityAlerts from "./pages/CommunityAlerts";
 import Install from "./pages/Install";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -69,6 +70,8 @@ const App = forwardRef(function App(_props, ref) {
             <Route path="/settings" element={<Settings />} />
             <Route path="/nearby-help" element={<NearbyHelpMap />} />
             <Route path="/trends" element={<CommunityAlerts />} />
+            {/* Required by both app stores; must work on every platform. */}
+            <Route path="/privacy" element={<Privacy />} />
             {/* Web-only surfaces. The native build redirects instead of 404ing. */}
             {IS_NATIVE_BUILD ? (
               <>

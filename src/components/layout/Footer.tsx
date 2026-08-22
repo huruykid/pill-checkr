@@ -45,6 +45,12 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
               >
                 {t("footer.viewHistory")}
               </Link>
+              <Link
+                to="/privacy"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                {t("footer.privacy")}
+              </Link>
             </nav>
           </div>
 

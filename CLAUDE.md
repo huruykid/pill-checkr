@@ -72,3 +72,10 @@ and "Report Content or User" all did nothing. Pill Checkr has the same three
 button archetypes (Near-me / Use my city, privacy links, report sheet).
 Before archiving: test every one of them on an **iPad** simulator, not just
 iPhone. Reviewers use iPad.
+
+## Privacy policy
+`/privacy` (Privacy.tsx) ships on BOTH web and native — never strip it. It is
+linked from the footer (web) AND from Settings (native, where there is no
+footer). Both links must be tapped on an iPad before every archive; a dead
+"Privacy Policy" tap is exactly what got Juice rejected under 2.1.
+Contact address used: privacy@pillcheckr.app — this mailbox must exist.
