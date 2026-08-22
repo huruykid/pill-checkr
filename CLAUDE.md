@@ -79,3 +79,23 @@ linked from the footer (web) AND from Settings (native, where there is no
 footer). Both links must be tapped on an iPad before every archive; a dead
 "Privacy Policy" tap is exactly what got Juice rejected under 2.1.
 Contact address used: privacy@pillcheckr.app — this mailbox must exist.
+
+## Location & the map (the contract)
+- Precise coordinates NEVER go on `counterfeit_reports`. They live in
+  `report_locations` (restricted): insert allowed for anon, SELECT admin-only.
+  The public feed/map/API cannot read it. Do not add a join.
+- Public rendering is ALWAYS the H3 cell (`hex_cell`, res 6 ≈ 36 km²) computed
+  on-device in src/lib/geo.ts. Points are for cluster detection and partner
+  sharing, not display.
+- Precise is opt-in per report, default "City only", never remembered.
+  PrecisionChoice.tsx states the subpoena tradeoff in plain words — don't
+  soften that copy.
+- `place_type='residence'` renders at hex publicly even when captured precisely.
+- Retention: `purge_expired_report_locations()` hard-deletes points at 30 days.
+  MUST be scheduled (pg_cron or an edge fn). Unscheduled = the privacy policy
+  is false. This is the single highest-risk loose end in the repo.
+- `report_type` pill|overdose, `evidence_tier` lab|strip|suspected_opioid|visual.
+  Every map point displays its tier. An overdose is NOT a fentanyl detection.
+- Privacy policy /privacy is coupled to all of the above. Change one, change
+  both in the same commit, or the App Privacy label becomes false — that is a
+  store removal, not a rejection.

@@ -3,7 +3,7 @@ import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, EyeOff, Trash2, AlertTriangle } from "lucide-react";
 
-const UPDATED = "August 21, 2026";
+const UPDATED = "August 22, 2026";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -39,7 +39,7 @@ export default function Privacy() {
               </li>
               <li className="flex gap-3">
                 <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span>We <strong className="text-foreground">never store your exact location</strong>. Location is converted to a city and state on your device, and the coordinates are discarded.</span>
+                <span><strong className="text-foreground">Location is your choice, every time.</strong> The default stores only a city and a wide map area. You can opt in to an exact point per report; if you do, it is kept separately, never shown publicly, and deleted after 30 days.</span>
               </li>
               <li className="flex gap-3">
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -79,10 +79,22 @@ export default function Privacy() {
                 own check history shows up on that device. It is not tied to your name, phone, email, or advertising ID.
               </li>
               <li>
-                <strong className="text-foreground">City and state, only if you ask for it.</strong> If you tap
-                "Use my city" or "Near me", your device determines a coarse location and converts it to a city and
-                state. We store only the city and state text. The latitude and longitude are discarded and are never
-                sent to our servers.
+                <strong className="text-foreground">Location, at the detail you choose.</strong> Location is only
+                requested when you tap a button that needs it, and every report asks you to pick a level:
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  <li>
+                    <strong className="text-foreground">City only (the default).</strong> We store a city and state,
+                    plus a wide map cell of roughly 36 square kilometers. No coordinates leave your device.
+                  </li>
+                  <li>
+                    <strong className="text-foreground">Exact spot (opt-in).</strong> We also store the coordinates,
+                    in a separate restricted table that the public feed, the map, and the API cannot read. They are
+                    used for detecting bad-batch clusters and for sharing with public health partners under
+                    agreement. They are deleted after 30 days; the wide map cell remains.
+                  </li>
+                </ul>
+                The choice is made per report and is never remembered. Reports at a private residence always display
+                publicly as a wide area, never as a point, no matter which level you chose.
               </li>
               <li>
                 <strong className="text-foreground">Community alerts you post.</strong> An imprint, what it was sold
@@ -99,7 +111,8 @@ export default function Privacy() {
 
           <Section id="never" title="What we never collect">
             <ul className="list-disc space-y-2 pl-5">
-              <li>Your precise GPS coordinates. A database trigger strips them on write, so they cannot be stored even by accident.</li>
+              <li>Your precise GPS coordinates, unless you explicitly choose "Exact spot" on a specific report. Precise points are never published, never sent to the API, and are deleted after 30 days.</li>
+              <li>Any link between a location and a person. Reports carry no name, no account requirement, and no contact information.</li>
               <li>Your contacts, photo library, call history, or browsing activity.</li>
               <li>Advertising identifiers. Pill Checkr contains no advertising SDK and does no cross-app tracking.</li>
               <li>Any information about drug purchases, sources, or sellers. We do not want it and there is nowhere in the app to enter it.</li>
@@ -141,11 +154,43 @@ export default function Privacy() {
             </p>
           </Section>
 
+          <Section id="overdose" title="Overdose reports">
+            <p>
+              Anyone who was present can report an overdose — usually the person who administered naloxone. An
+              overdose report records that an opioid overdose happened in an area, on a date, and how it was
+              established: laboratory confirmation, a test strip, a suspected opioid overdose, or visual suspicion
+              only. Every point on the map shows which of those it is.
+            </p>
+            <p>
+              We do not record who overdosed, who reported it, who supplied anything, or any description of a
+              person. There is nowhere in the app to enter that information. We are recording what is in the drug
+              supply, not who used it.
+            </p>
+            <p>
+              When several overdoses are reported in the same area within 48 hours, we surface a bad-batch warning
+              along with naloxone locations to anyone viewing that area. That is the entire reason the report
+              exists.
+            </p>
+          </Section>
+
+          <Section id="legal" title="Legal process">
+            <p>
+              We will resist requests that appear designed to identify people who use drugs, and we will challenge
+              overbroad demands. We cannot promise to defeat a valid court order, so we limit what exists to be
+              demanded: no identities, no photos on public records, day-resolution dates, coordinates only when you
+              opt in, and automatic deletion of those coordinates after 30 days.
+            </p>
+            <p>
+              If you are weighing the risk, choose "City only." It is the default for that reason.
+            </p>
+          </Section>
+
           <Section id="retention" title="How long we keep it">
             <ul className="list-disc space-y-2 pl-5">
               <li>Anonymous pill photos: deleted on a rolling basis and not retained long-term.</li>
               <li>Check history on an account: kept until you delete the check or your account.</li>
               <li>Community alerts: kept as long as they are useful to people in that area, then aged out.</li>
+              <li>Precise coordinates: hard-deleted 30 days after capture. The wide map cell survives, so the map stays accurate without the point.</li>
             </ul>
           </Section>
 

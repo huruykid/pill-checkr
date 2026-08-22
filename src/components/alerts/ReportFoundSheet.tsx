@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { detectWithToast, type CityState } from "@/lib/location";
+import { captureLocation, type Precision } from "@/lib/geo";
+import { PrecisionChoice } from "./PrecisionChoice";
 import { toast } from "sonner";
 import { Loader2, LocateFixed, Send } from "lucide-react";
 
@@ -38,6 +40,8 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
   const [state, setState] = useState(defaultLocation?.state || "");
   const [notes, setNotes] = useState("");
   const [geo, setGeo] = useState(false);
+  const [precision, setPrecision] = useState<Precision>("city");
+  const [captured, setCaptured] = useState<{ hexCell: string; point?: { lat: number; lng: number }; placeType: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -49,9 +53,19 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
 
   const locate = async () => {
     setGeo(true);
-    const loc = await detectWithToast();
-    if (loc) { setCity(loc.city); setState(loc.state); }
-    setGeo(false);
+    try {
+      const c = await captureLocation(precision);
+      setCity(c.city);
+      setState(c.state);
+      setCaptured({ hexCell: c.hexCell, point: c.point, placeType: c.placeType });
+      toast.success(precision === "precise" ? "Exact spot captured" : `Near ${c.city || c.state}`);
+    } catch {
+      // Fall back to the city-only path if precise capture fails.
+      const loc = await detectWithToast();
+      if (loc) { setCity(loc.city); setState(loc.state); }
+    } finally {
+      setGeo(false);
+    }
   };
 
   const canSubmit = strip !== null && (imprint.trim() || drug.trim());
@@ -60,7 +74,7 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
     if (!canSubmit) return;
     setBusy(true);
     try {
-      const { error } = await supabase.from("counterfeit_reports").insert({
+      const { data: inserted, error } = await supabase.from("counterfeit_reports").insert({
         imprint: imprint.trim().toUpperCase() || null,
         drug_name: drug.trim() || null,
         strip_result: strip!,
@@ -71,10 +85,25 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
         is_anonymous: !user,
         source: prefill?.reportId ? "results" : "alerts",
         report_id: prefill?.reportId || null,
-      });
+        report_type: "pill",
+        evidence_tier: strip === "not_tested" ? "visual" : "strip",
+        hex_cell: captured?.hexCell || null,
+      }).select("id").single();
       if (error) throw error;
+
+      // Precise point goes to the restricted table — never to the public view.
+      if (captured?.point && inserted?.id) {
+        const { error: locError } = await supabase.from("report_locations").insert({
+          report_id: inserted.id,
+          latitude: captured.point.lat,
+          longitude: captured.point.lng,
+          precision: "precise",
+          place_type: captured.placeType,
+        });
+        if (locError) console.error("precise location not stored:", locError);
+      }
       toast.success("Reported. Thank you — this helps people near you.");
-      setImprint(""); setDrug(""); setStrip(null); setNotes("");
+      setImprint(""); setDrug(""); setStrip(null); setNotes(""); setCaptured(null); setPrecision("city");
       onOpenChange(false);
       onSubmitted?.();
     } catch (e) {
@@ -138,6 +167,7 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
                 Use my city
               </Button>
             </div>
+            <PrecisionChoice value={precision} onChange={(p) => { setPrecision(p); setCaptured(null); }} />
             <div className="grid grid-cols-2 gap-3">
               <Input placeholder="City" value={city} maxLength={80} onChange={(e) => setCity(e.target.value)} className="text-base" />
               <Input placeholder="State" value={state} maxLength={40} onChange={(e) => setState(e.target.value)} className="text-base" />
