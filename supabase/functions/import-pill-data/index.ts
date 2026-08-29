@@ -416,7 +416,7 @@ const CURATED_DATA: Record<string, CuratedEntry[]> = {
     { drug_name: "Spironolactone 50mg", imprint: "ALDACTONE 50", shape: "round", color: "tan", notes: "Pfizer • K-sparing diuretic", ndc_code: "00025-1041" },
   ],
 
-  diabetes: [
+  diabetes_extra: [
     { drug_name: "Metformin 500mg", imprint: "Z 70", shape: "round", color: "white", notes: "Zydus • Biguanide • First-line diabetes", ndc_code: "68382-0028" },
     { drug_name: "Metformin 850mg", imprint: "93 48", shape: "round", color: "white", notes: "Teva • Biguanide", ndc_code: "00093-0048" },
     { drug_name: "Metformin 1000mg", imprint: "101", shape: "oval", color: "white", notes: "Sun Pharma • Biguanide", ndc_code: "63304-0101" },
@@ -904,10 +904,11 @@ function getEntriesForCategory(category: string): CuratedEntry[] {
   if (category === "all") {
     return Object.values(CURATED_DATA).flat();
   }
-  return CURATED_DATA[category] ?? [];
+  // Merge any "_extra" split-list back into its base category
+  return [...(CURATED_DATA[category] ?? []), ...(CURATED_DATA[`${category}_extra`] ?? [])];
 }
 
-async function fetchAllExistingReferences(adminClient: ReturnType<typeof createClient>): Promise<ExistingReference[]> {
+async function fetchAllExistingReferences(adminClient: any): Promise<ExistingReference[]> {
   const allRows: ExistingReference[] = [];
   const pageSize = 1000;
   let from = 0;
@@ -949,7 +950,7 @@ async function fetchRxImageUrl(ndcCode: string): Promise<string | null> {
 }
 
 async function storeReferenceImage(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: any,
   pillReferenceId: string,
   imageUrl: string,
   source: string,
@@ -978,7 +979,7 @@ async function storeReferenceImage(
 // ─── CURATED IMPORT ─────────────────────────────────────────────────────────
 
 async function runCuratedImport(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: any,
   category: string,
   limit: number,
   dryRun: boolean,
