@@ -1146,6 +1146,7 @@ Respond with JSON only:
     }
 
     // ─── Step 3.75: Regional counterfeit cross-reference ──────────────────
+    const extraRiskReasons: string[] = [];
     let counterfeitAlerts: Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }> = [];
     if (scoredMatches.length > 0) {
       const matchedDrugNames = [...new Set(scoredMatches.map(m => m.drug_name))];
@@ -1199,7 +1200,6 @@ Respond with JSON only:
 
     // ─── Step 4: Scoring and risk assessment ────────────────────────────────
     const topMatch = scoredMatches.length > 0 ? scoredMatches[0] : null;
-    const extraRiskReasons: string[] = [];
 
     // ─── One-strike safety threshold (full-analysis path) ─────────────────
     let oneStrikeTriggered = false;
