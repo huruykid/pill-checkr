@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -139,52 +139,12 @@ export type Database = {
         }
         Relationships: []
       }
-      report_locations: {
-        Row: {
-          id: string
-          report_id: string
-          latitude: number
-          longitude: number
-          precision: string
-          place_type: string
-          captured_at: string
-          expires_at: string
-        }
-        Insert: {
-          id?: string
-          report_id: string
-          latitude: number
-          longitude: number
-          precision?: string
-          place_type?: string
-          captured_at?: string
-          expires_at?: string
-        }
-        Update: {
-          id?: string
-          report_id?: string
-          latitude?: number
-          longitude?: number
-          precision?: string
-          place_type?: string
-          captured_at?: string
-          expires_at?: string
-        }
-        Relationships: []
-      }
       counterfeit_reports: {
         Row: {
           city: string | null
           created_at: string
           drug_name: string | null
           id: string
-          imprint: string | null
-          report_type: string
-          evidence_tier: string
-          hex_cell: string | null
-          hex_res: number | null
-          occurred_on: string | null
-          hidden: boolean
           is_anonymous: boolean
           location_lat: number | null
           location_lng: number | null
@@ -199,15 +159,6 @@ export type Database = {
           created_at?: string
           drug_name?: string | null
           id?: string
-          imprint?: string | null
-          report_type?: string
-          evidence_tier?: string
-          hex_cell?: string | null
-          hex_res?: number | null
-          occurred_on?: string | null
-          hidden?: boolean
-          strip_result?: string
-          source?: string
           is_anonymous?: boolean
           location_lat?: number | null
           location_lng?: number | null
@@ -747,30 +698,14 @@ export type Database = {
       }
     }
     Views: {
-      report_map_public: {
-        Row: {
-          hex_cell: string | null
-          hex_res: number | null
-          report_type: string | null
-          evidence_tier: string | null
-          strip_result: string | null
-          state: string | null
-          report_count: number | null
-          last_reported_on: string | null
-          last_updated_at: string | null
-        }
-        Relationships: []
-      }
       counterfeit_reports_public: {
         Row: {
           city: string | null
           created_at: string | null
           drug_name: string | null
           id: string | null
-          imprint: string | null
           risk_level: string | null
           state: string | null
-          strip_result: string | null
         }
         Insert: {
           city?: string | null
