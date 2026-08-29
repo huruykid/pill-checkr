@@ -254,17 +254,17 @@ Deno.serve(async (req) => {
                 totalRecords++;
                 stats.totalProcessed++;
               } catch (e) {
-                console.warn(`Props fetch failed for NDC ${ndc}:`, e.message);
+                console.warn(`Props fetch failed for NDC ${ndc}:`, e instanceof Error ? e.message : String(e));
                 stats.apiErrors++;
               }
             }
           } catch (e) {
-            console.warn(`NDC fetch failed for setid ${setId}:`, e.message);
+            console.warn(`NDC fetch failed for setid ${setId}:`, e instanceof Error ? e.message : String(e));
             stats.apiErrors++;
           }
         }
       } catch (e) {
-        console.warn(`SPL search failed for ${drugName}:`, e.message);
+        console.warn(`SPL search failed for ${drugName}:`, e instanceof Error ? e.message : String(e));
         stats.apiErrors++;
       }
     }
