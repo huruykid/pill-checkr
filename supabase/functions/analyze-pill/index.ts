@@ -570,8 +570,8 @@ serve(async (req) => {
       let oneStrikeTriggered = false;
       let oneStrikeReasons: string[] = [];
       if (topMatch?.metricRatios) {
-        const dominated = Object.entries(topMatch.metricRatios)
-          .filter(([_, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
+        const dominated = (Object.entries(topMatch.metricRatios) as [string, number | null][])
+          .filter(([, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
         if (dominated.length > 0) {
           topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
           oneStrikeTriggered = true;
@@ -1146,6 +1146,7 @@ Respond with JSON only:
     }
 
     // ─── Step 3.75: Regional counterfeit cross-reference ──────────────────
+    const extraRiskReasons: string[] = [];
     let counterfeitAlerts: Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }> = [];
     if (scoredMatches.length > 0) {
       const matchedDrugNames = [...new Set(scoredMatches.map(m => m.drug_name))];
@@ -1187,9 +1188,9 @@ Respond with JSON only:
           // Add to risk reasons if significant
           const totalCfReports = cfReports.length;
           if (totalCfReports >= 3) {
-            riskReasons.push(`⚠ ${totalCfReports} counterfeit reports in the last 90 days for this substance`);
+            extraRiskReasons.push(`⚠ ${totalCfReports} counterfeit reports in the last 90 days for this substance`);
           } else if (totalCfReports > 0) {
-            riskReasons.push(`${totalCfReports} counterfeit report(s) found for this substance recently`);
+            extraRiskReasons.push(`${totalCfReports} counterfeit report(s) found for this substance recently`);
           }
         }
       } catch (e) {
@@ -1204,8 +1205,8 @@ Respond with JSON only:
     let oneStrikeTriggered = false;
     let oneStrikeReasons: string[] = [];
     if (topMatch?.metricRatios) {
-      const dominated = Object.entries(topMatch.metricRatios)
-        .filter(([_, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
+      const dominated = (Object.entries(topMatch.metricRatios) as [string, number | null][])
+        .filter(([, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
       if (dominated.length > 0) {
         topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
         oneStrikeTriggered = true;
@@ -1246,6 +1247,7 @@ Respond with JSON only:
       anomalyScore,
       analysis.image_quality
     );
+    riskReasons.push(...extraRiskReasons);
 
     // Elevate risk for Schedule II substances
     if (isScheduleII && riskLevel === "low") {
