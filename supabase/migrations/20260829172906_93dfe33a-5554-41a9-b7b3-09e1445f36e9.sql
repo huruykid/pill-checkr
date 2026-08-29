@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.purge_expired_report_locations() FROM PUBLIC, anon, authenticated;
