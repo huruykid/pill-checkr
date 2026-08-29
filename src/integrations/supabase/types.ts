@@ -144,43 +144,61 @@ export type Database = {
           city: string | null
           created_at: string
           drug_name: string | null
+          evidence_tier: string
+          hex_cell: string | null
           id: string
+          imprint: string | null
           is_anonymous: boolean
           location_lat: number | null
           location_lng: number | null
           notes: string | null
           photo_url: string | null
           report_id: string | null
+          report_type: string
           risk_level: string | null
+          source: string | null
           state: string | null
+          strip_result: string | null
         }
         Insert: {
           city?: string | null
           created_at?: string
           drug_name?: string | null
+          evidence_tier?: string
+          hex_cell?: string | null
           id?: string
+          imprint?: string | null
           is_anonymous?: boolean
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
           photo_url?: string | null
           report_id?: string | null
+          report_type?: string
           risk_level?: string | null
+          source?: string | null
           state?: string | null
+          strip_result?: string | null
         }
         Update: {
           city?: string | null
           created_at?: string
           drug_name?: string | null
+          evidence_tier?: string
+          hex_cell?: string | null
           id?: string
+          imprint?: string | null
           is_anonymous?: boolean
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
           photo_url?: string | null
           report_id?: string | null
+          report_type?: string
           risk_level?: string | null
+          source?: string | null
           state?: string | null
+          strip_result?: string | null
         }
         Relationships: [
           {
@@ -478,6 +496,51 @@ export type Database = {
         }
         Relationships: []
       }
+      report_locations: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          place_type: string | null
+          precision: string
+          report_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          place_type?: string | null
+          precision?: string
+          report_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          place_type?: string | null
+          precision?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_locations_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "counterfeit_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_locations_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "counterfeit_reports_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           anomaly_reasons: string[] | null
@@ -703,25 +766,34 @@ export type Database = {
           city: string | null
           created_at: string | null
           drug_name: string | null
+          hex_cell: string | null
           id: string | null
+          imprint: string | null
           risk_level: string | null
           state: string | null
+          strip_result: string | null
         }
         Insert: {
           city?: string | null
           created_at?: string | null
           drug_name?: string | null
+          hex_cell?: string | null
           id?: string | null
+          imprint?: string | null
           risk_level?: string | null
           state?: string | null
+          strip_result?: string | null
         }
         Update: {
           city?: string | null
           created_at?: string | null
           drug_name?: string | null
+          hex_cell?: string | null
           id?: string | null
+          imprint?: string | null
           risk_level?: string | null
           state?: string | null
+          strip_result?: string | null
         }
         Relationships: []
       }
@@ -800,6 +872,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      purge_expired_report_locations: { Args: never; Returns: number }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
