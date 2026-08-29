@@ -571,7 +571,7 @@ serve(async (req) => {
       let oneStrikeReasons: string[] = [];
       if (topMatch?.metricRatios) {
         const dominated = (Object.entries(topMatch.metricRatios) as [string, number | null][])
-          .filter(([, v]): v is number => v !== null && v < ONE_STRIKE_FLOOR);
+          .filter(([, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
         if (dominated.length > 0) {
           topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
           oneStrikeTriggered = true;
@@ -1206,7 +1206,7 @@ Respond with JSON only:
     let oneStrikeReasons: string[] = [];
     if (topMatch?.metricRatios) {
       const dominated = (Object.entries(topMatch.metricRatios) as [string, number | null][])
-        .filter(([, v]): v is number => v !== null && v < ONE_STRIKE_FLOOR);
+        .filter(([, v]) => v !== null && v < ONE_STRIKE_FLOOR) as [string, number][];
       if (dominated.length > 0) {
         topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
         oneStrikeTriggered = true;
