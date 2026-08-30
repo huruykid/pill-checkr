@@ -49,7 +49,8 @@ export function PrecisionChoice({
             publicly, deleted after 30 days — but it could be subpoenaed. Homes always display as a wide area.
           </>
         ) : (
-          <>Only your city and a wide map area are stored. No coordinates ever leave your device.</>
+          <>Only your city and a wide map area are stored. Your coordinates are used once on your device and by a
+          map service to find your city name — we never store them.</>
         )}
       </p>
     </div>

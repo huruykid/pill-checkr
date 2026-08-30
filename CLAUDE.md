@@ -48,7 +48,9 @@ I test it?" The home screen answers it above the fold.
 - Anonymous uploads land in `pill-images/anon/` — purged at 30 days by the
   `purge-anon-images` edge fn (nightly pg_cron job `purge-anon-images-daily`).
   Privacy.tsx states the 30-day window; keep them in sync.
-- `tune-confidence-scores` edge fn is legacy admin tooling; safe to delete.
+- `tune-confidence-scores` was legacy admin tooling — deleted from the repo
+  and its weekly cron unscheduled (migration 20260830130100). If Lovable still
+  has it deployed, that instance is orphaned and safe to remove.
 
 ## Community Alerts (the loop, on screen)
 - `/trends` = CommunityAlerts.tsx feed (both targets). Old charts page lives
@@ -62,9 +64,13 @@ I test it?" The home screen answers it above the fold.
 - "Near me" = ilike(state) + same-city sorted first. Location is city/state
   only, cached in `pc_alert_location`. No coordinates are ever sent.
 - Moderation: `counterfeit_reports.hidden` exists; both public views filter
-  `hidden = false` and admins have an UPDATE policy to set it. No admin UI yet.
-- TODO before launch: rate-limit anonymous inserts (edge fn or pg trigger by
-  session), and an admin moderation queue UI for the hide flag.
+  `hidden = false`. Admin queue UI: /admin → Reports tab (ReportsModerationTab).
+- Rate limit: BEFORE INSERT trigger `throttle_counterfeit_reports` — max 5
+  reports/hour per connection, keyed on a salted IP hash kept 24h in
+  `report_throttle` (no policies; only the trigger touches it). Privacy.tsx
+  discloses the 24h hash — keep them in sync.
+- States are stored as USPS codes (`normalizeState` in src/lib/location.ts)
+  so geocoded "California" and hand-typed "CA" match in the near-me feed.
 
 ## App Store record (created Aug 2026)
 - Apple ID 6804091193 · bundle `app.pillcheckr.ios` (PERMANENT) · SKU pillcheckr-ios

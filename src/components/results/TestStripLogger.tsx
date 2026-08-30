@@ -44,15 +44,17 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
       const sessionId = localStorage.getItem("sessionId") || crypto.randomUUID();
       localStorage.setItem("sessionId", sessionId);
 
-      if (savedResult) {
-        // Update existing
-        await supabase
+      if (savedResult && user) {
+        const { error } = await supabase
           .from("test_strip_results")
           .update({ result, test_type: "fentanyl" })
           .eq("report_id", reportId);
+        if (error) throw error;
       } else {
-        // Insert new
-        await supabase
+        // Guests always insert: RLS restricts UPDATE to authenticated owners,
+        // so a guest "update" would silently match zero rows. A fresh row is
+        // allowed and the latest one wins.
+        const { error } = await supabase
           .from("test_strip_results")
           .insert({
             report_id: reportId,
@@ -61,6 +63,7 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
             user_id: user?.id || null,
             session_id: sessionId,
           });
+        if (error) throw error;
       }
 
       setSavedResult(result);

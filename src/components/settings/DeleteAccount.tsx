@@ -26,7 +26,14 @@ export function DeleteAccount() {
       });
       if (error || data?.error) throw new Error(error?.message || data?.error);
       // Clear anything cached locally as well.
-      ["pillCheckHistory", "pc_onboarding_complete", "pc_session_id"].forEach((k) => localStorage.removeItem(k));
+      [
+        "pillCheckHistory",
+        "pc_onboarding_complete",
+        "pc_session_id",
+        "sessionId",
+        "pc_alert_location",
+        "safetyChecklist",
+      ].forEach((k) => localStorage.removeItem(k));
       await supabase.auth.signOut();
       toast.success("Your account and data have been deleted.");
       navigate("/", { replace: true });

@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { detectWithToast, type CityState } from "@/lib/location";
+import { detectWithToast, normalizeState, type CityState } from "@/lib/location";
 import { hapticSuccess } from "@/lib/platform";
 import { captureLocation, type Precision } from "@/lib/geo";
 import { PrecisionChoice } from "./PrecisionChoice";
@@ -81,7 +81,7 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
         strip_result: strip!,
         risk_level: strip === "positive" ? "high" : strip === "not_tested" ? "medium" : "low",
         city: city.trim() || null,
-        state: state.trim() || null,
+        state: normalizeState(state) || null,
         notes: notes.trim() || null,
         is_anonymous: !user,
         source: prefill?.reportId ? "results" : "alerts",
@@ -110,7 +110,11 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
       onSubmitted?.();
     } catch (e) {
       console.error(e);
-      toast.error("Could not submit. Please try again.");
+      if (String((e as Error)?.message).includes("rate_limited")) {
+        toast.error("You're reporting too quickly. Please try again in an hour.");
+      } else {
+        toast.error("Could not submit. Please try again.");
+      }
     } finally {
       setBusy(false);
     }

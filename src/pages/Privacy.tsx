@@ -84,7 +84,9 @@ export default function Privacy() {
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>
                     <strong className="text-foreground">City only (the default).</strong> We store a city and state,
-                    plus a wide map cell of roughly 36 square kilometers. No coordinates leave your device.
+                    plus a wide map cell of roughly 36 square kilometers. Your coordinates are used once — on your
+                    device and by the OpenStreetMap geocoding service to find your city name — and are never stored
+                    by us.
                   </li>
                   <li>
                     <strong className="text-foreground">Exact spot (opt-in).</strong> We also store the coordinates,
@@ -134,7 +136,9 @@ export default function Privacy() {
           <Section id="why" title="Why we process this data">
             <p>
               To identify pills, to publish anonymous regional counterfeit alerts, to show you help nearby, and to
-              keep the alerts feed free of spam and abuse. Aggregate, de-identified counts (for example, how many
+              keep the alerts feed free of spam and abuse. To rate-limit report submissions, a one-way hash of your
+              connection address is kept for up to 24 hours and then deleted; the address itself is never stored.
+              Aggregate, de-identified counts (for example, how many
               fentanyl-positive strips were reported in a state in a month) may be shared with public health and
               harm reduction organizations. These aggregates contain no personal data.
             </p>

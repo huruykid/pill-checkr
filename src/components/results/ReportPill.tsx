@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { normalizeState } from "@/lib/location";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -75,7 +76,7 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
         drug_name: drugName || null,
         risk_level: riskLevel || null,
         city: city.trim() || null,
-        state: state.trim() || null,
+        state: normalizeState(state) || null,
         notes: notes.trim() || null,
         photo_url: photoUrl || null,
         location_lat: null,
@@ -88,7 +89,11 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
       toast.success("Report submitted anonymously. Thank you for helping keep others safe.");
     } catch (e) {
       console.error("Error submitting report:", e);
-      toast.error("Failed to submit report");
+      if (String((e as Error)?.message).includes("rate_limited")) {
+        toast.error("You're reporting too quickly. Please try again in an hour.");
+      } else {
+        toast.error("Failed to submit report");
+      }
     } finally {
       setSubmitting(false);
     }

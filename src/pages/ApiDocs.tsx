@@ -371,7 +371,7 @@ export default function ApiDocs() {
             </p>
             <CodeBlock
               code={`curl -X POST https://api.pillcheckr.app/v1/check \\
-  -H "Authorization: Bearer ff_live_abc123..." \\
+  -H "Authorization: Bearer pc_live_abc123..." \\
   -H "Content-Type: application/json" \\
   -d '{"imprint": "M30", "color": "blue", "shape": "round"}'`}
               lang="bash"
