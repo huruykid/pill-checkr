@@ -146,12 +146,15 @@ export type Database = {
           drug_name: string | null
           evidence_tier: string
           hex_cell: string | null
+          hex_res: number | null
+          hidden: boolean
           id: string
           imprint: string | null
           is_anonymous: boolean
           location_lat: number | null
           location_lng: number | null
           notes: string | null
+          occurred_on: string | null
           photo_url: string | null
           report_id: string | null
           report_type: string
@@ -166,12 +169,15 @@ export type Database = {
           drug_name?: string | null
           evidence_tier?: string
           hex_cell?: string | null
+          hex_res?: number | null
+          hidden?: boolean
           id?: string
           imprint?: string | null
           is_anonymous?: boolean
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
+          occurred_on?: string | null
           photo_url?: string | null
           report_id?: string | null
           report_type?: string
@@ -186,12 +192,15 @@ export type Database = {
           drug_name?: string | null
           evidence_tier?: string
           hex_cell?: string | null
+          hex_res?: number | null
+          hidden?: boolean
           id?: string
           imprint?: string | null
           is_anonymous?: boolean
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
+          occurred_on?: string | null
           photo_url?: string | null
           report_id?: string | null
           report_type?: string
@@ -766,9 +775,12 @@ export type Database = {
           city: string | null
           created_at: string | null
           drug_name: string | null
+          evidence_tier: string | null
           hex_cell: string | null
           id: string | null
           imprint: string | null
+          occurred_on: string | null
+          report_type: string | null
           risk_level: string | null
           state: string | null
           strip_result: string | null
@@ -777,9 +789,12 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           drug_name?: string | null
+          evidence_tier?: string | null
           hex_cell?: string | null
           id?: string | null
           imprint?: string | null
+          occurred_on?: string | null
+          report_type?: string | null
           risk_level?: string | null
           state?: string | null
           strip_result?: string | null
@@ -788,12 +803,28 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           drug_name?: string | null
+          evidence_tier?: string | null
           hex_cell?: string | null
           id?: string | null
           imprint?: string | null
+          occurred_on?: string | null
+          report_type?: string | null
           risk_level?: string | null
           state?: string | null
           strip_result?: string | null
+        }
+        Relationships: []
+      }
+      report_map_public: {
+        Row: {
+          evidence_tier: string | null
+          hex_cell: string | null
+          hex_res: number | null
+          last_reported_on: string | null
+          report_count: number | null
+          report_type: string | null
+          state: string | null
+          strip_result: string | null
         }
         Relationships: []
       }

@@ -72,7 +72,7 @@ export default function Privacy() {
             <ul className="list-disc space-y-2 pl-5">
               <li>
                 <strong className="text-foreground">Pill photos you upload.</strong> Used only to identify the imprint,
-                shape and color. Anonymous uploads are not linked to any identity and are deleted on a rolling basis.
+                shape and color. Anonymous uploads are not linked to any identity and are automatically deleted after 30 days.
               </li>
               <li>
                 <strong className="text-foreground">A random session identifier</strong> stored on your device, so your
@@ -187,7 +187,7 @@ export default function Privacy() {
 
           <Section id="retention" title="How long we keep it">
             <ul className="list-disc space-y-2 pl-5">
-              <li>Anonymous pill photos: deleted on a rolling basis and not retained long-term.</li>
+              <li>Anonymous pill photos: automatically deleted 30 days after upload.</li>
               <li>Check history on an account: kept until you delete the check or your account.</li>
               <li>Community alerts: kept as long as they are useful to people in that area, then aged out.</li>
               <li>Precise coordinates: hard-deleted 30 days after capture. The wide map cell survives, so the map stays accurate without the point.</li>

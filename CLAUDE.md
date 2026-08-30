@@ -40,7 +40,9 @@ I test it?" The home screen answers it above the fold.
 
 ## Traps
 - localStorage keys are `pc_*` (renamed from `ff_*`); API keys are `pc_*`.
-- Anonymous uploads land in `pill-images/anon/` — needs a purge job.
+- Anonymous uploads land in `pill-images/anon/` — purged at 30 days by the
+  `purge-anon-images` edge fn (nightly pg_cron job `purge-anon-images-daily`).
+  Privacy.tsx states the 30-day window; keep them in sync.
 - `tune-confidence-scores` edge fn is legacy admin tooling; safe to delete.
 
 ## Community Alerts (the loop, on screen)
@@ -54,8 +56,10 @@ I test it?" The home screen answers it above the fold.
   imprint, drug, strip result and report_id (source='results').
 - "Near me" = ilike(state) + same-city sorted first. Location is city/state
   only, cached in `pc_alert_location`. No coordinates are ever sent.
+- Moderation: `counterfeit_reports.hidden` exists; both public views filter
+  `hidden = false` and admins have an UPDATE policy to set it. No admin UI yet.
 - TODO before launch: rate-limit anonymous inserts (edge fn or pg trigger by
-  session), and an admin "hide" flag on counterfeit_reports for spam.
+  session), and an admin moderation queue UI for the hide flag.
 
 ## App Store record (created Aug 2026)
 - Apple ID 6804091193 · bundle `app.pillcheckr.ios` (PERMANENT) · SKU pillcheckr-ios
@@ -92,8 +96,9 @@ Contact address used: privacy@pillcheckr.app — this mailbox must exist.
   soften that copy.
 - `place_type='residence'` renders at hex publicly even when captured precisely.
 - Retention: `purge_expired_report_locations()` hard-deletes points at 30 days.
-  MUST be scheduled (pg_cron or an edge fn). Unscheduled = the privacy policy
-  is false. This is the single highest-risk loose end in the repo.
+  Scheduled: pg_cron job `purge-report-locations`, nightly 03:30 UTC (see
+  migration 20260829172854). If this job ever disappears, the privacy policy
+  is false — verify it exists after any DB reset.
 - `report_type` pill|overdose, `evidence_tier` lab|strip|suspected_opioid|visual.
   Every map point displays its tier. An overdose is NOT a fentanyl detection.
 - Privacy policy /privacy is coupled to all of the above. Change one, change

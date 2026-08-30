@@ -22,3 +22,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.delete-account]
 verify_jwt = true
+
+[functions.purge-anon-images]
+verify_jwt = true
