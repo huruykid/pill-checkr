@@ -72,7 +72,7 @@ export default function Privacy() {
             <ul className="list-disc space-y-2 pl-5">
               <li>
                 <strong className="text-foreground">Pill photos you upload.</strong> Used only to identify the imprint,
-                shape and color. Anonymous uploads are not linked to any identity and are deleted on a rolling basis.
+                shape and color. Anonymous uploads are not linked to any identity and are automatically deleted after 30 days.
               </li>
               <li>
                 <strong className="text-foreground">A random session identifier</strong> stored on your device, so your
@@ -84,7 +84,9 @@ export default function Privacy() {
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>
                     <strong className="text-foreground">City only (the default).</strong> We store a city and state,
-                    plus a wide map cell of roughly 36 square kilometers. No coordinates leave your device.
+                    plus a wide map cell of roughly 36 square kilometers. Your coordinates are used once — on your
+                    device and by the OpenStreetMap geocoding service to find your city name — and are never stored
+                    by us.
                   </li>
                   <li>
                     <strong className="text-foreground">Exact spot (opt-in).</strong> We also store the coordinates,
@@ -134,7 +136,9 @@ export default function Privacy() {
           <Section id="why" title="Why we process this data">
             <p>
               To identify pills, to publish anonymous regional counterfeit alerts, to show you help nearby, and to
-              keep the alerts feed free of spam and abuse. Aggregate, de-identified counts (for example, how many
+              keep the alerts feed free of spam and abuse. To rate-limit report submissions, a one-way hash of your
+              connection address is kept for up to 24 hours and then deleted; the address itself is never stored.
+              Aggregate, de-identified counts (for example, how many
               fentanyl-positive strips were reported in a state in a month) may be shared with public health and
               harm reduction organizations. These aggregates contain no personal data.
             </p>
@@ -187,7 +191,7 @@ export default function Privacy() {
 
           <Section id="retention" title="How long we keep it">
             <ul className="list-disc space-y-2 pl-5">
-              <li>Anonymous pill photos: deleted on a rolling basis and not retained long-term.</li>
+              <li>Anonymous pill photos: automatically deleted 30 days after upload.</li>
               <li>Check history on an account: kept until you delete the check or your account.</li>
               <li>Community alerts: kept as long as they are useful to people in that area, then aged out.</li>
               <li>Precise coordinates: hard-deleted 30 days after capture. The wide map cell survives, so the map stays accurate without the point.</li>

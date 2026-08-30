@@ -10,3 +10,13 @@ export function isNative(): boolean {
   const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
   return !!w.Capacitor?.isNativePlatform?.();
 }
+
+/**
+ * Success haptic for the moments that matter (strip logged, report sent).
+ * Lazy-loads the Capacitor code so the web bundle never carries it; a no-op
+ * on web and safe to call unconditionally.
+ */
+export function hapticSuccess(): void {
+  if (!isNative()) return;
+  import("./native").then((m) => m.hapticSuccess()).catch(() => {});
+}

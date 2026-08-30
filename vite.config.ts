@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
+      // The service worker is web-only: inside the Capacitor shell it serves
+      // stale bundles from cache and fights cap copy. Native ships no SW.
+      disable: mode === "native",
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {

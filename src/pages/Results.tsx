@@ -59,31 +59,33 @@ interface ResultsData {
 
 interface VisualSimilarityData {
   hasComparison: boolean;
-  score: number | null;
   flags: string[];
 }
 
+// Risk is categorical: never surface the numeric similarity score the
+// analyzer stores in match_reasons — only whether a comparison ran and
+// which visual discrepancies it flagged.
 function parseVisualSimilarity(matchReasons: string | null): VisualSimilarityData {
-  if (!matchReasons) return { hasComparison: false, score: null, flags: [] };
-  const scoreMatch = matchReasons.match(/Visual similarity:\s*(\d+)%/i);
-  const score = scoreMatch ? parseInt(scoreMatch[1], 10) : null;
+  if (!matchReasons) return { hasComparison: false, flags: [] };
+  const hasComparison = /Visual similarity:/i.test(matchReasons);
   const flagsMatch = matchReasons.match(/Visual flags?:\s*([^.]+)/i);
-  const flags = flagsMatch 
+  const flags = flagsMatch
     ? flagsMatch[1].split(',').map(f => f.trim()).filter(Boolean)
     : [];
-  return { hasComparison: score !== null, score, flags };
+  return { hasComparison, flags };
 }
 
-function getVisualScoreColor(score: number): string {
-  if (score >= 70) return "bg-success";
-  if (score >= 40) return "bg-warning";
-  return "bg-danger";
-}
-
-function getVisualScoreText(score: number): string {
-  if (score >= 70) return "text-success";
-  if (score >= 40) return "text-warning";
-  return "text-danger";
+// Existing rows carry "Visual similarity: 82%" inside match_reasons, so the
+// score has to be stripped at display time too, not just at write time.
+function sanitizeMatchReasons(matchReasons: string | null): string | null {
+  if (!matchReasons) return matchReasons;
+  const cleaned = matchReasons
+    .replace(/visual similarity:\s*\d{1,3}\s*%\s*[.;,]?/gi, "")
+    .replace(/visual flags?:\s*[^.;]+[.;]?/gi, "")
+    .replace(/\b\d{1,3}\s*%/g, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/^[\s.;,]+|[\s.;,]+$/g, "");
+  return cleaned.length > 0 ? cleaned : null;
 }
 
 const harmReductionStepKeys = ["steps.1", "steps.2", "steps.3", "steps.4", "steps.5", "steps.6"];
@@ -396,13 +398,12 @@ export default function Results() {
                                 {(report.detected_logos as any[]).map((logo: any, idx: number) => (
                                   <Badge key={idx} variant="secondary" className="text-xs gap-1">
                                     🏷️ {logo.name}
-                                    {logo.confidence === "high" && <CheckCircle className="h-3 w-3 text-success" />}
                                   </Badge>
                                 ))}
                               </div>
                             )}
-                            {match.match_reasons && (
-                              <p className="mt-1 text-sm text-primary/80">{match.match_reasons}</p>
+                            {sanitizeMatchReasons(match.match_reasons) && (
+                              <p className="mt-1 text-sm text-primary/80">{sanitizeMatchReasons(match.match_reasons)}</p>
                             )}
                             {match.explanation && (
                               <p className="mt-2 text-sm text-muted-foreground">{match.explanation}</p>
@@ -413,23 +414,13 @@ export default function Results() {
                               const visualData = parseVisualSimilarity(match.match_reasons);
                               return (
                                 <div className="mt-3 pt-3 border-t border-border/50">
-                                  {visualData.hasComparison && visualData.score !== null ? (
+                                  {visualData.hasComparison ? (
                                     <div className="space-y-2">
-                                      <div className="flex items-center gap-2">
-                                        <Eye className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-xs text-muted-foreground">Visual Comparison</span>
-                                        <div className="flex-1 max-w-[120px]">
-                                          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                                            <div 
-                                              className={`h-full transition-all ${getVisualScoreColor(visualData.score)}`}
-                                              style={{ width: `${visualData.score}%` }}
-                                            />
-                                          </div>
-                                        </div>
-                                        <span className={`text-xs font-medium ${getVisualScoreText(visualData.score)}`}>
-                                          {visualData.score}%
+                                      <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Eye className="h-4 w-4" />
+                                        <span className="text-xs">
+                                          Compared against a reference photo. A visual match is not proof — counterfeits copy appearance.
                                         </span>
-                                        <CheckCircle className="h-3.5 w-3.5 text-success" />
                                       </div>
                                       {visualData.flags.length > 0 && (
                                         <div className="flex flex-wrap gap-1.5 ml-6">

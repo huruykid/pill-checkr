@@ -32,6 +32,11 @@ I test it?" The home screen answers it above the fold.
 - Tabs: Identify(/check) · Alerts(/trends) · Help(/nearby-help) · History.
 
 ## App Store
+- iOS shell: Capacitor (SPM only, no CocoaPods) in `ios/`. Mechanics, the
+  release loop, and the iPad dead-tap checklist live in RELEASING.md — read
+  it before any archive. Native ships `npm run ios:sync`, never plain build.
+- Google sign-in is hidden on native (Guideline 4.8) until Sign in with
+  Apple ships; email auth is the native path.
 - Target 17+ (Drug Use or References; Medical/Treatment Information).
 - In-app account deletion: Settings → DeleteAccount → `delete-account` edge
   function (needs SUPABASE_SERVICE_ROLE_KEY).
@@ -40,8 +45,12 @@ I test it?" The home screen answers it above the fold.
 
 ## Traps
 - localStorage keys are `pc_*` (renamed from `ff_*`); API keys are `pc_*`.
-- Anonymous uploads land in `pill-images/anon/` — needs a purge job.
-- `tune-confidence-scores` edge fn is legacy admin tooling; safe to delete.
+- Anonymous uploads land in `pill-images/anon/` — purged at 30 days by the
+  `purge-anon-images` edge fn (nightly pg_cron job `purge-anon-images-daily`).
+  Privacy.tsx states the 30-day window; keep them in sync.
+- `tune-confidence-scores` was legacy admin tooling — deleted from the repo
+  and its weekly cron unscheduled (migration 20260830130100). If Lovable still
+  has it deployed, that instance is orphaned and safe to remove.
 
 ## Community Alerts (the loop, on screen)
 - `/trends` = CommunityAlerts.tsx feed (both targets). Old charts page lives
@@ -54,8 +63,14 @@ I test it?" The home screen answers it above the fold.
   imprint, drug, strip result and report_id (source='results').
 - "Near me" = ilike(state) + same-city sorted first. Location is city/state
   only, cached in `pc_alert_location`. No coordinates are ever sent.
-- TODO before launch: rate-limit anonymous inserts (edge fn or pg trigger by
-  session), and an admin "hide" flag on counterfeit_reports for spam.
+- Moderation: `counterfeit_reports.hidden` exists; both public views filter
+  `hidden = false`. Admin queue UI: /admin → Reports tab (ReportsModerationTab).
+- Rate limit: BEFORE INSERT trigger `throttle_counterfeit_reports` — max 5
+  reports/hour per connection, keyed on a salted IP hash kept 24h in
+  `report_throttle` (no policies; only the trigger touches it). Privacy.tsx
+  discloses the 24h hash — keep them in sync.
+- States are stored as USPS codes (`normalizeState` in src/lib/location.ts)
+  so geocoded "California" and hand-typed "CA" match in the near-me feed.
 
 ## App Store record (created Aug 2026)
 - Apple ID 6804091193 · bundle `app.pillcheckr.ios` (PERMANENT) · SKU pillcheckr-ios
@@ -92,8 +107,9 @@ Contact address used: privacy@pillcheckr.app — this mailbox must exist.
   soften that copy.
 - `place_type='residence'` renders at hex publicly even when captured precisely.
 - Retention: `purge_expired_report_locations()` hard-deletes points at 30 days.
-  MUST be scheduled (pg_cron or an edge fn). Unscheduled = the privacy policy
-  is false. This is the single highest-risk loose end in the repo.
+  Scheduled: pg_cron job `purge-report-locations`, nightly 03:30 UTC (see
+  migration 20260829172854). If this job ever disappears, the privacy policy
+  is false — verify it exists after any DB reset.
 - `report_type` pill|overdose, `evidence_tier` lab|strip|suspected_opioid|visual.
   Every map point displays its tier. An overdose is NOT a fentanyl detection.
 - Privacy policy /privacy is coupled to all of the above. Change one, change

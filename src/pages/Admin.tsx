@@ -27,6 +27,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Pill, BookOpen, ShieldCheck, Database as DatabaseIcon, Users, AlertTriangle } from "lucide-react";
 import { CommunitySubmissionsTab } from "@/components/admin/CommunitySubmissionsTab";
+import { ReportsModerationTab } from "@/components/admin/ReportsModerationTab";
 import type { Database } from "@/integrations/supabase/types";
 
 type PillReference = Database["public"]["Tables"]["pill_reference"]["Row"];
@@ -295,6 +296,10 @@ export default function Admin() {
                 <Users className="h-4 w-4" />
                 Community
               </TabsTrigger>
+              <TabsTrigger value="reports" className="gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Reports
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="pills">
@@ -440,6 +445,10 @@ export default function Admin() {
 
             <TabsContent value="community">
               <CommunitySubmissionsTab />
+            </TabsContent>
+
+            <TabsContent value="reports">
+              <ReportsModerationTab />
             </TabsContent>
           </Tabs>
         </div>
