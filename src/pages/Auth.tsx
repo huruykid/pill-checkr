@@ -12,6 +12,7 @@ import { Loader2, Shield, Mail, Lock, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
+import { isNative } from "@/lib/platform";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -149,6 +150,10 @@ export default function Auth() {
               </form>
             ) : (
               <div className="space-y-4">
+                {/* Guideline 4.8: a third-party login on native requires Sign in
+                    with Apple. Until SIWA ships, native offers email only. */}
+                {!isNative() && (
+                <>
                 <Button
                   type="button"
                   variant="outline"
@@ -191,6 +196,8 @@ export default function Auth() {
                     <span className="bg-card px-2 text-muted-foreground">or</span>
                   </div>
                 </div>
+                </>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">

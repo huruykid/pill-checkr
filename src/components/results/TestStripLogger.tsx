@@ -7,6 +7,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { useAuth } from "@/hooks/useAuth";
 import { FlaskConical, ShieldCheck, ShieldAlert, RotateCcw, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { hapticSuccess } from "@/lib/platform";
 
 interface TestStripLoggerProps {
   reportId: string;
@@ -63,6 +64,7 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
       }
 
       setSavedResult(result);
+      hapticSuccess();
       toast.success(t("testStrip.logged"));
       onLogged?.(result);
     } catch (error) {

@@ -32,6 +32,11 @@ I test it?" The home screen answers it above the fold.
 - Tabs: Identify(/check) · Alerts(/trends) · Help(/nearby-help) · History.
 
 ## App Store
+- iOS shell: Capacitor (SPM only, no CocoaPods) in `ios/`. Mechanics, the
+  release loop, and the iPad dead-tap checklist live in RELEASING.md — read
+  it before any archive. Native ships `npm run ios:sync`, never plain build.
+- Google sign-in is hidden on native (Guideline 4.8) until Sign in with
+  Apple ships; email auth is the native path.
 - Target 17+ (Drug Use or References; Medical/Treatment Information).
 - In-app account deletion: Settings → DeleteAccount → `delete-account` edge
   function (needs SUPABASE_SERVICE_ROLE_KEY).

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { detectWithToast, type CityState } from "@/lib/location";
+import { hapticSuccess } from "@/lib/platform";
 import { captureLocation, type Precision } from "@/lib/geo";
 import { PrecisionChoice } from "./PrecisionChoice";
 import { toast } from "sonner";
@@ -102,6 +103,7 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
         });
         if (locError) console.error("precise location not stored:", locError);
       }
+      hapticSuccess();
       toast.success("Reported. Thank you — this helps people near you.");
       setImprint(""); setDrug(""); setStrip(null); setNotes(""); setCaptured(null); setPrecision("city");
       onOpenChange(false);
