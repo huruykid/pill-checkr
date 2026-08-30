@@ -301,7 +301,7 @@ export default function Results() {
                   icon: <AlertTriangle className="h-6 w-6 text-warning shrink-0 mt-0.5" />,
                   border: "border-l-warning",
                   bg: "bg-warning-light",
-                  message: t("results.summary.identified").replace("{drug}", topDrug || ""),
+                  message: t("results.summary.identified").replaceAll("{drug}", topDrug || ""),
                 };
 
             return (
@@ -476,7 +476,7 @@ export default function Results() {
               <div className="rounded-lg bg-warning-light border border-warning/30 p-4">
                 <p className="font-semibold text-foreground">
                   {matches.length > 0
-                    ? t("results.verdict.identified").replace("{drug}", matches[0].drug_name || "")
+                    ? t("results.verdict.identified").replaceAll("{drug}", matches[0].drug_name || "")
                     : t("results.verdict.unidentified")}
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">{t("results.verdict.why")}</p>
