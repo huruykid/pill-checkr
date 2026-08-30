@@ -550,6 +550,24 @@ export type Database = {
           },
         ]
       }
+      report_throttle: {
+        Row: {
+          created_at: string
+          id: number
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           anomaly_reasons: string[] | null
