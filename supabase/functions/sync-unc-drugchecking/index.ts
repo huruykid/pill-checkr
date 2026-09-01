@@ -1,7 +1,5 @@
 // Nightly sync of UNC Street Drug Analysis Lab open data (analysis_dataset.csv)
-// into external_reports. One normalizer, defensive against upstream shape drift
-// (see external-data rules: mixed shapes are permanent; normalize at ONE boundary;
-// dates are hostile; keep the raw row).
+// into external_reports. One normalizer, defensive against upstream shape drift.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -15,7 +13,6 @@ const SHAPE_VERSION = 2;
 const CHUNK = 500;
 const FETCH_TIMEOUT = 30_000;
 
-// ---------- CSV parsing (quotes, embedded commas/newlines) ----------
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [], field = "", inQ = false;
@@ -39,7 +36,6 @@ function parseCsv(text: string): string[][] {
   return rows;
 }
 
-// ---------- Normalizer: the ONE boundary between UNC's shape and ours ----------
 type Norm = {
   source_id: string;
   source_record_id: string;
@@ -76,7 +72,7 @@ function flag(v: string | undefined): boolean | null {
   const t = v.trim().toLowerCase();
   if (t === "1" || t === "true" || t === "yes") return true;
   if (t === "0" || t === "false" || t === "no") return false;
-  return null; // "", "NA", ".", junk — unknown, never guessed
+  return null;
 }
 
 function text(v: string | undefined): string | null {
@@ -95,9 +91,9 @@ function isoDate(v: string | undefined): string | null {
   const t = (v ?? "").trim();
   if (!t) return null;
   const d = new Date(t);
-  if (isNaN(d.getTime())) return null;         // Invalid Date never leaves the normalizer
+  if (isNaN(d.getTime())) return null;
   const y = d.getUTCFullYear();
-  if (y < 2015 || y > 2100) return null;       // Stata epoch numbers etc. get rejected here
+  if (y < 2015 || y > 2100) return null;
   return d.toISOString().slice(0, 10);
 }
 
