@@ -26,6 +26,15 @@ export function LabResultCard({ r, sourceName }: { r: ExternalLabReport; sourceN
       fent || nitaz ? "border-l-4 border-l-danger border-danger/30" : "border-border",
     )}>
       <div className="flex items-start justify-between gap-3">
+        {typeof r.image_url === "string" && r.image_url.startsWith("https://") && (
+          <img
+            src={r.image_url}
+            alt={`Photo of tested sample${soldAs ? ` sold as ${soldAs}` : ""}`}
+            loading="lazy"
+            className="h-14 w-14 shrink-0 rounded-lg border object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).hidden = true; }}
+          />
+        )}
         <div className="min-w-0">
           <p className="font-display text-xl leading-tight truncate">{title}</p>
           {detected.length > 0 && (

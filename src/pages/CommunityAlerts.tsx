@@ -8,12 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertCard, type CommunityAlert } from "@/components/alerts/AlertCard";
 import { LabResultCard } from "@/components/alerts/LabResultCard";
 import { DataSourcesSheet } from "@/components/alerts/DataSourcesSheet";
+import { LabResultsMap } from "@/components/alerts/LabResultsMap";
 import { fetchExternalReports, fetchExternalSources, type ExternalLabReport } from "@/lib/externalData";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { detectWithToast, getSavedLocation, saveLocation, type CityState } from "@/lib/location";
 import { isNative } from "@/lib/platform";
 import { cn } from "@/lib/utils";
-import { Radio, LocateFixed, Loader2, Plus, X, FlaskConical, BarChart3, Info } from "lucide-react";
+import { Radio, LocateFixed, Loader2, Plus, X, FlaskConical, BarChart3, Info, List, Map as MapIcon } from "lucide-react";
 
 type Scope = "near" | "all";
 const PAGE = 50;
@@ -30,6 +31,7 @@ export default function CommunityAlerts() {
   const [labLoading, setLabLoading] = useState(true);
   const [sourceNames, setSourceNames] = useState<Record<string, string>>({});
   const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [labView, setLabView] = useState<"list" | "map">("list");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,7 +54,7 @@ export default function CommunityAlerts() {
     let on = true;
     setLabLoading(true);
     Promise.all([
-      fetchExternalReports({ state: scope === "near" ? loc?.state : null, limit: 50 }),
+      fetchExternalReports({ state: scope === "near" ? loc?.state : null, limit: 500 }),
       fetchExternalSources(),
     ]).then(([reports, sources]) => {
       if (!on) return;
@@ -224,11 +226,42 @@ export default function CommunityAlerts() {
             )}
           </div>
         ) : (
-          <ul className="space-y-3">
-            {labReports.map((r) => (
-              <LabResultCard key={r.id} r={r} sourceName={sourceNames[r.source_id] || "Verified lab"} />
-            ))}
-          </ul>
+          <>
+            <div className="mb-3 flex justify-end">
+              <div className="flex rounded-full border bg-card p-1" role="tablist" aria-label="Lab results view">
+                <button
+                  type="button" role="tab" aria-selected={labView === "list"}
+                  onClick={() => setLabView("list")}
+                  className={cn("flex min-h-[40px] items-center gap-1.5 rounded-full px-4 text-sm font-medium",
+                    labView === "list" ? "bg-foreground text-background" : "text-muted-foreground")}
+                >
+                  <List className="h-4 w-4" />List
+                </button>
+                <button
+                  type="button" role="tab" aria-selected={labView === "map"}
+                  onClick={() => setLabView("map")}
+                  className={cn("flex min-h-[40px] items-center gap-1.5 rounded-full px-4 text-sm font-medium",
+                    labView === "map" ? "bg-foreground text-background" : "text-muted-foreground")}
+                >
+                  <MapIcon className="h-4 w-4" />Map
+                </button>
+              </div>
+            </div>
+            {labView === "map" ? (
+              <LabResultsMap reports={labReports} sourceNames={sourceNames} />
+            ) : (
+              <ul className="space-y-3">
+                {labReports.slice(0, 60).map((r) => (
+                  <LabResultCard key={r.id} r={r} sourceName={sourceNames[r.source_id] || "Verified lab"} />
+                ))}
+                {labReports.length > 60 && (
+                  <li className="py-2 text-center text-sm text-muted-foreground">
+                    Showing the 60 most recent — switch to Map to see everything
+                  </li>
+                )}
+              </ul>
+            )}
+          </>
         ))}
 
         <p className="mt-6 text-center text-xs text-muted-foreground">

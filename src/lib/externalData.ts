@@ -28,6 +28,7 @@ export interface ExternalLabReport {
   lon: number | null;
   geo_precision: string;
   collected_on: string | null;
+  image_url: string | null;
 }
 
 // Single cast boundary (tables not yet in generated Database types).
@@ -46,7 +47,7 @@ export async function fetchExternalSources(): Promise<ExternalSource[]> {
 export async function fetchExternalReports(opts: { state?: string | null; limit?: number }): Promise<ExternalLabReport[]> {
   let q = db
     .from("external_reports_public")
-    .select("id, source_id, substance_expected, substances_detected, lab_flags, sample_type, is_pill, county, state, lat, lon, geo_precision, collected_on")
+    .select("id, source_id, substance_expected, substances_detected, lab_flags, sample_type, is_pill, county, state, lat, lon, geo_precision, collected_on, image_url")
     .order("collected_on", { ascending: false, nullsFirst: false })
     .limit(opts.limit ?? 50);
   if (opts.state) q = q.ilike("state", opts.state);
