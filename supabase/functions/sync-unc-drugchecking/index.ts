@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const SOURCE_ID = "unc_drugchecking";
-const SHAPE_VERSION = 1;
+const SHAPE_VERSION = 2;
 const CHUNK = 500;
 const FETCH_TIMEOUT = 30_000;
 
