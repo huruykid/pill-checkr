@@ -97,17 +97,22 @@ function isoDate(v: string | undefined): string | null {
   return d.toISOString().slice(0, 10);
 }
 
-function normalizeRow(get: (col: string) => string | undefined, rawObj: Record<string, string>): Norm | null {
+function normalizeRow(header: string[], get: (col: string) => string | undefined, rawObj: Record<string, string>): Norm | null {
   const sampleid = text(get("sampleid"));
   if (!sampleid) return null;
   const state = text(get("state"));
-  if (!state || state.length !== 2) return null;
+  if (!state || state.length !== 2) return null; // state is UNC's minimum geographic unit
 
+  // Capture EVERY lab_* flag column the CSV has today (columns drift; grab all,
+  // skip the numeric lab_num_* counters).
   const flags: Record<string, boolean | null> = {};
-  for (const c of FLAG_COLUMNS) flags[c] = flag(get(c));
+  for (const h of header) {
+    if (h.startsWith("lab_") && !h.startsWith("lab_num_")) flags[h] = flag(get(h));
+  }
 
-  const detected = (text(get("primary")) ?? "")
-    .split(/[;,]/).map((s) => s.trim()).filter(Boolean);
+  const detected = Object.entries(PRIMARY_FLAG_NAMES)
+    .filter(([col]) => flags[col] === true)
+    .map(([, name]) => name);
 
   const lat = num(get("lat"));
   const lon = num(get("lon"));
