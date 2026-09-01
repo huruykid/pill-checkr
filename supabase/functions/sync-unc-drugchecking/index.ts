@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
       };
       const rawObj: Record<string, string> = {};
       header.forEach((h, i) => { if (cells[i] !== undefined && cells[i] !== "") rawObj[h] = cells[i]; });
-      const norm = normalizeRow(get, rawObj);
+      const norm = normalizeRow(header, get, rawObj);
       if (!norm) { skipped++; continue; }
       batch.push(norm);
       if (batch.length >= CHUNK) await flush();
