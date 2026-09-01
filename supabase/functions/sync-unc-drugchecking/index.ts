@@ -55,11 +55,17 @@ type Norm = {
   shape_version: number;
 };
 
-const FLAG_COLUMNS = [
-  "lab_fentanyl", "lab_fentanyl_any", "lab_xylazine", "lab_xylazine_any",
-  "lab_meth", "lab_meth_any", "lab_cocaine", "lab_cocaine_any",
-  "lab_nitazenes_any", "lab_carfentanil_any", "lab_opiates_opioids_any",
-];
+// Primary-detection flags -> user-facing substance names. The live CSV has no
+// substance-name column (names live in the separate lab_detail dataset), so
+// detected substances are derived from the primary lab_* flags.
+const PRIMARY_FLAG_NAMES: Record<string, string> = {
+  lab_fentanyl: "fentanyl", lab_meth: "methamphetamine", lab_cocaine: "cocaine",
+  lab_mdma: "MDMA", lab_xylazine: "xylazine", lab_tramadol: "tramadol",
+  lab_caffeine: "caffeine", lab_gabapentin: "gabapentin", lab_ketamine: "ketamine",
+  lab_nitazene: "nitazenes", lab_carfentanil: "carfentanil",
+  lab_benzodiazepine: "benzodiazepine", lab_potent_benzodiazepine: "potent benzodiazepine",
+  lab_opioid: "opioid", lab_btmps: "BTMPS", lab_synthetic_cannabinoid: "synthetic cannabinoid",
+};
 
 function flag(v: string | undefined): boolean | null {
   if (v === undefined) return null;
