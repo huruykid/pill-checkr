@@ -219,6 +219,24 @@ export type Database = {
           },
         ]
       }
+      county_centroids: {
+        Row: {
+          fips: string
+          lat: number
+          lon: number
+        }
+        Insert: {
+          fips: string
+          lat: number
+          lon: number
+        }
+        Update: {
+          fips?: string
+          lat?: number
+          lon?: number
+        }
+        Relationships: []
+      }
       drug_info_cache: {
         Row: {
           adverse_events_data: Json | null
@@ -310,6 +328,7 @@ export type Database = {
           county: string | null
           geo_precision: string
           id: string
+          image_url: string | null
           is_pill: boolean
           lab_flags: Json
           lat: number | null
@@ -330,6 +349,7 @@ export type Database = {
           county?: string | null
           geo_precision?: string
           id?: string
+          image_url?: string | null
           is_pill?: boolean
           lab_flags?: Json
           lat?: number | null
@@ -350,6 +370,7 @@ export type Database = {
           county?: string | null
           geo_precision?: string
           id?: string
+          image_url?: string | null
           is_pill?: boolean
           lab_flags?: Json
           lat?: number | null
@@ -952,6 +973,7 @@ export type Database = {
           county: string | null
           geo_precision: string | null
           id: string | null
+          image_url: string | null
           is_pill: boolean | null
           lab_flags: Json | null
           lat: number | null
@@ -967,6 +989,7 @@ export type Database = {
           county?: string | null
           geo_precision?: string | null
           id?: string | null
+          image_url?: string | null
           is_pill?: boolean | null
           lab_flags?: Json | null
           lat?: number | null
@@ -982,6 +1005,7 @@ export type Database = {
           county?: string | null
           geo_precision?: string | null
           id?: string | null
+          image_url?: string | null
           is_pill?: boolean | null
           lab_flags?: Json | null
           lat?: number | null
