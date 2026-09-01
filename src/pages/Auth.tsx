@@ -96,10 +96,10 @@ export default function Auth() {
   return (
     <Layout>
       <SEOHead
-        title="Sign In | Pill Checkr"
+        title="Sign In | Stamped"
         description="Create an account or sign in to save your pill check history and manage emergency contacts."
         path="/auth"
-        jsonLd={makeWebPage("Sign In", "/auth", "Create an account or sign in to Pill Checkr.")}
+        jsonLd={makeWebPage("Sign In", "/auth", "Create an account or sign in to Stamped.")}
       />
       <div className="container flex min-h-[60vh] items-center justify-center py-12">
         <Card className="w-full max-w-md border-2 border-border">

@@ -270,7 +270,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "If you suspect an overdose:",
     "footer.call911": "Call 911 Immediately",
     "footer.administerNaloxone": "Administer naloxone if available",
-    "footer.copyright": "© {year} Pill Checkr. For harm reduction purposes only.",
+    "footer.copyright": "© {year} Stamped. For harm reduction purposes only.",
     "footer.madeWith": "Made with",
     "footer.forHR": "for harm reduction",
 
@@ -622,7 +622,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "Si sospechas una sobredosis:",
     "footer.call911": "Llama al 911 Inmediatamente",
     "footer.administerNaloxone": "Administra naloxona si está disponible",
-    "footer.copyright": "© {year} Pill Checkr. Solo para reducción de daños.",
+    "footer.copyright": "© {year} Stamped. Solo para reducción de daños.",
     "footer.madeWith": "Hecho con",
     "footer.forHR": "para reducción de daños",
 
@@ -932,7 +932,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "Si vous suspectez une surdose :",
     "footer.call911": "Appelez le 911 Immédiatement",
     "footer.administerNaloxone": "Administrez la naloxone si disponible",
-    "footer.copyright": "© {year} Pill Checkr. Pour la réduction des risques uniquement.",
+    "footer.copyright": "© {year} Stamped. Pour la réduction des risques uniquement.",
     "footer.madeWith": "Fait avec",
     "footer.forHR": "pour la réduction des risques",
 
@@ -1242,7 +1242,7 @@ const translations: Record<Language, Record<string, string>> = {
     "footer.suspectOverdose": "Se suspeitar de uma overdose:",
     "footer.call911": "Ligue 911 Imediatamente",
     "footer.administerNaloxone": "Administre naloxona se disponível",
-    "footer.copyright": "© {year} Pill Checkr. Apenas para redução de danos.",
+    "footer.copyright": "© {year} Stamped. Apenas para redução de danos.",
     "footer.madeWith": "Feito com",
     "footer.forHR": "para redução de danos",
 

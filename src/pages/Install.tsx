@@ -47,8 +47,8 @@ export default function Install() {
   return (
     <Layout>
       <SEOHead
-        title="Install Pill Checkr | Offline Access"
-        description="Install Pill Checkr on your device for offline access to education content and safety checklists."
+        title="Install Stamped | Offline Access"
+        description="Install Stamped on your device for offline access to education content and safety checklists."
         path="/install"
       />
       <div className="container py-12">
@@ -59,12 +59,12 @@ export default function Install() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Smartphone className="h-5 w-5 text-primary" />
-                Install Pill Checkr
+                Install Stamped
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Install Pill Checkr on your device for quick access. Education content and safety checklists are available offline.
+                Install Stamped on your device for quick access. Education content and safety checklists are available offline.
               </p>
 
               {isInstalled ? (

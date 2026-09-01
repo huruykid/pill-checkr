@@ -22,7 +22,7 @@ const Index = () => {
   return (
     <Layout>
       <SEOHead
-        title="Pill Checkr — Identify Pills, Find Test Strips & Naloxone"
+        title="Stamped — Identify Pills, Find Test Strips & Naloxone"
         description="Identify a pill, test it with a fentanyl strip, log the result, and see what counterfeits are being found near you. Free harm reduction tool with naloxone and help nearby."
         path="/"
         jsonLd={jsonLdWebSite}

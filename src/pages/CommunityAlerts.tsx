@@ -93,7 +93,7 @@ export default function CommunityAlerts() {
   return (
     <Layout>
       <SEOHead
-        title="Community Alerts | Pill Checkr"
+        title="Community Alerts | Stamped"
         description="See what counterfeit pills and fentanyl-positive test strips are being reported near you. Anonymous, city-level, community-sourced."
         path="/trends"
         jsonLd={makeWebPage("Community Alerts", "/trends", "Anonymous community reports of counterfeit pills and fentanyl test strip results by city.")}

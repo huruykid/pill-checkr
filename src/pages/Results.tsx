@@ -16,6 +16,7 @@ import { ReportPill } from "@/components/results/ReportPill";
 import { TestStripLogger } from "@/components/results/TestStripLogger";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { RegionalCounterfeitAlert } from "@/components/results/RegionalCounterfeitAlert";
+import { ImprintTestHistory } from "@/components/results/ImprintTestHistory";
 import { NearbyHelp } from "@/components/shared/NearbyHelp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -260,7 +261,7 @@ export default function Results() {
   return (
     <Layout urgentEmergency={riskLevel === "high"}>
       <SEOHead
-        title="Pill Analysis Results | Pill Checkr"
+        title="Pill Analysis Results | Stamped"
         description="View your pill analysis results including visual matching, consistency scoring, and harm reduction guidance."
         path={`/results/${reportId}`}
         jsonLd={makeWebPage("Pill Analysis Results", `/results/${reportId}`, "Pill analysis results with visual matching and safety guidance.")}
@@ -463,6 +464,9 @@ export default function Results() {
           {counterfeitAlerts.length > 0 && (
             <RegionalCounterfeitAlert alerts={counterfeitAlerts} className="mb-6" />
           )}
+
+          {/* Local test history for this exact imprint (danger-forward; no clean/safe framing) */}
+          <ImprintTestHistory imprint={report.imprint_text} className="mb-6" />
 
           {/* Section B: What this check can and cannot tell you (categorical, no scores) */}
           <Card className="mb-6 border-warning/40">

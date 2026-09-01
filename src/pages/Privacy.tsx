@@ -18,10 +18,10 @@ export default function Privacy() {
   return (
     <Layout>
       <SEOHead
-        title="Privacy Policy | Pill Checkr"
-        description="What Pill Checkr collects, what it never collects, and how to delete everything. We do not sell data, do not track you across apps, and never store your exact location."
+        title="Privacy Policy | Stamped"
+        description="What Stamped collects, what it never collects, and how to delete everything. We do not sell data, do not track you across apps, and never store your exact location."
         path="/privacy"
-        jsonLd={makeWebPage("Privacy Policy", "/privacy", "Pill Checkr privacy policy — data collection, retention, and deletion.")}
+        jsonLd={makeWebPage("Privacy Policy", "/privacy", "Stamped privacy policy — data collection, retention, and deletion.")}
       />
 
       <div className="container max-w-3xl py-8 md:py-12">
@@ -56,12 +56,12 @@ export default function Privacy() {
         <div className="space-y-10">
           <Section id="who" title="Who we are">
             <p>
-              Pill Checkr is a harm reduction tool operated by Appfinity Labs LLC. It helps people identify
+              Stamped is a harm reduction tool operated by Appfinity Labs LLC. It helps people identify
               what a pill is stamped to be, encourages testing with a fentanyl test strip, and connects
               people to naloxone, test strips, and treatment nearby.
             </p>
             <p className="rounded-lg border border-warning/40 bg-warning-light p-4 text-foreground">
-              Pill Checkr cannot detect fentanyl and does not tell you a pill is safe. A photo only matches
+              Stamped cannot detect fentanyl and does not tell you a pill is safe. A photo only matches
               an imprint against reference images. Counterfeit pills are pressed to look identical to real
               ones. Only a test strip or a laboratory can tell you what is inside a pill.
             </p>
@@ -116,7 +116,7 @@ export default function Privacy() {
               <li>Your precise GPS coordinates, unless you explicitly choose "Exact spot" on a specific report. Precise points are never published, never sent to the API, and are deleted after 30 days.</li>
               <li>Any link between a location and a person. Reports carry no name, no account requirement, and no contact information.</li>
               <li>Your contacts, photo library, call history, or browsing activity.</li>
-              <li>Advertising identifiers. Pill Checkr contains no advertising SDK and does no cross-app tracking.</li>
+              <li>Advertising identifiers. Stamped contains no advertising SDK and does no cross-app tracking.</li>
               <li>Any information about drug purchases, sources, or sellers. We do not want it and there is nowhere in the app to enter it.</li>
             </ul>
           </Section>
@@ -220,7 +220,7 @@ export default function Privacy() {
 
           <Section id="children" title="Children">
             <p>
-              Pill Checkr is rated 17+ and is not directed at children. We do not knowingly collect information from
+              Stamped is rated 17+ and is not directed at children. We do not knowingly collect information from
               anyone under 17. If you believe a child has provided us information, contact us and we will delete it.
             </p>
           </Section>

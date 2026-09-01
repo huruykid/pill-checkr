@@ -164,7 +164,7 @@ export default function Trends() {
   return (
     <Layout>
       <SEOHead
-        title="Analytics | Pill Checkr"
+        title="Analytics | Stamped"
         description="Anonymized pill check trends, risk distribution, and community alerts. Monitor counterfeit drug activity in your area."
         path="/analytics"
         jsonLd={makeWebPage("Analytics", "/analytics", "See what counterfeit pills are being found near you, reported by the community.")}

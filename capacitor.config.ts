@@ -4,7 +4,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // Never change appId.
 const config: CapacitorConfig = {
   appId: "app.pillcheckr.ios",
-  appName: "Pill Checkr",
+  appName: "Stamped",
   webDir: "dist",
   ios: {
     contentInset: "never", // Header/BottomTabBar own the safe areas via env()
