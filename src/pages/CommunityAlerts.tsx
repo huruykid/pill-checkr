@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCard, type CommunityAlert } from "@/components/alerts/AlertCard";
+import { LabResultCard } from "@/components/alerts/LabResultCard";
+import { DataSourcesSheet } from "@/components/alerts/DataSourcesSheet";
+import { fetchExternalReports, fetchExternalSources, type ExternalLabReport } from "@/lib/externalData";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { detectWithToast, getSavedLocation, saveLocation, type CityState } from "@/lib/location";
 import { isNative } from "@/lib/platform";
 import { cn } from "@/lib/utils";
-import { Radio, LocateFixed, Loader2, Plus, X, FlaskConical, BarChart3 } from "lucide-react";
+import { Radio, LocateFixed, Loader2, Plus, X, FlaskConical, BarChart3, Info } from "lucide-react";
 
 type Scope = "near" | "all";
 const PAGE = 50;
@@ -22,6 +25,11 @@ export default function CommunityAlerts() {
   const [scope, setScope] = useState<Scope>(() => (getSavedLocation() ? "near" : "all"));
   const [geo, setGeo] = useState(false);
   const [sheet, setSheet] = useState(false);
+  const [feed, setFeed] = useState<"community" | "lab">("community");
+  const [labReports, setLabReports] = useState<ExternalLabReport[]>([]);
+  const [labLoading, setLabLoading] = useState(true);
+  const [sourceNames, setSourceNames] = useState<Record<string, string>>({});
+  const [sourcesOpen, setSourcesOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -38,6 +46,22 @@ export default function CommunityAlerts() {
   }, [scope, loc?.state]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (feed !== "lab") return;
+    let on = true;
+    setLabLoading(true);
+    Promise.all([
+      fetchExternalReports({ state: scope === "near" ? loc?.state : null, limit: 50 }),
+      fetchExternalSources(),
+    ]).then(([reports, sources]) => {
+      if (!on) return;
+      setLabReports(reports);
+      setSourceNames(Object.fromEntries(sources.map((s) => [s.id, s.name])));
+      setLabLoading(false);
+    });
+    return () => { on = false; };
+  }, [feed, scope, loc?.state]);
 
   const locate = async () => {
     setGeo(true);
@@ -127,8 +151,37 @@ export default function CommunityAlerts() {
           )}
         </div>
 
+        {/* Feed toggle: community reports vs verified lab results */}
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex rounded-full border bg-card p-1" role="tablist" aria-label="Alert type">
+            <button
+              type="button" role="tab" aria-selected={feed === "community"}
+              onClick={() => setFeed("community")}
+              className={cn("min-h-[36px] rounded-full px-4 text-sm font-medium",
+                feed === "community" ? "bg-foreground text-background" : "text-muted-foreground")}
+            >
+              Community
+            </button>
+            <button
+              type="button" role="tab" aria-selected={feed === "lab"}
+              onClick={() => setFeed("lab")}
+              className={cn("min-h-[36px] rounded-full px-4 text-sm font-medium",
+                feed === "lab" ? "bg-foreground text-background" : "text-muted-foreground")}
+            >
+              Lab results
+            </button>
+          </div>
+          <button
+            type="button" onClick={() => setSourcesOpen(true)}
+            className="ml-auto flex min-h-[40px] items-center gap-1.5 rounded-full px-3 text-sm font-medium text-muted-foreground"
+          >
+            <Info className="h-4 w-4" />
+            Sources
+          </button>
+        </div>
+
         {/* Feed */}
-        {loading ? (
+        {feed === "community" && (loading ? (
           <ul className="space-y-3">
             {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
           </ul>
@@ -151,10 +204,37 @@ export default function CommunityAlerts() {
               <AlertCard key={a.id} a={a} highlight={scope === "near" && !!loc?.city && (a.city || "").toLowerCase() === loc.city.toLowerCase()} />
             ))}
           </ul>
-        )}
+        ))}
+
+        {feed === "lab" && (labLoading ? (
+          <ul className="space-y-3">
+            {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          </ul>
+        ) : labReports.length === 0 ? (
+          <div className="rounded-xl border border-dashed p-8 text-center">
+            <FlaskConical className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+            <p className="font-semibold">
+              {scope === "near" ? `No lab results yet in ${loc?.state || "your area"}` : "No lab results yet"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Verified results appear here as partner labs publish new data.
+            </p>
+            {scope === "near" && (
+              <Button variant="link" className="mt-2" onClick={() => setScope("all")}>Show everywhere</Button>
+            )}
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {labReports.map((r) => (
+              <LabResultCard key={r.id} r={r} sourceName={sourceNames[r.source_id] || "Verified lab"} />
+            ))}
+          </ul>
+        ))}
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Reports are unverified and community-sourced. A negative strip is not proof a pill is safe.
+          {feed === "community"
+            ? "Reports are unverified and community-sourced. A negative strip is not proof a pill is safe."
+            : "Lab results describe individual samples, not every pill near you. No result proves a pill is safe."}
         </p>
       </div>
 
@@ -170,6 +250,7 @@ export default function CommunityAlerts() {
       </div>
 
       <ReportFoundSheet open={sheet} onOpenChange={setSheet} defaultLocation={loc} onSubmitted={load} />
+      <DataSourcesSheet open={sourcesOpen} onOpenChange={setSourcesOpen} />
     </Layout>
   );
 }

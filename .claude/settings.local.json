@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(security find-certificate *)",
+      "Bash(openssl x509 *)",
+      "Bash(xcodebuild -project ios/App/App.xcodeproj -scheme App -destination 'platform=iOS Simulator,name=iPhone 17' -configuration Debug CODE_SIGNING_ALLOWED=NO build)",
+      "Bash(xcrun simctl *)",
+      "Bash(ps -p 6602 -o pid,stat,command)",
+      "Bash(rm -rf /tmp/PillCheckr.xcarchive /tmp/PillCheckr-export /tmp/pillcheckr-archive.log)",
+      "Bash(xcodebuild -project /Users/huruykidanemariam/pill-checkr/ios/App/App.xcodeproj -scheme App -destination 'generic/platform=iOS' -configuration Release -archivePath /tmp/PillCheckr.xcarchive archive -allowProvisioningUpdates DEVELOPMENT_TEAM=SY35L8QMFJ CODE_SIGN_STYLE=Automatic)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(/usr/libexec/PlistBuddy -c \"Print :CFBundleIdentifier\" /tmp/PillCheckr.xcarchive/Products/Applications/App.app/Info.plist)",
+      "Bash(/usr/libexec/PlistBuddy -c \"Print :CFBundleShortVersionString\" /tmp/PillCheckr.xcarchive/Products/Applications/App.app/Info.plist)",
+      "Bash(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" /tmp/PillCheckr.xcarchive/Products/Applications/App.app/Info.plist)",
+      "Bash(xcodebuild -exportArchive -archivePath /tmp/PillCheckr.xcarchive -exportPath /tmp/PillCheckr-export -exportOptionsPlist /tmp/pillcheckr-export-options.plist -allowProvisioningUpdates)",
+      "Bash(security find-identity *)",
+      "Read(//Users/huruykidanemariam/Library/Developer/Xcode/UserData/**)",
+      "Bash(defaults read *)",
+      "Bash(open -a Xcode /tmp/PillCheckr.xcarchive)",
+      "Bash(osascript -e 'tell application \"Xcode\" to activate')"
+    ]
+  }
+}
