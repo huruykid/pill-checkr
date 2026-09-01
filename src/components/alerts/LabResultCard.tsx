@@ -8,7 +8,7 @@ import { FlaskConical, MapPin, ShieldCheck } from "lucide-react";
 export function LabResultCard({ r, sourceName }: { r: ExternalLabReport; sourceName: string }) {
   const fent = flagTrue(r.lab_flags, "lab_fentanyl") || flagTrue(r.lab_flags, "lab_fentanyl_any");
   const xyl = flagTrue(r.lab_flags, "lab_xylazine") || flagTrue(r.lab_flags, "lab_xylazine_any");
-  const nitaz = flagTrue(r.lab_flags, "lab_nitazenes_any");
+  const nitaz = flagTrue(r.lab_flags, "lab_nitazene_any") || flagTrue(r.lab_flags, "lab_nitazenes_any");
 
   const soldAs = typeof r.substance_expected === "string" ? r.substance_expected : "";
   const detected = Array.isArray(r.substances_detected)
