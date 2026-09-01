@@ -157,7 +157,7 @@ export default function CommunityAlerts() {
             <button
               type="button" role="tab" aria-selected={feed === "community"}
               onClick={() => setFeed("community")}
-              className={cn("min-h-[36px] rounded-full px-4 text-sm font-medium",
+              className={cn("min-h-[40px] rounded-full px-4 text-sm font-medium",
                 feed === "community" ? "bg-foreground text-background" : "text-muted-foreground")}
             >
               Community
@@ -165,7 +165,7 @@ export default function CommunityAlerts() {
             <button
               type="button" role="tab" aria-selected={feed === "lab"}
               onClick={() => setFeed("lab")}
-              className={cn("min-h-[36px] rounded-full px-4 text-sm font-medium",
+              className={cn("min-h-[40px] rounded-full px-4 text-sm font-medium",
                 feed === "lab" ? "bg-foreground text-background" : "text-muted-foreground")}
             >
               Lab results

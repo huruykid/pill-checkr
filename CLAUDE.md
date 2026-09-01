@@ -115,3 +115,8 @@ Contact address used: privacy@pillcheckr.app — this mailbox must exist.
 - Privacy policy /privacy is coupled to all of the above. Change one, change
   both in the same commit, or the App Privacy label becomes false — that is a
   store removal, not a rejection.
+
+## UX audits
+For any iPhone interface design, UX review, accessibility review, or UI
+implementation work, use the audit-iphone-ux skill (.claude/skills/) before
+making changes, and always before a TestFlight/App Store build.
