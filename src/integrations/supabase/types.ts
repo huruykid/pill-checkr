@@ -303,6 +303,119 @@ export type Database = {
         }
         Relationships: []
       }
+      external_reports: {
+        Row: {
+          collected_on: string | null
+          completed_on: string | null
+          county: string | null
+          geo_precision: string
+          id: string
+          is_pill: boolean
+          lab_flags: Json
+          lat: number | null
+          lon: number | null
+          raw: Json
+          sample_type: string | null
+          shape_version: number
+          source_id: string
+          source_record_id: string
+          state: string | null
+          substance_expected: string | null
+          substances_detected: string[]
+          synced_at: string
+        }
+        Insert: {
+          collected_on?: string | null
+          completed_on?: string | null
+          county?: string | null
+          geo_precision?: string
+          id?: string
+          is_pill?: boolean
+          lab_flags?: Json
+          lat?: number | null
+          lon?: number | null
+          raw?: Json
+          sample_type?: string | null
+          shape_version?: number
+          source_id: string
+          source_record_id: string
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[]
+          synced_at?: string
+        }
+        Update: {
+          collected_on?: string | null
+          completed_on?: string | null
+          county?: string | null
+          geo_precision?: string
+          id?: string
+          is_pill?: boolean
+          lab_flags?: Json
+          lat?: number | null
+          lon?: number | null
+          raw?: Json
+          sample_type?: string | null
+          shape_version?: number
+          source_id?: string
+          source_record_id?: string
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[]
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_reports_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_sources: {
+        Row: {
+          attribution_text: string
+          created_at: string
+          data_url: string
+          description: string
+          enabled: boolean
+          homepage_url: string
+          id: string
+          last_synced_at: string | null
+          license_note: string
+          name: string
+          organization: string
+        }
+        Insert: {
+          attribution_text: string
+          created_at?: string
+          data_url: string
+          description: string
+          enabled?: boolean
+          homepage_url: string
+          id: string
+          last_synced_at?: string | null
+          license_note: string
+          name: string
+          organization: string
+        }
+        Update: {
+          attribution_text?: string
+          created_at?: string
+          data_url?: string
+          description?: string
+          enabled?: boolean
+          homepage_url?: string
+          id?: string
+          last_synced_at?: string | null
+          license_note?: string
+          name?: string
+          organization?: string
+        }
+        Relationships: []
+      }
       match_feedback: {
         Row: {
           created_at: string
@@ -832,6 +945,62 @@ export type Database = {
           strip_result?: string | null
         }
         Relationships: []
+      }
+      external_reports_public: {
+        Row: {
+          collected_on: string | null
+          county: string | null
+          geo_precision: string | null
+          id: string | null
+          is_pill: boolean | null
+          lab_flags: Json | null
+          lat: number | null
+          lon: number | null
+          sample_type: string | null
+          source_id: string | null
+          state: string | null
+          substance_expected: string | null
+          substances_detected: string[] | null
+        }
+        Insert: {
+          collected_on?: string | null
+          county?: string | null
+          geo_precision?: string | null
+          id?: string | null
+          is_pill?: boolean | null
+          lab_flags?: Json | null
+          lat?: number | null
+          lon?: number | null
+          sample_type?: string | null
+          source_id?: string | null
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[] | null
+        }
+        Update: {
+          collected_on?: string | null
+          county?: string | null
+          geo_precision?: string | null
+          id?: string | null
+          is_pill?: boolean | null
+          lab_flags?: Json | null
+          lat?: number | null
+          lon?: number | null
+          sample_type?: string | null
+          source_id?: string | null
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_reports_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       report_map_public: {
         Row: {
