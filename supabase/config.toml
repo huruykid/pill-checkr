@@ -22,6 +22,10 @@ verify_jwt = false
 
 [functions.import-testri]
 verify_jwt = false
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 [functions.delete-account]
 verify_jwt = true
 
