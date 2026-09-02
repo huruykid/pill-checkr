@@ -526,6 +526,42 @@ export type Database = {
           },
         ]
       }
+      overdose_county_periods: {
+        Row: {
+          county: string | null
+          data_as_of: string | null
+          deaths: number | null
+          fips: string
+          footnote: string | null
+          pct_pending: number | null
+          period_end: string
+          state: string | null
+          synced_at: string
+        }
+        Insert: {
+          county?: string | null
+          data_as_of?: string | null
+          deaths?: number | null
+          fips: string
+          footnote?: string | null
+          pct_pending?: number | null
+          period_end: string
+          state?: string | null
+          synced_at?: string
+        }
+        Update: {
+          county?: string | null
+          data_as_of?: string | null
+          deaths?: number | null
+          fips?: string
+          footnote?: string | null
+          pct_pending?: number | null
+          period_end?: string
+          state?: string | null
+          synced_at?: string
+        }
+        Relationships: []
+      }
       pill_reference: {
         Row: {
           color: Database["public"]["Enums"]["pill_color"]
@@ -1026,6 +1062,29 @@ export type Database = {
           },
         ]
       }
+      external_reports_state_counts: {
+        Row: {
+          n: number | null
+          state: string | null
+        }
+        Relationships: []
+      }
+      overdose_county_latest: {
+        Row: {
+          county: string | null
+          data_as_of: string | null
+          deaths: number | null
+          deaths_prior: number | null
+          fips: string | null
+          footnote: string | null
+          lat: number | null
+          lon: number | null
+          pct_pending: number | null
+          period_end: string | null
+          state: string | null
+        }
+        Relationships: []
+      }
       report_map_public: {
         Row: {
           evidence_tier: string | null
@@ -1162,12 +1221,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1191,11 +1250,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1216,11 +1275,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1241,11 +1300,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1258,11 +1317,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
