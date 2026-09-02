@@ -13,7 +13,7 @@ const corsHeaders = {
 const SOURCE_ID = "cfsre_nps_discovery";
 const ORIGIN = "https://www.cfsre.org";
 const LISTING = `${ORIGIN}/nps-discovery/public-alerts`;
-const SHAPE_VERSION = 1;
+const SHAPE_VERSION = 2;
 const PAGE_SIZE = 10;
 const MAX_PAGES = 12;
 const FETCH_TIMEOUT = 30_000;
@@ -71,6 +71,27 @@ function paragraphAfter(block: string, label: string): string | null {
   return text || null;
 }
 
+// Whole text of the item body (the col-sm-8 column) minus the download button,
+// for alerts that do not use the Purpose/Summary labels. Capped at a sentence
+// boundary so cards stay readable; the PDF link carries the full document.
+function bodyText(block: string): string | null {
+  const start = block.indexOf('class="col-sm-8"');
+  if (start < 0) return null;
+  const open = block.indexOf(">", start) + 1;
+  const end = block.indexOf("<!-- /col-sm-x -->", open);
+  let inner = block.slice(open, end > 0 ? end : undefined);
+  inner = inner.replace(/<a[^>]*class="btn"[^>]*>[\s\S]*?<\/a>/gi, " ");
+  inner = inner.replace(/<br\s*\/?>/gi, " ");
+  let text = decode(inner).replace(/^Purpose:\s*/i, "");
+  if (!text) return null;
+  if (text.length > 1400) {
+    const cut = text.slice(0, 1400);
+    const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "), cut.lastIndexOf("! "));
+    text = (stop > 400 ? cut.slice(0, stop + 1) : cut) + " …";
+  }
+  return text;
+}
+
 function parseListing(html: string): Parsed[] {
   const out: Parsed[] = [];
   const blocks = html.split('itemprop="blogPost"').slice(1);
@@ -86,7 +107,7 @@ function parseListing(html: string): Parsed[] {
       url: abs(href)!,
       pdf_url: abs(b.match(/href="([^"]+\.pdf)"/i)?.[1]),
       image_url: abs(b.match(/src="([^"]+)"[^>]*itemprop="thumbnailUrl"/)?.[1]),
-      summary: paragraphAfter(b, "Summary"),
+      summary: paragraphAfter(b, "Summary") ?? bodyText(b),
       purpose: paragraphAfter(b, "Purpose"),
     });
   }
