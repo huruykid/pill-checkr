@@ -1,7 +1,10 @@
 // Nightly sync of UNC Street Drug Analysis Lab open data (MIT-licensed GitHub
 // datasets) into external_reports. v3: ingests ALL program datasets (~10.5k
-// samples, 15+ states), not the 20-row example file. One normalizer, defensive
-// against upstream shape drift; dates are hostile; raw rows kept.
+// samples, 15+ states), not the 20-row example file. v4: joins each program's
+// lab_detail file (one row per substance per sample) so substances_detected
+// carries the lab's standardized chemical names, with trace-level detections
+// kept apart in substances_trace. One normalizer, defensive against upstream
+// shape drift; dates are hostile; raw rows kept.
 // Community standards honored: attribution in-app, harm-reduction use only.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -12,7 +15,7 @@ const corsHeaders = {
 };
 
 const SOURCE_ID = "unc_drugchecking";
-const SHAPE_VERSION = 3;
+const SHAPE_VERSION = 4;
 const CHUNK = 500;
 const FETCH_TIMEOUT = 60_000;
 
@@ -34,6 +37,11 @@ const DATASETS: Record<string, string> = {
   rv: `${REPO}/selfservice/RV/analysis_dataset.csv`,
   hnc: `${REPO}/selfservice/hnc/analysis_dataset.csv`,
 };
+// Same programs, long-format substance detail. Missing/failed detail files fall
+// back to the flag-derived category names so a sync never loses samples.
+const DETAILS: Record<string, string> = Object.fromEntries(
+  Object.entries(DATASETS).map(([k, url]) => [k, url.replace(/[a-z_]*analysis_dataset\.csv$/, k === "nc" ? "nc_lab_detail.csv" : "lab_detail.csv")]),
+);
 
 // Population-weighted county centroids derived from US Census data.
 const CENTROIDS_URL = "https://raw.githubusercontent.com/btskinner/spatial/master/data/county_centers.csv";
@@ -67,6 +75,7 @@ type Norm = {
   source_record_id: string;
   substance_expected: string | null;
   substances_detected: string[];
+  substances_trace: string[];
   lab_flags: Record<string, boolean | null>;
   sample_type: string | null;
   is_pill: boolean;
@@ -132,12 +141,58 @@ function fips5(v: string | undefined): string | null {
   return t.padStart(5, "0");
 }
 
+// Substances people most need to see first on a card; everything else keeps
+// the lab's order. Matching is by name fragment on the lab's standardized names.
+const PRIORITY = [
+  /carfentanil/i, /nitazene/i, /fentanyl/i, /xylazine/i, /medetomidine/i, /btmps|tetramethyl-4-piperidyl/i,
+  /bromazolam|clonazolam|flualprazolam|etizolam|benzodiazep|azolam$/i,
+  /methamphetamine/i, /cocaine/i, /heroin/i, /mdma/i, /ketamine/i, /tramadol/i, /levamisole/i,
+];
+function rank(name: string): number {
+  const i = PRIORITY.findIndex((re) => re.test(name));
+  return i < 0 ? PRIORITY.length : i;
+}
+
+type Detail = { primary: string[]; trace: string[] };
+
+// lab_detail.csv -> sampleid -> { primary[], trace[] } (deduped, priority-sorted).
+function parseDetail(csv: string): Map<string, Detail> {
+  const map = new Map<string, Detail>();
+  const rows = parseCsv(csv);
+  if (rows.length < 2) return map;
+  const header = rows[0].map((h) => h.trim().toLowerCase());
+  const idx = new Map(header.map((h, i) => [h, i]));
+  const iId = idx.get("sampleid"), iSub = idx.get("substance");
+  const iTrace = idx.get("trace"), iAbund = idx.get("abundance"), iPrimary = idx.get("primary");
+  if (iId === undefined || iSub === undefined) return map;
+  for (let r = 1; r < rows.length; r++) {
+    const c = rows[r];
+    const id = text(c[iId]);
+    const name = text(c[iSub]);
+    if (!id || !name) continue;
+    const isTrace = (iTrace !== undefined && flag(c[iTrace]) === true)
+      || (iAbund !== undefined && (c[iAbund] ?? "").trim().toLowerCase() === "trace")
+      || (iPrimary !== undefined && flag(c[iPrimary]) === false);
+    const d = map.get(id) ?? { primary: [], trace: [] };
+    const list = isTrace ? d.trace : d.primary;
+    if (!list.includes(name)) list.push(name);
+    map.set(id, d);
+  }
+  for (const d of map.values()) {
+    d.primary.sort((a, b) => rank(a) - rank(b));
+    d.trace.sort((a, b) => rank(a) - rank(b));
+    d.trace = d.trace.filter((n) => !d.primary.includes(n));
+  }
+  return map;
+}
+
 function normalizeRow(
   program: string,
   header: string[],
   get: (col: string) => string | undefined,
   rawObj: Record<string, string>,
   centroids: Map<string, [number, number]>,
+  details: Map<string, Detail>,
 ): Norm | null {
   const sampleid = text(get("sampleid"));
   if (!sampleid) return null;
@@ -149,9 +204,14 @@ function normalizeRow(
     if (h.startsWith("lab_") && !h.startsWith("lab_num_")) flags[h] = flag(get(h));
   }
 
-  const detected = Object.entries(PRIMARY_FLAG_NAMES)
-    .filter(([col]) => flags[col] === true)
-    .map(([, name]) => name);
+  // Prefer the lab's per-substance detail; fall back to flag-derived categories.
+  const detail = details.get(sampleid);
+  const detected = detail && (detail.primary.length || detail.trace.length)
+    ? detail.primary
+    : Object.entries(PRIMARY_FLAG_NAMES)
+      .filter(([col]) => flags[col] === true)
+      .map(([, name]) => name);
+  const trace = detail ? detail.trace : [];
 
   const fips = fips5(get("countyfips"));
   const cent = fips ? centroids.get(fips) : undefined;
@@ -161,6 +221,7 @@ function normalizeRow(
     source_record_id: `${program}:${sampleid}`,
     substance_expected: text(get("expectedsubstance")),
     substances_detected: detected,
+    substances_trace: trace,
     lab_flags: flags,
     sample_type: text(get("sampletype")),
     is_pill: flag(get("pill")) === true,
@@ -257,6 +318,7 @@ Deno.serve(async (req) => {
 
     let upserted = 0, skipped = 0;
     const perProgram: Record<string, number> = {};
+    const detailSamples: Record<string, number> = {};
 
     for (const [program, url] of Object.entries(DATASETS)) {
       let csv: string;
@@ -269,6 +331,13 @@ Deno.serve(async (req) => {
       }
       const rows = parseCsv(csv);
       if (rows.length < 2) { perProgram[program] = 0; continue; }
+      let details = new Map<string, Detail>();
+      try {
+        details = parseDetail(await fetchText(DETAILS[program]));
+      } catch (e) {
+        console.error(`detail ${program} fetch failed (falling back to flags):`, e);
+      }
+      detailSamples[program] = details.size;
       const header = rows[0].map((h) => h.trim().toLowerCase());
       const idx = new Map(header.map((h, i) => [h, i]));
       let batch: Norm[] = [];
@@ -290,7 +359,7 @@ Deno.serve(async (req) => {
         };
         const rawObj: Record<string, string> = {};
         header.forEach((h, i) => { if (cells[i] !== undefined && cells[i] !== "") rawObj[h] = cells[i]; });
-        const norm = normalizeRow(program, header, get, rawObj, centroids);
+        const norm = normalizeRow(program, header, get, rawObj, centroids, details);
         if (!norm) { skipped++; continue; }
         batch.push(norm);
         count++;
@@ -303,7 +372,7 @@ Deno.serve(async (req) => {
     await supabase.from("external_sources")
       .update({ last_synced_at: new Date().toISOString() }).eq("id", SOURCE_ID);
 
-    return new Response(JSON.stringify({ ok: true, upserted, skipped, perProgram }),
+    return new Response(JSON.stringify({ ok: true, upserted, skipped, perProgram, detailSamples }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("sync-unc-drugchecking:", e);
