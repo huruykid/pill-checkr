@@ -321,6 +321,71 @@ export type Database = {
         }
         Relationships: []
       }
+      external_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          pdf_url: string | null
+          published_on: string | null
+          raw: Json
+          region: string
+          severity: string
+          shape_version: number
+          source_id: string
+          source_record_id: string
+          substances: string[]
+          summary: string | null
+          synced_at: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          raw?: Json
+          region?: string
+          severity?: string
+          shape_version?: number
+          source_id: string
+          source_record_id: string
+          substances?: string[]
+          summary?: string | null
+          synced_at?: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          raw?: Json
+          region?: string
+          severity?: string
+          shape_version?: number
+          source_id?: string
+          source_record_id?: string
+          substances?: string[]
+          summary?: string | null
+          synced_at?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_alerts_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_reports: {
         Row: {
           collected_on: string | null
@@ -1002,6 +1067,62 @@ export type Database = {
           strip_result?: string | null
         }
         Relationships: []
+      }
+      external_alerts_public: {
+        Row: {
+          id: string | null
+          image_url: string | null
+          pdf_url: string | null
+          published_on: string | null
+          region: string | null
+          severity: string | null
+          source_id: string | null
+          source_record_id: string | null
+          substances: string[] | null
+          summary: string | null
+          synced_at: string | null
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          id?: string | null
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          region?: string | null
+          severity?: string | null
+          source_id?: string | null
+          source_record_id?: string | null
+          substances?: string[] | null
+          summary?: string | null
+          synced_at?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          id?: string | null
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          region?: string | null
+          severity?: string | null
+          source_id?: string | null
+          source_record_id?: string | null
+          substances?: string[] | null
+          summary?: string | null
+          synced_at?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_alerts_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       external_reports_public: {
         Row: {
