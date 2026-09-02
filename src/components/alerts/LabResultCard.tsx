@@ -14,6 +14,13 @@ export function LabResultCard({ r, sourceName }: { r: ExternalLabReport; sourceN
   const detected = Array.isArray(r.substances_detected)
     ? r.substances_detected.filter((s): s is string => typeof s === "string" && !!s)
     : [];
+  const trace = Array.isArray(r.substances_trace)
+    ? r.substances_trace.filter((s): s is string => typeof s === "string" && !!s)
+    : [];
+  // Names arrive priority-sorted (fentanyl-class first); show a few, count the rest.
+  const SHOW = 4;
+  const shown = detected.slice(0, SHOW);
+  const more = detected.length - shown.length;
   const title = soldAs ? `Sold as ${soldAs}` : detected[0] || "Unknown sample";
   const where = [r.county, r.state].filter(Boolean).join(", ") || "Location approximate";
   const when = r.collected_on && !isNaN(new Date(r.collected_on).getTime())
@@ -37,8 +44,19 @@ export function LabResultCard({ r, sourceName }: { r: ExternalLabReport; sourceN
         )}
         <div className="min-w-0">
           <p className="font-display text-xl leading-tight truncate">{title}</p>
-          {detected.length > 0 && (
-            <p className="text-sm text-muted-foreground truncate">lab found: {detected.join(", ")}</p>
+          {detected.length > 0 ? (
+            <p className="text-sm text-muted-foreground">
+              lab found: {shown.join(", ")}{more > 0 ? ` +${more} more` : ""}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {trace.length > 0 ? "lab found: only trace amounts" : "lab found: nothing identified — not proof it was safe"}
+            </p>
+          )}
+          {trace.length > 0 && (
+            <p className="text-xs text-muted-foreground/80">
+              trace: {trace.slice(0, 3).join(", ")}{trace.length > 3 ? ` +${trace.length - 3}` : ""}
+            </p>
           )}
         </div>
         <span className="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold flex items-center gap-1 bg-foreground text-background">

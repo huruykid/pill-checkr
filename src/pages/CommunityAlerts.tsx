@@ -9,7 +9,8 @@ import { AlertCard, type CommunityAlert } from "@/components/alerts/AlertCard";
 import { LabResultCard } from "@/components/alerts/LabResultCard";
 import { DataSourcesSheet } from "@/components/alerts/DataSourcesSheet";
 import { LabResultsMap } from "@/components/alerts/LabResultsMap";
-import { fetchExternalReports, fetchExternalSources, type ExternalLabReport } from "@/lib/externalData";
+import { EarlyWarningStrip } from "@/components/alerts/EarlyWarningStrip";
+import { fetchExternalReports, fetchExternalSources, fetchExternalStates, fetchOverdoseCounties, type ExternalLabReport, type ExternalStateCount, type OverdoseCounty } from "@/lib/externalData";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { detectWithToast, getSavedLocation, saveLocation, type CityState } from "@/lib/location";
 import { isNative } from "@/lib/platform";
@@ -32,6 +33,9 @@ export default function CommunityAlerts() {
   const [sourceNames, setSourceNames] = useState<Record<string, string>>({});
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [labView, setLabView] = useState<"list" | "map">("list");
+  const [labState, setLabState] = useState<string | null>(null); // national by default; independent of community "near me"
+  const [labStates, setLabStates] = useState<ExternalStateCount[]>([]);
+  const [heat, setHeat] = useState<OverdoseCounty[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,21 +53,37 @@ export default function CommunityAlerts() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Lab results are NATIONAL reference data — never gated behind the community
+  // "near me" location. Optional labState filter is the user's own explicit choice.
   useEffect(() => {
     if (feed !== "lab") return;
     let on = true;
     setLabLoading(true);
-    Promise.all([
-      fetchExternalReports({ state: scope === "near" ? loc?.state : null, limit: 500 }),
-      fetchExternalSources(),
-    ]).then(([reports, sources]) => {
+    fetchExternalReports({ state: labState, limit: 1000 }).then((reports) => {
       if (!on) return;
       setLabReports(reports);
-      setSourceNames(Object.fromEntries(sources.map((s) => [s.id, s.name])));
       setLabLoading(false);
     });
     return () => { on = false; };
-  }, [feed, scope, loc?.state]);
+  }, [feed, labState]);
+
+  // Source names are needed by every external layer (early warnings, lab cards,
+  // map popups), so they load once on mount.
+  useEffect(() => {
+    fetchExternalSources().then((sources) =>
+      setSourceNames(Object.fromEntries(sources.map((s) => [s.id, s.name]))));
+  }, []);
+
+  useEffect(() => {
+    if (feed !== "lab" || labStates.length) return;
+    fetchExternalStates().then(setLabStates);
+  }, [feed, labStates.length]);
+
+  // CDC county overdose heat layer — loaded once when the map is first shown.
+  useEffect(() => {
+    if (feed !== "lab" || labView !== "map" || heat.length) return;
+    fetchOverdoseCounties().then(setHeat);
+  }, [feed, labView, heat.length]);
 
   const locate = async () => {
     setGeo(true);
@@ -121,6 +141,9 @@ export default function CommunityAlerts() {
             </Link>
           )}
         </div>
+
+        {/* National early-warning notice (forensic labs), independent of feed/scope */}
+        <EarlyWarningStrip sourceNames={sourceNames} />
 
         {/* Scope chips */}
         <div className="mb-4 flex items-center gap-2 overflow-x-auto">
@@ -216,18 +239,32 @@ export default function CommunityAlerts() {
           <div className="rounded-xl border border-dashed p-8 text-center">
             <FlaskConical className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
             <p className="font-semibold">
-              {scope === "near" ? `No lab results yet in ${loc?.state || "your area"}` : "No lab results yet"}
+              {labState ? `No lab results in ${labState} yet` : "No lab results yet"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               Verified results appear here as partner labs publish new data.
             </p>
-            {scope === "near" && (
-              <Button variant="link" className="mt-2" onClick={() => setScope("all")}>Show everywhere</Button>
+            {labState && (
+              <Button variant="link" className="mt-2" onClick={() => setLabState(null)}>Show all states</Button>
             )}
           </div>
         ) : (
           <>
-            <div className="mb-3 flex justify-end">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <label htmlFor="labState" className="sr-only">Filter lab results by state</label>
+                <select
+                  id="labState"
+                  value={labState ?? ""}
+                  onChange={(e) => setLabState(e.target.value || null)}
+                  className="min-h-[40px] rounded-full border bg-card px-4 text-sm font-medium"
+                >
+                  <option value="">All states (national)</option>
+                  {labStates.map((st) => (
+                    <option key={st.state} value={st.state}>{st.state} ({st.n})</option>
+                  ))}
+                </select>
+              </div>
               <div className="flex rounded-full border bg-card p-1" role="tablist" aria-label="Lab results view">
                 <button
                   type="button" role="tab" aria-selected={labView === "list"}
@@ -248,7 +285,7 @@ export default function CommunityAlerts() {
               </div>
             </div>
             {labView === "map" ? (
-              <LabResultsMap reports={labReports} sourceNames={sourceNames} />
+              <LabResultsMap reports={labReports} sourceNames={sourceNames} heat={heat} />
             ) : (
               <ul className="space-y-3">
                 {labReports.slice(0, 60).map((r) => (

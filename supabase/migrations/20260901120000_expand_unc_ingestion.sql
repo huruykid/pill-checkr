@@ -21,3 +21,12 @@ WITH (security_invoker = on) AS
          sample_type, is_pill, county, state, lat, lon, geo_precision,
          collected_on, image_url
   FROM public.external_reports;
+
+-- State counts for the lab-results state picker (national reference data;
+-- independent of the community "near me" scope).
+CREATE OR REPLACE VIEW public.external_reports_state_counts
+WITH (security_invoker = on) AS
+  SELECT state, count(*)::int AS n
+  FROM public.external_reports
+  WHERE state IS NOT NULL
+  GROUP BY state;
