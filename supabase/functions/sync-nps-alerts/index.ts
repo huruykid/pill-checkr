@@ -107,7 +107,7 @@ function parseListing(html: string): Parsed[] {
       url: abs(href)!,
       pdf_url: abs(b.match(/href="([^"]+\.pdf)"/i)?.[1]),
       image_url: abs(b.match(/src="([^"]+)"[^>]*itemprop="thumbnailUrl"/)?.[1]),
-      summary: paragraphAfter(b, "Summary"),
+      summary: paragraphAfter(b, "Summary") ?? bodyText(b),
       purpose: paragraphAfter(b, "Purpose"),
     });
   }
