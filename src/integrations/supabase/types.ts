@@ -406,6 +406,7 @@ export type Database = {
           state: string | null
           substance_expected: string | null
           substances_detected: string[]
+          substances_trace: string[]
           synced_at: string
         }
         Insert: {
@@ -427,6 +428,7 @@ export type Database = {
           state?: string | null
           substance_expected?: string | null
           substances_detected?: string[]
+          substances_trace?: string[]
           synced_at?: string
         }
         Update: {
@@ -448,6 +450,7 @@ export type Database = {
           state?: string | null
           substance_expected?: string | null
           substances_detected?: string[]
+          substances_trace?: string[]
           synced_at?: string
         }
         Relationships: [
@@ -1140,6 +1143,7 @@ export type Database = {
           state: string | null
           substance_expected: string | null
           substances_detected: string[] | null
+          substances_trace: string[] | null
         }
         Insert: {
           collected_on?: string | null
@@ -1156,6 +1160,7 @@ export type Database = {
           state?: string | null
           substance_expected?: string | null
           substances_detected?: string[] | null
+          substances_trace?: string[] | null
         }
         Update: {
           collected_on?: string | null
@@ -1172,6 +1177,7 @@ export type Database = {
           state?: string | null
           substance_expected?: string | null
           substances_detected?: string[] | null
+          substances_trace?: string[] | null
         }
         Relationships: [
           {
