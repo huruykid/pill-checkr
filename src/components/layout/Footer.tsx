@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { Shield, Heart } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
+import { AppStoreBadge } from "@/components/shared/AppStoreBadge";
 
 export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
   const { t } = useI18n();
@@ -21,6 +22,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
             <p className="text-sm text-muted-foreground leading-relaxed">
               {t("footer.brand")}
             </p>
+            <AppStoreBadge placement="footer" />
           </div>
 
           {/* Quick Links */}

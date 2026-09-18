@@ -3,7 +3,7 @@ import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, EyeOff, Trash2, AlertTriangle } from "lucide-react";
 
-const UPDATED = "August 22, 2026";
+const UPDATED = "September 18, 2026";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -43,7 +43,7 @@ export default function Privacy() {
               </li>
               <li className="flex gap-3">
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span>We <strong className="text-foreground">do not sell your data, share it with advertisers, or track you across apps</strong>. There is no advertising SDK and no analytics broker in this app.</span>
+                <span>We <strong className="text-foreground">do not sell your data, share it with advertisers, or track you across apps</strong>. There is no advertising SDK and no third-party analytics in this app.</span>
               </li>
               <li className="flex gap-3">
                 <Trash2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -75,8 +75,16 @@ export default function Privacy() {
                 shape and color. Anonymous uploads are not linked to any identity and are automatically deleted after 30 days.
               </li>
               <li>
-                <strong className="text-foreground">A random session identifier</strong> stored on your device, so your
+                <strong className="text-foreground">A random device identifier</strong> stored on your device, so your
                 own check history shows up on that device. It is not tied to your name, phone, email, or advertising ID.
+              </li>
+              <li>
+                <strong className="text-foreground">Anonymous usage events.</strong> Which screen or action (for example
+                "a check was completed", "a strip result was logged", "alerts were viewed"), the app version, your
+                language, and the state you chose for alerts, tied to the random device identifier above. Never your
+                IP address, exact location, imprint text, or photos. We collect this ourselves, with no third-party
+                analytics service, to see whether the app works and where it is being used. Raw events are deleted
+                after 90 days; only daily counts are kept.
               </li>
               <li>
                 <strong className="text-foreground">Location, at the detail you choose.</strong> Location is only
@@ -192,6 +200,7 @@ export default function Privacy() {
           <Section id="retention" title="How long we keep it">
             <ul className="list-disc space-y-2 pl-5">
               <li>Anonymous pill photos: automatically deleted 30 days after upload.</li>
+              <li>Anonymous usage events: raw events deleted after 90 days; daily counts kept.</li>
               <li>Check history on an account: kept until you delete the check or your account.</li>
               <li>Community alerts: kept as long as they are useful to people in that area, then aged out.</li>
               <li>Precise coordinates: hard-deleted 30 days after capture. The wide map cell survives, so the map stays accurate without the point.</li>

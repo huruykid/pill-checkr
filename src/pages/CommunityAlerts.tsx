@@ -9,6 +9,7 @@ import { AlertCard, type CommunityAlert } from "@/components/alerts/AlertCard";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { detectWithToast, getSavedLocation, saveLocation, type CityState } from "@/lib/location";
 import { isNative } from "@/lib/platform";
+import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { Radio, LocateFixed, Loader2, Plus, X, FlaskConical, BarChart3 } from "lucide-react";
 
@@ -33,8 +34,12 @@ export default function CommunityAlerts() {
     if (scope === "near" && loc?.state) q = q.ilike("state", loc.state);
     const { data, error } = await q;
     if (error) console.error(error);
-    setAlerts((data as CommunityAlert[]) || []);
+    const rows = (data as CommunityAlert[]) || [];
+    setAlerts(rows);
     setLoading(false);
+    if (scope === "near" && loc?.state) {
+      track("alerts_viewed_near", { count_bucket: rows.length === 0 ? "0" : rows.length <= 5 ? "1-5" : "6+" });
+    }
   }, [scope, loc?.state]);
 
   useEffect(() => { load(); }, [load]);

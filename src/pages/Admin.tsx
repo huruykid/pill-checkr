@@ -25,9 +25,10 @@ import { ApiImportTab, type ApiImportParams, type ApiImportResult, type ImportSt
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Pill, BookOpen, ShieldCheck, Database as DatabaseIcon, Users, AlertTriangle } from "lucide-react";
+import { Loader2, Plus, Trash2, Pill, BookOpen, ShieldCheck, Database as DatabaseIcon, Users, AlertTriangle, BarChart3 } from "lucide-react";
 import { CommunitySubmissionsTab } from "@/components/admin/CommunitySubmissionsTab";
 import { ReportsModerationTab } from "@/components/admin/ReportsModerationTab";
+import { MetricsTab } from "@/components/admin/MetricsTab";
 import type { Database } from "@/integrations/supabase/types";
 
 type PillReference = Database["public"]["Tables"]["pill_reference"]["Row"];
@@ -300,6 +301,10 @@ export default function Admin() {
                 <AlertTriangle className="h-4 w-4" />
                 Reports
               </TabsTrigger>
+              <TabsTrigger value="metrics" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Metrics
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="pills">
@@ -449,6 +454,10 @@ export default function Admin() {
 
             <TabsContent value="reports">
               <ReportsModerationTab />
+            </TabsContent>
+
+            <TabsContent value="metrics">
+              <MetricsTab />
             </TabsContent>
           </Tabs>
         </div>

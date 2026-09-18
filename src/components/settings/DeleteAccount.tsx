@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Trash2, TriangleAlert } from "lucide-react";
+import { ANALYTICS_STORAGE_KEYS } from "@/lib/analytics";
 
 /** In-app account deletion — required by App Store Guideline 5.1.1(v). */
 export function DeleteAccount() {
@@ -33,6 +34,8 @@ export function DeleteAccount() {
         "sessionId",
         "pc_alert_location",
         "safetyChecklist",
+        "pc_safety_modal_seen",
+        ...ANALYTICS_STORAGE_KEYS,
       ].forEach((k) => localStorage.removeItem(k));
       await supabase.auth.signOut();
       toast.success("Your account and data have been deleted.");

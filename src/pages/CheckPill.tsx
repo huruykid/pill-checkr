@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { GuidedCaptureOverlay } from "@/components/check/GuidedCaptureOverlay";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { SEOHead, jsonLdWebApp } from "@/components/shared/SEOHead";
 import { Disclaimer } from "@/components/shared/Disclaimer";
@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
 import { preprocessForOCR } from "@/lib/imagePreprocess";
+import { CHECKS_COMPLETED_KEY, rememberMyReport, incrementChecksCompleted } from "@/lib/analytics";
 
 interface QualityIssue {
   issue: string;
@@ -55,6 +56,7 @@ const SCORING_KEYS = ["none","single","double","quad","other"] as const;
 
 export default function CheckPill() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,7 +66,7 @@ export default function CheckPill() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [backImageFile, setBackImageFile] = useState<File | null>(null);
   const [backImagePreview, setBackImagePreview] = useState<string | null>(null);
-  const [imprint, setImprint] = useState("");
+  const [imprint, setImprint] = useState(() => searchParams.get("imprint") || "");
   const [shape, setShape] = useState("");
   const [color, setColor] = useState("");
   const [scoring, setScoring] = useState("");
@@ -77,7 +79,17 @@ export default function CheckPill() {
   const [qualityFeedback, setQualityFeedback] = useState<QualityFeedback | null>(null);
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<string | null>(null);
-  const [mode, setMode] = useState<"photo" | "quick">("photo");
+  // Deep link: /check?imprint=M%2030&auto=1 (WelcomeGate "try it", QR
+  // posters, shared links). Typing an imprint is the lower-friction first
+  // action and needs no camera permission, so first-time users start there.
+  const linkedImprint = searchParams.get("imprint");
+  const autoRun = searchParams.get("auto") === "1";
+  const [mode, setMode] = useState<"photo" | "quick">(() => {
+    if (linkedImprint) return "quick";
+    const done = Number(localStorage.getItem(CHECKS_COMPLETED_KEY) || "0");
+    return done === 0 ? "quick" : "photo";
+  });
+  const autoRanRef = useRef(false);
 
   const handleFileSelect = useCallback((file: File, side: "front" | "back" = "front") => {
     if (!file.type.startsWith("image/")) {
@@ -195,6 +207,8 @@ export default function CheckPill() {
 
       if (error) throw error;
 
+      rememberMyReport(data.reportId);
+      incrementChecksCompleted();
       navigate(`/results/${data.reportId}`);
     } catch (error) {
       console.error("Quick check error:", error);
@@ -276,6 +290,8 @@ export default function CheckPill() {
       };
       setQualityFeedback(feedback);
       setCurrentReportId(data.reportId);
+      rememberMyReport(data.reportId);
+      incrementChecksCompleted();
 
       if (data.imageQuality === "poor") {
         setShowRetakePrompt(true);
@@ -295,6 +311,17 @@ export default function CheckPill() {
       setAnalysisStep(0);
     }
   };
+
+  useEffect(() => {
+    if (!linkedImprint) return;
+    // Consume the params so a refresh or back-navigation doesn't re-run.
+    setSearchParams({}, { replace: true });
+    if (autoRun && !autoRanRef.current) {
+      autoRanRef.current = true;
+      handleQuickCheck();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Layout>

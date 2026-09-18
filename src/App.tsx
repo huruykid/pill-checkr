@@ -7,8 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { IS_NATIVE_BUILD } from "@/lib/platform";
 import { AuthProvider } from "@/hooks/useAuth";
 import { I18nProvider } from "@/hooks/useI18n";
-import { DisclaimerGate, useDisclaimerAccepted } from "@/components/shared/DisclaimerGate";
-import { OnboardingWalkthrough, useOnboardingComplete } from "@/components/shared/OnboardingWalkthrough";
+import { WelcomeGate, useDisclaimerAccepted } from "@/components/shared/WelcomeGate";
 import Index from "./pages/Index";
 import CheckPill from "./pages/CheckPill";
 import Results from "./pages/Results";
@@ -24,24 +23,24 @@ import ApiDocs from "./pages/ApiDocs";
 import Trends from "./pages/Trends";
 import CommunityAlerts from "./pages/CommunityAlerts";
 import Install from "./pages/Install";
+import Go from "./pages/Go";
+import QrPoster from "./pages/QrPoster";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
+/**
+ * One gate, then the app. Lives inside BrowserRouter so the "try it" action
+ * can navigate straight into a real check.
+ */
 function AppGates({ children }: { children: React.ReactNode }) {
   const disclaimerAccepted = useDisclaimerAccepted();
-  const onboardingComplete = useOnboardingComplete();
   const [gateAccepted, setGateAccepted] = useState(disclaimerAccepted);
-  const [onboardingDone, setOnboardingDone] = useState(onboardingComplete);
 
   if (!gateAccepted) {
-    return <DisclaimerGate onAccept={() => setGateAccepted(true)} />;
-  }
-
-  if (!onboardingDone) {
-    return <OnboardingWalkthrough onComplete={() => setOnboardingDone(true)} />;
+    return <WelcomeGate onAccept={() => setGateAccepted(true)} />;
   }
 
   return <>{children}</>;
@@ -55,8 +54,8 @@ const App = forwardRef(function App(_props, ref) {
       <AuthProvider>
         <Toaster />
         <Sonner />
-        <AppGates>
         <BrowserRouter>
+        <AppGates>
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
@@ -80,6 +79,8 @@ const App = forwardRef(function App(_props, ref) {
                 <Route path="/api-docs" element={<Navigate to="/" replace />} />
                 <Route path="/install" element={<Navigate to="/" replace />} />
                 <Route path="/analytics" element={<Navigate to="/trends" replace />} />
+                <Route path="/go" element={<Navigate to="/check" replace />} />
+                <Route path="/qr" element={<Navigate to="/" replace />} />
               </>
             ) : (
               <>
@@ -88,12 +89,15 @@ const App = forwardRef(function App(_props, ref) {
                 <Route path="/api-docs" element={<ApiDocs />} />
                 <Route path="/install" element={<Install />} />
                 <Route path="/analytics" element={<Trends />} />
+                {/* QR landing + printable poster for physical distribution. */}
+                <Route path="/go" element={<Go />} />
+                <Route path="/qr" element={<QrPoster />} />
               </>
             )}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
         </AppGates>
+        </BrowserRouter>
       </AuthProvider>
       </I18nProvider>
     </TooltipProvider>

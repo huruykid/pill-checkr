@@ -148,7 +148,22 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
             {lang.toUpperCase()}
           </Button>
 
-          {/* Auth Links */}
+          {/* Auth Links. On native, Settings is the only path to the Privacy
+              Policy (no footer), so it must be reachable logged out. */}
+          {!user && native && (
+            <Link to="/settings">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`gap-2 text-background/80 hover:text-background hover:bg-background/10 ${
+                  isActive("/settings") ? "text-secondary bg-background/10" : ""
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+                {t("nav.settings")}
+              </Button>
+            </Link>
+          )}
           {user ? (
             <>
               <Link to="/settings">
@@ -237,6 +252,19 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
               <Globe className="h-5 w-5" />
               {LANGUAGE_LABELS[lang as Language]} → {LANGUAGE_LABELS[LANGUAGES[(LANGUAGES.indexOf(lang as Language) + 1) % LANGUAGES.length]]}
             </Button>
+            {!user && native && (
+              <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className={`w-full justify-start gap-3 text-background/80 hover:text-background hover:bg-background/10 ${
+                    isActive("/settings") ? "text-secondary" : ""
+                  }`}
+                >
+                  <Settings className="h-5 w-5" />
+                  {t("nav.settings")}
+                </Button>
+              </Link>
+            )}
             {user ? (
               <>
                 <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>

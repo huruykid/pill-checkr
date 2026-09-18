@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Users,
   Plus,
@@ -36,7 +36,6 @@ interface Contact {
 
 export default function Settings() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -45,9 +44,13 @@ export default function Settings() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
 
+  // Guests can open Settings: it is the only path to the Privacy Policy on
+  // native (no footer there), and App Review tests logged out. Account-only
+  // cards render behind `user`; nothing redirects to /auth.
   useEffect(() => {
     if (!user) {
-      navigate("/auth");
+      setContacts([]);
+      setLoading(false);
       return;
     }
     fetchContacts();
@@ -111,8 +114,6 @@ export default function Settings() {
     }
   };
 
-  if (!user) return null;
-
   return (
     <Layout>
       <SEOHead
@@ -130,11 +131,33 @@ export default function Settings() {
             </div>
             <h1 className="mb-2 text-3xl font-bold md:text-4xl">Your Settings</h1>
             <p className="text-muted-foreground">
-              Manage your emergency contacts and preferences
+              {user ? "Manage your emergency contacts and preferences" : "Privacy, legal, and account options"}
             </p>
           </div>
 
-          {/* Emergency Contacts */}
+          {/* Emergency Contacts (account only) */}
+          {!user ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  Emergency Contacts
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Sign in to save people who can check on you when a high-risk pill is detected.
+                  Everything else in Pill Checkr works without an account.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <Button asChild variant="outline" className="w-full gap-2">
+                  <Link to="/auth">
+                    <UserPlus className="h-4 w-4" />
+                    Sign in or create an account
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -290,9 +313,10 @@ export default function Settings() {
               )}
             </CardContent>
           </Card>
+          )}
 
           {/* Developer platform — web only; not part of the App Store build */}
-          {!isNative() && (
+          {!isNative() && user && (
             <>
               <ApiKeyManager />
               <WebhookManager />
@@ -316,7 +340,7 @@ export default function Settings() {
           </Card>
 
           {/* Account deletion — App Store 5.1.1(v) */}
-          <DeleteAccount />
+          {user && <DeleteAccount />}
         </div>
       </div>
     </Layout>

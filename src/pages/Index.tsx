@@ -5,6 +5,7 @@ import { SEOHead, jsonLdWebSite } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Shield, Search, BookOpen, ArrowRight, Heart, CheckCircle, ArrowDown, Radio, FlaskConical } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
+import { AppStoreBadge } from "@/components/shared/AppStoreBadge";
 
 const Index = () => {
   const { t } = useI18n();
@@ -54,6 +55,10 @@ const Index = () => {
                   {t("index.getTheFacts")}
                 </Button>
               </Link>
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <AppStoreBadge placement="home-hero" />
             </div>
 
             <div className="mt-12 flex justify-center">

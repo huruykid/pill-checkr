@@ -3,7 +3,8 @@ import { Layout } from "@/components/layout/Layout";
 import { SEOHead } from "@/components/shared/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Check, Smartphone, Wifi, WifiOff } from "lucide-react";
+import { Download, Check, Smartphone, Wifi, WifiOff, Apple } from "lucide-react";
+import { AppStoreBadge, APP_STORE_LIVE } from "@/components/shared/AppStoreBadge";
 
 export default function Install() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -47,19 +48,41 @@ export default function Install() {
   return (
     <Layout>
       <SEOHead
-        title="Install Pill Checkr | Offline Access"
-        description="Install Pill Checkr on your device for offline access to education content and safety checklists."
+        title="Get the Pill Checkr App | iOS and Web"
+        description="Get Pill Checkr on iPhone, or add the web app to your home screen. Identify pills, log fentanyl test strips, and see counterfeit alerts near you."
         path="/install"
       />
       <div className="container py-12">
         <div className="mx-auto max-w-lg">
-          <h1 className="mb-6 text-3xl font-bold text-center">Install App</h1>
+          <h1 className="mb-6 text-3xl font-bold text-center">Get the App</h1>
+
+          {/* Native first: the iOS app is the product; the PWA is the fallback. */}
+          <Card className="mb-6 border-2 border-primary/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Apple className="h-5 w-5" />
+                Pill Checkr for iPhone and iPad
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Identify a pill, log a test strip result, and get counterfeit alerts for your area. Free, no account, no ads.
+              </p>
+              {APP_STORE_LIVE ? (
+                <AppStoreBadge placement="install-page" />
+              ) : (
+                <p className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                  Coming to the App Store soon. Everything works in the browser today.
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Smartphone className="h-5 w-5 text-primary" />
-                Install Pill Checkr
+                Add the web app to your home screen
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

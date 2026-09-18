@@ -53,6 +53,75 @@ export type Database = {
         }
         Relationships: []
       }
+      app_events: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          event: string
+          id: number
+          install_id: string
+          lang: string | null
+          platform: string
+          props: Json
+          source: string | null
+          state: string | null
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          event: string
+          id?: never
+          install_id: string
+          lang?: string | null
+          platform: string
+          props?: Json
+          source?: string | null
+          state?: string | null
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          event?: string
+          id?: never
+          install_id?: string
+          lang?: string | null
+          platform?: string
+          props?: Json
+          source?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
+      app_events_daily: {
+        Row: {
+          day: string
+          event: string
+          events: number
+          installs: number
+          platform: string
+          source: string | null
+          state: string | null
+        }
+        Insert: {
+          day: string
+          event: string
+          events: number
+          installs: number
+          platform: string
+          source?: string | null
+          state?: string | null
+        }
+        Update: {
+          day?: string
+          event?: string
+          events?: number
+          installs?: number
+          platform?: string
+          source?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
       buddy_alerts: {
         Row: {
           contacts_notified: Json
@@ -788,6 +857,26 @@ export type Database = {
       }
     }
     Views: {
+      activation_funnel_30d: {
+        Row: {
+          first_check: number | null
+          installs_seen: number | null
+          platform: string | null
+          report_posted: number | null
+          share_tapped: number | null
+          strip_logged: number | null
+        }
+        Relationships: []
+      }
+      retention_d7: {
+        Row: {
+          cohort_day: string | null
+          installs: number | null
+          platform: string | null
+          returned_d7: number | null
+        }
+        Relationships: []
+      }
       counterfeit_reports_public: {
         Row: {
           city: string | null

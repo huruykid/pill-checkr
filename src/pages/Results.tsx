@@ -41,13 +41,13 @@ import {
   Eye,
   ImageIcon,
   MapPin,
-  Share2,
-  Link2,
-  LinkIcon,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/integrations/supabase/types";
+import { trackVerdictViewed, isMyReport } from "@/lib/analytics";
+import { ShareResultCard } from "@/components/results/ShareResultCard";
+import { AppStoreBadge } from "@/components/shared/AppStoreBadge";
 
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 type Match = Database["public"]["Tables"]["matches"]["Row"];
@@ -88,6 +88,8 @@ function sanitizeMatchReasons(matchReasons: string | null): string | null {
   return cleaned.length > 0 ? cleaned : null;
 }
 
+const SAFETY_MODAL_SEEN_KEY = "pc_safety_modal_seen";
+
 const harmReductionStepKeys = ["steps.1", "steps.2", "steps.3", "steps.4", "steps.5", "steps.6"];
 
 export default function Results() {
@@ -99,7 +101,6 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [safetyModalOpen, setSafetyModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [sharing, setSharing] = useState(false);
   const [signedPhotoUrl, setSignedPhotoUrl] = useState<string | null>(null);
   const [loggedStrip, setLoggedStrip] = useState<"positive" | "negative" | null>(null);
   const [warnOpen, setWarnOpen] = useState(false);
@@ -138,10 +139,14 @@ export default function Results() {
 
       if (matchesError) throw matchesError;
       setData({ report, matches: matches || [] });
+      trackVerdictViewed({
+        verdict: matches && matches.length > 0 ? "identified" : "unidentified",
+        mode: report.photo_url ? "photo" : "quick",
+      });
 
-      // Show safety modal if not yet dismissed for this report
-      const modalKey = `pc_safety_modal_${reportId}`;
-      if (!localStorage.getItem(modalKey)) {
+      // Safety countdown once per device, not per report. The verdict card
+      // and disclaimers still render on every result.
+      if (!localStorage.getItem(SAFETY_MODAL_SEEN_KEY)) {
         setSafetyModalOpen(true);
       }
 
@@ -252,6 +257,11 @@ export default function Results() {
   }
 
   const { report, matches } = data;
+  // Owner: the signed-in author, or the device that ran this guest check.
+  // Anyone else holding the link is a viewer: they get the verdict and the
+  // matches, never the photo or the ability to log strips on this report.
+  const isOwner = (!!user && report.user_id === user.id) || isMyReport(report.id);
+  const canToggleShare = !!user && report.user_id === user.id;
   const riskLevel = (report.risk_level || "medium") as "low" | "medium" | "high";
   const anomalyReasons = report.anomaly_reasons ?? [];
   const riskReasons = report.risk_reasons ?? [];
@@ -264,12 +274,13 @@ export default function Results() {
         description="View your pill analysis results including visual matching, consistency scoring, and harm reduction guidance."
         path={`/results/${reportId}`}
         jsonLd={makeWebPage("Pill Analysis Results", `/results/${reportId}`, "Pill analysis results with visual matching and safety guidance.")}
+        noindex
       />
       <SafetyThresholdModal
         open={safetyModalOpen}
         onDismiss={() => {
           setSafetyModalOpen(false);
-          localStorage.setItem(`pc_safety_modal_${reportId}`, "1");
+          localStorage.setItem(SAFETY_MODAL_SEEN_KEY, "1");
         }}
       />
       <div className={cn("container py-8 md:py-12 transition-all duration-300", safetyModalOpen && "blur-xl pointer-events-none select-none")}>
@@ -278,6 +289,19 @@ export default function Results() {
             <ArrowLeft className="h-4 w-4" />
             {t("results.backToCheck")}
           </Link>
+
+          {!isOwner && (
+            <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <p className="font-semibold">{t("share.viewerTitle")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t("share.viewerBody")}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Button asChild size="sm">
+                  <Link to="/check">{t("share.viewerCta")}</Link>
+                </Button>
+                <AppStoreBadge placement="shared-result" className="py-1.5" />
+              </div>
+            </div>
+          )}
 
           <div className="mb-8 text-center">
             <h1 className="mb-4 text-3xl font-bold md:text-4xl">{t("results.title")}</h1>
@@ -343,7 +367,7 @@ export default function Results() {
           )}
 
           {/* Show pill photo if available */}
-          {signedPhotoUrl && (
+          {isOwner && signedPhotoUrl && (
             <Card className="mb-6 overflow-hidden">
               <CardContent className="p-0">
                 <img
@@ -514,12 +538,14 @@ export default function Results() {
           </Card>
 
           {/* PRIMARY ACTION: log the test strip result. This is the moat interaction. */}
+          {isOwner && (
           <TestStripLogger
             reportId={report.id}
             className="mb-3"
             onLogged={(r) => { if (r !== "invalid") { setLoggedStrip(r); setWarnOpen(r === "positive"); } }}
           />
-          {loggedStrip && (
+          )}
+          {isOwner && loggedStrip && (
             <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
               <div className="text-sm">
                 <p className="font-semibold">Warn people near you</p>
@@ -535,6 +561,20 @@ export default function Results() {
             onOpenChange={setWarnOpen}
             prefill={{ imprint: report.imprint_text, drug: matches[0]?.drug_name, strip: loggedStrip, reportId: report.id }}
           />
+
+          {/* Share: the emotional peak is right after logging a strip. */}
+          {isOwner && (
+            <ShareResultCard
+              className="mb-6"
+              reportId={report.id}
+              imprint={report.imprint_text}
+              drugName={matches[0]?.drug_name || null}
+              strip={loggedStrip}
+              shared={(report as { shared?: boolean }).shared ?? !report.user_id}
+              canToggle={canToggleShare}
+              onSharedChange={(shared) => setData({ ...data, report: { ...report, shared } })}
+            />
+          )}
 
           {/* Section C: What To Do Next */}
           <Card className="mb-8">
@@ -567,14 +607,17 @@ export default function Results() {
           )}
 
           {/* Buddy Alert System */}
+          {isOwner && (
           <BuddyAlert
             reportId={report.id}
             drugName={matches.length > 0 ? matches[0].drug_name : undefined}
             riskLevel={riskLevel}
             className="mb-6"
           />
+          )}
 
           {/* Report This Pill */}
+          {isOwner && (
           <ReportPill
             reportId={report.id}
             drugName={matches.length > 0 ? matches[0].drug_name : undefined}
@@ -582,6 +625,7 @@ export default function Results() {
             photoUrl={report.photo_url}
             className="mb-6"
           />
+          )}
 
           {/* Harm Reduction Resources */}
           <HarmReductionResources className="mb-8" showFindHelp={riskLevel === "high"} />
@@ -600,7 +644,7 @@ export default function Results() {
           )}
 
           {/* Match Feedback */}
-          {matches.length > 0 && (
+          {isOwner && matches.length > 0 && (
             <MatchFeedback
               reportId={report.id}
               matchId={matches[0].id}
@@ -610,56 +654,9 @@ export default function Results() {
 
           <Disclaimer className="mb-8" />
 
-          {/* Share Toggle */}
-          {user && data.report.user_id === user.id && (
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Share2 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">{t("results.shareableLink")}</span>
-                  </div>
-                  <Button
-                    variant={(data.report as any).shared ? "outline" : "default"}
-                    size="sm"
-                    disabled={sharing}
-                    onClick={async () => {
-                      setSharing(true);
-                      try {
-                        const newShared = !(data.report as any).shared;
-                        await supabase
-                          .from("reports")
-                          .update({ shared: newShared } as any)
-                          .eq("id", data.report.id);
-                        setData({ ...data, report: { ...data.report, shared: newShared } as any });
-                        if (newShared) {
-                          await navigator.clipboard.writeText(window.location.href);
-                          toast.success(t("results.shareCopied"));
-                        } else {
-                          toast.success(t("results.unshareMsg"));
-                        }
-                      } catch {
-                        toast.error(t("results.shareError"));
-                      } finally {
-                        setSharing(false);
-                      }
-                    }}
-                  >
-                    <LinkIcon className="mr-1.5 h-3.5 w-3.5" />
-                    {(data.report as any).shared ? t("results.unshare") : t("results.share")}
-                  </Button>
-                </div>
-                {(data.report as any).shared && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {t("results.shareNote")}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
           {/* Actions */}
           <div className="flex flex-col gap-4 sm:flex-row">
+            {isOwner && (
             <Button 
               variant="outline" 
               className="flex-1"
@@ -673,6 +670,7 @@ export default function Results() {
               )}
               {user ? t("results.saveToAccount") : t("results.saveToHistory")}
             </Button>
+            )}
             <Link to="/check" className="flex-1">
               <Button variant="default" className="w-full">
                 <RotateCcw className="mr-2 h-4 w-4" />

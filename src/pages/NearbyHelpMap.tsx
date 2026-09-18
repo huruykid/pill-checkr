@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { track } from "@/lib/analytics";
 
 interface Facility {
   name: string;
@@ -65,6 +66,11 @@ export default function NearbyHelpMap() {
   const [showList, setShowList] = useState(false);
 
   const filteredFacilities = facilities.filter((f) => matchesFilter(f, filter));
+
+  useEffect(() => {
+    track("help_map_opened", { filter: initialFilter });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;

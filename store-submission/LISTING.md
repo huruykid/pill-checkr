@@ -122,6 +122,12 @@ strip result), NOT linked to identity.
 **Identifiers**: none for advertising. (The 24-hour salted connection-hash
 for rate limiting falls under fraud prevention and is not retained.)
 
+**Usage Data → Product Interaction**: collected, NOT linked to identity,
+purposes: App Functionality + Analytics. First-party only (a Supabase table
+we own — no third-party SDK); events carry a random per-install ID, app
+version, language, and the 2-letter state chosen for alerts. Never IP,
+precise location, imprint text, or photos. Raw events deleted after 90 days.
+
 **Tracking**: NO data used for tracking. No ads, no data brokers.
 
 ## 5. Age rating questionnaire

@@ -1,6 +1,12 @@
 import { forwardRef, useEffect } from "react";
 
-const BASE_URL = "https://pill-checkr.lovable.app";
+/**
+ * Canonical origin for links that leave the app (share text, canonicals,
+ * OG URLs, the QR landing page). Set VITE_SITE_URL once the custom domain
+ * (pillcheckr.app) is connected; nothing else needs to change.
+ */
+export const SITE_URL: string = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") || "https://pill-checkr.lovable.app";
+const BASE_URL = SITE_URL;
 const SITE_NAME = "Pill Checkr";
 
 interface SEOHeadProps {
@@ -8,9 +14,11 @@ interface SEOHeadProps {
   description: string;
   path: string;
   jsonLd?: Record<string, unknown>;
+  /** Pages that should not be crawled (per-report result pages). */
+  noindex?: boolean;
 }
 
-export const SEOHead = forwardRef<HTMLDivElement, SEOHeadProps>(function SEOHead({ title, description, path, jsonLd }, _ref) {
+export const SEOHead = forwardRef<HTMLDivElement, SEOHeadProps>(function SEOHead({ title, description, path, jsonLd, noindex }, _ref) {
   useEffect(() => {
     document.title = title;
 
@@ -31,6 +39,15 @@ export const SEOHead = forwardRef<HTMLDivElement, SEOHeadProps>(function SEOHead
     setMeta("property", "og:type", "website");
     setMeta("name", "twitter:title", title);
     setMeta("name", "twitter:description", description);
+
+    // robots: only ever set to noindex; remove the tag otherwise so a
+    // previous page's value can't leak into the next one.
+    const robots = document.querySelector('meta[name="robots"]');
+    if (noindex) setMeta("name", "robots", "noindex, nofollow");
+    else if (robots) robots.remove();
+
+    // Smart App Banner deep-links Safari visitors into the same page in the app.
+    setMeta("name", "apple-itunes-app", `app-id=6804091193, app-argument=${BASE_URL}${path}`);
 
     // Canonical
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
@@ -61,7 +78,7 @@ export const SEOHead = forwardRef<HTMLDivElement, SEOHeadProps>(function SEOHead
       const s = document.getElementById(jsonLdId);
       if (s) s.remove();
     };
-  }, [title, description, path, jsonLd]);
+  }, [title, description, path, jsonLd, noindex]);
 
   return null;
 });
