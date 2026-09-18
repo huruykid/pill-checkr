@@ -40,11 +40,52 @@ I test it?" The home screen answers it above the fold.
 - Target 17+ (Drug Use or References; Medical/Treatment Information).
 - In-app account deletion: Settings → DeleteAccount → `delete-account` edge
   function (needs SUPABASE_SERVICE_ROLE_KEY).
+- Migrations that must be applied to the live (Lovable Cloud) database before
+  build 1 ships: `20260918100000_app_events`, `20260918100100_share_visibility`,
+  `20260918100200_official_advisories`. Without the first, `track()` fails
+  silently (fine) but Metrics is empty; without the second, shared links from
+  account holders render with no matches.
 - Reviewer notes must state: harm reduction, never outputs "safe", cites
   SAMHSA/CDC; provide demo account and a sample imprint (e.g. "M 30").
 
+## Growth surfaces (Sept 2026)
+- Onboarding is ONE screen: `WelcomeGate` (legal checkbox + "Try it: M 30"
+  which deep-links to `/check?imprint=M%2030&auto=1`). The old walkthrough
+  is gone; `pc_onboarding_complete` is still written for compatibility.
+  Safety countdown shows once per device (`pc_safety_modal_seen`).
+- Guests can open Settings (native has no footer, so Settings → Privacy is
+  the only path; reviewers test logged out). Account-only cards render
+  behind `user`. Never reintroduce the `/auth` redirect.
+- Analytics are FIRST-PARTY ONLY: `app_events` table via
+  `src/lib/analytics.ts` (`track()`); anon insert, admin select, 90-day raw
+  retention, nightly `rollup-app-events-daily`. No third-party SDK, ever —
+  Privacy.tsx and LISTING.md §4 say so. Never send imprint text, photo
+  paths, coordinates, IP, or user id. Admin → Metrics reads the rollup.
+- Results has owner vs viewer mode. Guest ownership = `pc_my_reports`.
+  Viewers never see the photo, strip logger, Buddy Alert, or Save. Result
+  pages are `noindex`. Guest reports are `shared=true` at creation; account
+  holders flip `shared` from ShareResultCard. RLS on matches/test strips
+  follows the parent report's `shared`.
+- Share text lives in i18n `share.*` and must never contain "safe".
+- `/go?c=<code>` is the QR landing page, `/qr?c=<code>&lang=es` the printable
+  poster (web only; native redirects). Every printed poster gets its own
+  code; `pc_acq_source` keeps first touch; Metrics shows first checks by
+  source. Once live, the QR points at the App Store campaign link.
+- Official advisories (`official_advisories` + `_public` view) are the honest
+  seed for an empty feed. They are NOT community reports: separate table,
+  distinct `AdvisoryCard`, not under the community disclaimer. Enter them
+  in Admin → Advisories. Never seed fake community reports.
+- Near-me with zero community reports falls back to everywhere VISIBLY
+  (notice + near chip stays selected). Do not silently switch scope.
+- `VITE_APP_STORE_LIVE=true` turns on the AppStoreBadge everywhere;
+  `VITE_SITE_URL` is the canonical origin (set when pillcheckr.app connects);
+  `VITE_ASC_PROVIDER_TOKEN` adds `pt=` to App Store campaign links.
+
 ## Traps
 - localStorage keys are `pc_*` (renamed from `ff_*`); API keys are `pc_*`.
+  Analytics/ownership keys: `pc_install_id`, `pc_acq_source`,
+  `pc_first_check_at`, `pc_checks_completed`, `pc_my_reports`,
+  `pc_safety_modal_seen` — all cleared by DeleteAccount.
 - Anonymous uploads land in `pill-images/anon/` — purged at 30 days by the
   `purge-anon-images` edge fn (nightly pg_cron job `purge-anon-images-daily`).
   Privacy.tsx states the 30-day window; keep them in sync.

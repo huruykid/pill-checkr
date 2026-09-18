@@ -2,6 +2,7 @@ import { AlertTriangle, MapPin, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 interface CounterfeitAlert {
   drug_name: string;
@@ -28,6 +29,7 @@ function timeAgo(dateStr: string): string {
 }
 
 export function RegionalCounterfeitAlert({ alerts, className }: RegionalCounterfeitAlertProps) {
+  const { t } = useI18n();
   if (!alerts || alerts.length === 0) return null;
 
   const totalReports = alerts.reduce((sum, a) => sum + a.count, 0);
@@ -45,10 +47,12 @@ export function RegionalCounterfeitAlert({ alerts, className }: RegionalCounterf
             "h-5 w-5",
             hasHighRisk ? "text-destructive" : "text-warning"
           )} />
-          Regional Counterfeit Reports
+          {t("results.regional.title")}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          {totalReports} counterfeit report{totalReports !== 1 ? "s" : ""} for this substance in the last 90 days
+          {t("results.regional.count")
+            .replace("{n}", String(totalReports))
+            .replace("{reports}", t(totalReports === 1 ? "results.regional.report" : "results.regional.reports"))}
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -66,7 +70,7 @@ export function RegionalCounterfeitAlert({ alerts, className }: RegionalCounterf
                 <div className="flex items-center gap-2 mt-0.5">
                   <Clock className="h-3 w-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    Latest: {timeAgo(alert.latest)}
+                    {t("results.regional.latest").replace("{when}", timeAgo(alert.latest))}
                   </span>
                 </div>
               </div>
@@ -78,14 +82,14 @@ export function RegionalCounterfeitAlert({ alerts, className }: RegionalCounterf
                 </Badge>
               )}
               <Badge variant="secondary" className="text-xs tabular-nums">
-                {alert.count} report{alert.count !== 1 ? "s" : ""}
+                {alert.count} {t(alert.count === 1 ? "results.regional.report" : "results.regional.reports")}
               </Badge>
             </div>
           </div>
         ))}
 
         <p className="text-xs text-muted-foreground text-center pt-1">
-          Based on anonymous community reports. Always test with fentanyl strips and carry naloxone.
+          {t("results.regional.footer")}
         </p>
       </CardContent>
     </Card>

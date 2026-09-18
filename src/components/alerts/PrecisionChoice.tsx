@@ -2,10 +2,12 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { MapPin, Crosshair } from "lucide-react";
 import type { Precision } from "@/lib/geo";
+import { useI18n } from "@/hooks/useI18n";
 
 /**
  * Precise location is opt-in, per report, never remembered.
- * The copy states the real tradeoff instead of burying it.
+ * The copy states the real tradeoff instead of burying it. Translations
+ * must carry the same weight (the subpoena sentence stays).
  */
 export function PrecisionChoice({
   value,
@@ -14,14 +16,15 @@ export function PrecisionChoice({
   value: Precision;
   onChange: (p: Precision) => void;
 }) {
+  const { t } = useI18n();
   const options: { value: Precision; label: string; hint: string; icon: typeof MapPin }[] = [
-    { value: "city", label: "City only", hint: "Recommended", icon: MapPin },
-    { value: "precise", label: "Exact spot", hint: "More useful, less private", icon: Crosshair },
+    { value: "city", label: t("precision.city"), hint: t("precision.cityHint"), icon: MapPin },
+    { value: "precise", label: t("precision.precise"), hint: t("precision.preciseHint"), icon: Crosshair },
   ];
 
   return (
     <div className="space-y-2">
-      <Label>Location detail</Label>
+      <Label>{t("precision.label")}</Label>
       <div className="grid grid-cols-2 gap-2">
         {options.map((o) => (
           <button
@@ -43,15 +46,7 @@ export function PrecisionChoice({
         ))}
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">
-        {value === "precise" ? (
-          <>
-            An exact point makes bad-batch clusters visible block by block. It is stored separately, never shown
-            publicly, deleted after 30 days — but it could be subpoenaed. Homes always display as a wide area.
-          </>
-        ) : (
-          <>Only your city and a wide map area are stored. Your coordinates are used once on your device and by a
-          map service to find your city name — we never store them.</>
-        )}
+        {value === "precise" ? t("precision.preciseCopy") : t("precision.cityCopy")}
       </p>
     </div>
   );

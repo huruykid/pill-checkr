@@ -461,6 +461,57 @@ export type Database = {
           },
         ]
       }
+      official_advisories: {
+        Row: {
+          city: string | null
+          created_at: string
+          created_by: string | null
+          drug_name: string | null
+          expires_on: string | null
+          hidden: boolean
+          id: string
+          imprint: string | null
+          issuer: string
+          published_on: string
+          source_url: string
+          state: string
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          drug_name?: string | null
+          expires_on?: string | null
+          hidden?: boolean
+          id?: string
+          imprint?: string | null
+          issuer: string
+          published_on: string
+          source_url: string
+          state: string
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          drug_name?: string | null
+          expires_on?: string | null
+          hidden?: boolean
+          id?: string
+          imprint?: string | null
+          issuer?: string
+          published_on?: string
+          source_url?: string
+          state?: string
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       pill_reference: {
         Row: {
           color: Database["public"]["Enums"]["pill_color"]
@@ -874,6 +925,21 @@ export type Database = {
           installs: number | null
           platform: string | null
           returned_d7: number | null
+        }
+        Relationships: []
+      }
+      official_advisories_public: {
+        Row: {
+          city: string | null
+          drug_name: string | null
+          id: string | null
+          imprint: string | null
+          issuer: string | null
+          published_on: string | null
+          source_url: string | null
+          state: string | null
+          summary: string | null
+          title: string | null
         }
         Relationships: []
       }

@@ -184,9 +184,12 @@ Demo account (optional — every feature works logged out):
 
 ## 8. Pre-submission checklist
 
+- [ ] Migrations 20260918100000/100100/100200 applied to the live DB (RELEASING.md)
+- [ ] 10–15 official advisories entered for the launch metro (Admin → Advisories)
+- [ ] Alerts screenshot (04) retaken with real advisories, not sample reports
 - [ ] privacy@pillcheckr.app mailbox exists (policy references it)
 - [ ] Demo account created; credentials pasted into review notes
-- [ ] iPad simulator dead-tap pass (RELEASING.md checklist)
+- [ ] iPad simulator dead-tap pass (RELEASING.md checklist, incl. logged-out Settings → Privacy)
 - [ ] TestFlight pass on a real device
 - [ ] Screenshots uploaded to BOTH slots (iPad 13" gates Add for Review)
 - [ ] Privacy nutrition label saved (§4)

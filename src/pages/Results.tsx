@@ -47,6 +47,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/integrations/supabase/types";
 import { trackVerdictViewed, isMyReport } from "@/lib/analytics";
 import { ShareResultCard } from "@/components/results/ShareResultCard";
+import { AdvisoryCard, type OfficialAdvisory } from "@/components/alerts/AdvisoryCard";
 import { AppStoreBadge } from "@/components/shared/AppStoreBadge";
 
 type Report = Database["public"]["Tables"]["reports"]["Row"];
@@ -105,6 +106,7 @@ export default function Results() {
   const [loggedStrip, setLoggedStrip] = useState<"positive" | "negative" | null>(null);
   const [warnOpen, setWarnOpen] = useState(false);
   const [counterfeitAlerts, setCounterfeitAlerts] = useState<Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }>>([]);
+  const [advisories, setAdvisories] = useState<OfficialAdvisory[]>([]);
 
   const hasCounterfeitRisk = useMemo(() => {
     return data?.matches.some(
@@ -148,6 +150,24 @@ export default function Results() {
       // and disclaimers still render on every result.
       if (!localStorage.getItem(SAFETY_MODAL_SEEN_KEY)) {
         setSafetyModalOpen(true);
+      }
+
+      // Official advisories that name this imprint or drug (health dept, DEA, poison control).
+      {
+        const drugNames = [...new Set((matches || []).map((m) => m.drug_name).filter(Boolean))] as string[];
+        const imprint = report.imprint_text?.trim().toUpperCase();
+        const ors: string[] = [];
+        if (imprint) ors.push(`imprint.ilike.${imprint.replace(/[,()]/g, "")}`);
+        for (const d of drugNames) ors.push(`drug_name.ilike.${d.replace(/[,()]/g, "")}%`);
+        if (ors.length > 0) {
+          const { data: adv } = await supabase
+            .from("official_advisories_public")
+            .select("*")
+            .or(ors.join(","))
+            .order("published_on", { ascending: false })
+            .limit(3);
+          setAdvisories((adv as OfficialAdvisory[]) || []);
+        }
       }
 
       // Fetch regional counterfeit alerts for matched drug names
@@ -336,7 +356,7 @@ export default function Results() {
                     <p className="text-base font-semibold text-foreground leading-snug">{config.message}</p>
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                       <AlertTriangle className="h-3 w-3 shrink-0" />
-                      This is not lab testing. Always use fentanyl test strips.
+                      {t("results.notLabTesting")}
                     </p>
                   </div>
                 </div>
@@ -443,7 +463,7 @@ export default function Results() {
                                       <div className="flex items-center gap-2 text-muted-foreground">
                                         <Eye className="h-4 w-4" />
                                         <span className="text-xs">
-                                          Compared against a reference photo. A visual match is not proof — counterfeits copy appearance.
+                                          {t("results.comparedNote")}
                                         </span>
                                       </div>
                                       {visualData.flags.length > 0 && (
@@ -482,6 +502,16 @@ export default function Results() {
 
           {/* Counterfeit Warning */}
           {hasCounterfeitRisk && <CounterfeitWarning className="mb-6" />}
+
+          {/* Official advisories naming this imprint or drug */}
+          {advisories.length > 0 && (
+            <div className="mb-6">
+              <p className="mb-2 text-sm font-semibold">{t("results.advisories.title")}</p>
+              <ul className="space-y-3">
+                {advisories.map((a) => <AdvisoryCard key={a.id} a={a} />)}
+              </ul>
+            </div>
+          )}
 
           {/* Regional Counterfeit Alerts */}
           {counterfeitAlerts.length > 0 && (
@@ -548,11 +578,11 @@ export default function Results() {
           {isOwner && loggedStrip && (
             <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
               <div className="text-sm">
-                <p className="font-semibold">Warn people near you</p>
-                <p className="text-muted-foreground">Post this result to Community Alerts. Anonymous, city-level.</p>
+                <p className="font-semibold">{t("results.warnTitle")}</p>
+                <p className="text-muted-foreground">{t("results.warnBody")}</p>
               </div>
               <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setWarnOpen(true)}>
-                <Radio className="h-4 w-4" />Post
+                <Radio className="h-4 w-4" />{t("results.warnPost")}
               </Button>
             </div>
           )}

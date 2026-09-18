@@ -14,6 +14,7 @@ import { captureLocation, type Precision } from "@/lib/geo";
 import { PrecisionChoice } from "./PrecisionChoice";
 import { toast } from "sonner";
 import { Loader2, LocateFixed, Send } from "lucide-react";
+import { useI18n } from "@/hooks/useI18n";
 
 type Strip = "positive" | "negative" | "not_tested";
 
@@ -26,15 +27,16 @@ interface Props {
   prefill?: { imprint?: string | null; drug?: string | null; strip?: Strip | null; reportId?: string | null };
 }
 
-const STRIP_OPTIONS: { value: Strip; label: string; hint: string; cls: string }[] = [
-  { value: "positive", label: "Positive", hint: "Fentanyl detected", cls: "data-[on=true]:bg-danger data-[on=true]:text-danger-foreground data-[on=true]:border-danger" },
-  { value: "negative", label: "Negative", hint: "No fentanyl on strip", cls: "data-[on=true]:bg-foreground data-[on=true]:text-background data-[on=true]:border-foreground" },
-  { value: "not_tested", label: "Not tested", hint: "Reporting by sight", cls: "data-[on=true]:bg-warning data-[on=true]:text-foreground data-[on=true]:border-warning" },
+const STRIP_OPTIONS: { value: Strip; labelKey: string; hintKey: string; cls: string }[] = [
+  { value: "positive", labelKey: "report.positive", hintKey: "report.positiveHint", cls: "data-[on=true]:bg-danger data-[on=true]:text-danger-foreground data-[on=true]:border-danger" },
+  { value: "negative", labelKey: "report.negative", hintKey: "report.negativeHint", cls: "data-[on=true]:bg-foreground data-[on=true]:text-background data-[on=true]:border-foreground" },
+  { value: "not_tested", labelKey: "report.notTested", hintKey: "report.notTestedHint", cls: "data-[on=true]:bg-warning data-[on=true]:text-foreground data-[on=true]:border-warning" },
 ];
 
 /** "Report what you found" — works without an account. City-level only; no GPS stored. */
 export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmitted, prefill }: Props) {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [imprint, setImprint] = useState(prefill?.imprint || "");
   const [drug, setDrug] = useState(prefill?.drug || "");
   const [strip, setStrip] = useState<Strip | null>(prefill?.strip ?? null);
@@ -60,7 +62,7 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
       setCity(c.city);
       setState(c.state);
       setCaptured({ hexCell: c.hexCell, point: c.point, placeType: c.placeType });
-      toast.success(precision === "precise" ? "Exact spot captured" : `Near ${c.city || c.state}`);
+      toast.success(precision === "precise" ? t("report.exactCaptured") : t("report.nearCaptured").replace("{place}", c.city || c.state));
     } catch {
       // Fall back to the city-only path if precise capture fails.
       const loc = await detectWithToast();
@@ -111,16 +113,16 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
         located: !!(city.trim() || state.trim()),
         precise: !!captured?.point,
       });
-      toast.success("Reported. Thank you — this helps people near you.");
+      toast.success(t("report.success"));
       setImprint(""); setDrug(""); setStrip(null); setNotes(""); setCaptured(null); setPrecision("city");
       onOpenChange(false);
       onSubmitted?.();
     } catch (e) {
       console.error(e);
       if (String((e as Error)?.message).includes("rate_limited")) {
-        toast.error("You're reporting too quickly. Please try again in an hour.");
+        toast.error(t("report.rateLimited"));
       } else {
-        toast.error("Could not submit. Please try again.");
+        toast.error(t("report.failed"));
       }
     } finally {
       setBusy(false);
@@ -131,15 +133,13 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-t-2xl max-h-[92dvh] overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <SheetHeader className="text-left">
-          <SheetTitle className="font-display text-2xl">Report what you found</SheetTitle>
-          <SheetDescription>
-            Anonymous. City-level only — we never store your exact location or identity.
-          </SheetDescription>
+          <SheetTitle className="font-display text-2xl">{t("report.title")}</SheetTitle>
+          <SheetDescription>{t("report.description")}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-5 space-y-5">
           <div className="space-y-2">
-            <Label>Test strip result</Label>
+            <Label>{t("report.stripLabel")}</Label>
             <div className="grid grid-cols-3 gap-2">
               {STRIP_OPTIONS.map((o) => (
                 <button
@@ -152,8 +152,8 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
                     o.cls,
                   )}
                 >
-                  <span className="block text-sm font-semibold">{o.label}</span>
-                  <span className="block text-[11px] opacity-80">{o.hint}</span>
+                  <span className="block text-sm font-semibold">{t(o.labelKey)}</span>
+                  <span className="block text-[11px] opacity-80">{t(o.hintKey)}</span>
                 </button>
               ))}
             </div>
@@ -161,41 +161,41 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="rf-imprint">Imprint</Label>
+              <Label htmlFor="rf-imprint">{t("report.imprint")}</Label>
               <Input id="rf-imprint" placeholder="M 30" value={imprint} maxLength={40}
                 onChange={(e) => setImprint(e.target.value)} className="text-base font-mono uppercase" autoCapitalize="characters" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="rf-drug">Sold as</Label>
-              <Input id="rf-drug" placeholder="Oxycodone" value={drug} maxLength={80}
+              <Label htmlFor="rf-drug">{t("report.soldAs")}</Label>
+              <Input id="rf-drug" placeholder={t("report.soldAsPlaceholder")} value={drug} maxLength={80}
                 onChange={(e) => setDrug(e.target.value)} className="text-base" />
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Where (optional)</Label>
+              <Label>{t("report.where")}</Label>
               <Button type="button" variant="ghost" size="sm" className="h-8 gap-1.5" onClick={locate} disabled={geo}>
                 {geo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LocateFixed className="h-3.5 w-3.5" />}
-                Use my city
+                {t("report.useMyCity")}
               </Button>
             </div>
             <PrecisionChoice value={precision} onChange={(p) => { setPrecision(p); setCaptured(null); }} />
             <div className="grid grid-cols-2 gap-3">
-              <Input placeholder="City" value={city} maxLength={80} onChange={(e) => setCity(e.target.value)} className="text-base" />
-              <Input placeholder="State" value={state} maxLength={40} onChange={(e) => setState(e.target.value)} className="text-base" />
+              <Input placeholder={t("report.city")} value={city} maxLength={80} onChange={(e) => setCity(e.target.value)} className="text-base" />
+              <Input placeholder={t("report.state")} value={state} maxLength={40} onChange={(e) => setState(e.target.value)} className="text-base" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rf-notes">Notes (optional, admin-only)</Label>
+            <Label htmlFor="rf-notes">{t("report.notes")}</Label>
             <Textarea id="rf-notes" rows={2} maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)}
-              placeholder="Color, shape, anything else that would help someone recognize it" className="text-base" />
+              placeholder={t("report.notesPlaceholder")} className="text-base" />
           </div>
 
           <Button size="lg" className="w-full gap-2" disabled={!canSubmit || busy} onClick={submit}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            Post alert
+            {t("report.submit")}
           </Button>
         </div>
       </SheetContent>
