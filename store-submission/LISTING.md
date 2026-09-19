@@ -130,6 +130,11 @@ precise location, imprint text, or photos. Raw events deleted after 90 days.
 
 **Tracking**: NO data used for tracking. No ads, no data brokers.
 
+**Push tokens (1.1, area alerts)**: an APNs device token is not itself an App
+Privacy data type. The state it is paired with is already declared under
+Coarse Location (App Functionality, not linked). No new label row; the
+privacy policy describes the token, its purpose, and its deletion.
+
 ## 5. Age rating questionnaire
 
 - Drug, Alcohol, or Tobacco Use or References: **Frequent/Intense**
@@ -196,3 +201,11 @@ Demo account (optional — every feature works logged out):
 - [ ] Age rating saved (§5)
 - [ ] Build attached to version 1.0
 - [ ] Add for Review → Submit
+
+### 1.1 additions (area alert push)
+
+- [ ] Migration 20260919100000_area_alert_push applied; `cron.job` lists `notify-area-alerts-15m`
+- [ ] APNs auth key created; five `APNS_*` secrets set on the Supabase project; `notify-area-alerts` deployed
+- [ ] Xcode → Signing & Capabilities shows Push Notifications (App.entitlements)
+- [ ] Push received end to end on a TestFlight build (production APNs host), tap opens Alerts
+- [ ] What's New: "Area alerts: get notified when a fentanyl-positive strip is reported in your state."

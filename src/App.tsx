@@ -1,10 +1,10 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { IS_NATIVE_BUILD } from "@/lib/platform";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { IS_NATIVE_BUILD, isNative } from "@/lib/platform";
 import { AuthProvider } from "@/hooks/useAuth";
 import { I18nProvider } from "@/hooks/useI18n";
 import { WelcomeGate, useDisclaimerAccepted } from "@/components/shared/WelcomeGate";
@@ -46,6 +46,19 @@ function AppGates({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/**
+ * Tapping an area-alert push opens the path in its payload (default /trends).
+ * Native only; the push module is loaded on demand so web never carries it.
+ */
+function PushNavigation() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isNative()) return;
+    import("@/lib/push").then((m) => m.wirePushNavigation((p) => navigate(p))).catch(() => {});
+  }, [navigate]);
+  return null;
+}
+
 const App = forwardRef(function App(_props, ref) {
   return (
   <QueryClientProvider client={queryClient}>
@@ -57,6 +70,7 @@ const App = forwardRef(function App(_props, ref) {
         <BrowserRouter>
         <AppGates>
           <ScrollToTop />
+          <PushNavigation />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/check" element={<CheckPill />} />

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Trash2, TriangleAlert } from "lucide-react";
 import { ANALYTICS_STORAGE_KEYS } from "@/lib/analytics";
+import { isNative } from "@/lib/platform";
 
 /** In-app account deletion — required by App Store Guideline 5.1.1(v). */
 export function DeleteAccount() {
@@ -26,8 +27,14 @@ export function DeleteAccount() {
         body: { confirm: "DELETE" },
       });
       if (error || data?.error) throw new Error(error?.message || data?.error);
+      // Push tokens are not account-linked, but deleting everything means
+      // everything: drop the subscription too (best effort, native only).
+      if (isNative()) {
+        try { await (await import("@/lib/push")).disableAreaAlerts(); } catch { /* ignore */ }
+      }
       // Clear anything cached locally as well.
       [
+        "pc_push_state",
         "pillCheckHistory",
         "pc_onboarding_complete",
         "pc_session_id",

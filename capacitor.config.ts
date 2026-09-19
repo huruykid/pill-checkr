@@ -21,6 +21,10 @@ const config: CapacitorConfig = {
       style: "DARK",
       overlaysWebView: true,
     },
+    PushNotifications: {
+      // Area alerts: show the banner even when the app is in the foreground.
+      presentationOptions: ["alert", "sound"],
+    },
   },
 };
 

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_subscriptions: {
+        Row: {
+          city: string | null
+          created_at: string
+          device_token: string
+          failures: number
+          id: string
+          lang: string
+          last_notified_at: string | null
+          platform: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          device_token: string
+          failures?: number
+          id?: string
+          lang?: string
+          last_notified_at?: string | null
+          platform?: string
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          device_token?: string
+          failures?: number
+          id?: string
+          lang?: string
+          last_notified_at?: string | null
+          platform?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -223,6 +262,7 @@ export type Database = {
           location_lat: number | null
           location_lng: number | null
           notes: string | null
+          notified_at: string | null
           occurred_on: string | null
           photo_url: string | null
           report_id: string | null
@@ -246,6 +286,7 @@ export type Database = {
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
+          notified_at?: string | null
           occurred_on?: string | null
           photo_url?: string | null
           report_id?: string | null
@@ -269,6 +310,7 @@ export type Database = {
           location_lat?: number | null
           location_lng?: number | null
           notes?: string | null
+          notified_at?: string | null
           occurred_on?: string | null
           photo_url?: string | null
           report_id?: string | null
@@ -1077,6 +1119,11 @@ export type Database = {
         Returns: boolean
       }
       purge_expired_report_locations: { Args: never; Returns: number }
+      subscribe_area_alerts: {
+        Args: { p_token: string; p_state: string; p_city?: string | null; p_lang?: string | null }
+        Returns: undefined
+      }
+      unsubscribe_area_alerts: { Args: { p_token: string }; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }

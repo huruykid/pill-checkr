@@ -22,3 +22,6 @@ verify_jwt = true
 
 [functions.purge-anon-images]
 verify_jwt = true
+
+[functions.notify-area-alerts]
+verify_jwt = true

@@ -24,6 +24,7 @@ import {
 import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
 import { WebhookManager } from "@/components/settings/WebhookManager";
 import { DeleteAccount } from "@/components/settings/DeleteAccount";
+import { AreaAlertsToggle } from "@/components/alerts/AreaAlertsToggle";
 import { isNative } from "@/lib/platform";
 
 interface Contact {
@@ -314,6 +315,9 @@ export default function Settings() {
             </CardContent>
           </Card>
           )}
+
+          {/* Area alert pushes — native only; renders once a state is saved */}
+          <AreaAlertsToggle className="mt-6" />
 
           {/* Developer platform — web only; not part of the App Store build */}
           {!isNative() && user && (

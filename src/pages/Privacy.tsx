@@ -3,7 +3,7 @@ import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, EyeOff, Trash2, AlertTriangle } from "lucide-react";
 
-const UPDATED = "September 18, 2026";
+const UPDATED = "September 19, 2026";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -110,6 +110,13 @@ export default function Privacy() {
                 <strong className="text-foreground">Community alerts you post.</strong> An imprint, what it was sold
                 as, a test strip result, and optionally a city and state. These are published anonymously.
               </li>
+              <li>
+                <strong className="text-foreground">Area alerts (iOS only, optional).</strong> If you turn them on, we
+                store your device's push notification token together with the state, and optionally the city, you
+                chose for alerts, so we can notify you when a fentanyl-positive test strip is reported there. No
+                coordinates, no account link, and never more than one notification every six hours. Turning alerts
+                off deletes the token.
+              </li>
             </ul>
 
             <p className="pt-2"><strong className="text-foreground">If you create an account:</strong></p>
@@ -201,6 +208,7 @@ export default function Privacy() {
             <ul className="list-disc space-y-2 pl-5">
               <li>Anonymous pill photos: automatically deleted 30 days after upload.</li>
               <li>Anonymous usage events: raw events deleted after 90 days; daily counts kept.</li>
+              <li>Push notification tokens: kept until you turn area alerts off, or until Apple reports the device is gone.</li>
               <li>Check history on an account: kept until you delete the check or your account.</li>
               <li>Community alerts: kept as long as they are useful to people in that area, then aged out.</li>
               <li>Precise coordinates: hard-deleted 30 days after capture. The wide map cell survives, so the map stays accurate without the point.</li>

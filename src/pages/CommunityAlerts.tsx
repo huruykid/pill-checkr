@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertCard, type CommunityAlert } from "@/components/alerts/AlertCard";
 import { AdvisoryCard, type OfficialAdvisory } from "@/components/alerts/AdvisoryCard";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
+import { AreaAlertsToggle } from "@/components/alerts/AreaAlertsToggle";
 import { detectWithToast, getSavedLocation, saveLocation, type CityState } from "@/lib/location";
 import { isNative } from "@/lib/platform";
 import { track } from "@/lib/analytics";
@@ -172,6 +173,9 @@ export default function CommunityAlerts() {
             </button>
           )}
         </div>
+
+        {/* Area alert push opt-in (native only, needs a known state). */}
+        <AreaAlertsToggle loc={loc} className="mb-4" />
 
         {loading ? (
           <ul className="space-y-3">

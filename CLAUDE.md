@@ -77,6 +77,14 @@ I test it?" The home screen answers it above the fold.
   in Admin → Advisories. Never seed fake community reports.
 - Near-me with zero community reports falls back to everywhere VISIBLY
   (notice + near chip stays selected). Do not silently switch scope.
+- Area alert push (1.1): `alert_subscriptions` = device token + 2-letter
+  state (+ optional city). RLS with NO policies; the API only reaches it via
+  `subscribe_area_alerts` / `unsubscribe_area_alerts` RPCs. Sender
+  `notify-area-alerts` (pg_cron every 15 min) pushes positive strips only,
+  one per device per 6 h, never the word "safe". Client is
+  `src/lib/push.ts` (dynamic import, native only) + `AreaAlertsToggle`.
+  `pc_push_state` holds the token locally. Turning off deletes the row.
+  Privacy.tsx describes the token; change both together.
 - `VITE_APP_STORE_LIVE=true` turns on the AppStoreBadge everywhere;
   `VITE_SITE_URL` is the canonical origin (set when pillcheckr.app connects);
   `VITE_ASC_PROVIDER_TOKEN` adds `pt=` to App Store campaign links.
