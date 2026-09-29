@@ -63,7 +63,7 @@ export function ShareResultCard({
       const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void>; canShare?: (d: ShareData) => boolean };
       if (nav.share) {
         try {
-          await nav.share({ title: "Pill Checkr", text, url });
+          await nav.share({ title: "Stamped", text, url });
           track("share_tapped", { method: "sheet", kind });
           setDone(true);
           return;

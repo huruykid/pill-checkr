@@ -58,7 +58,7 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
             <Shield className="h-4 w-4 text-secondary-foreground" />
           </div>
           <span className="font-display text-2xl text-background tracking-wider">
-            PILL CHECKR
+            STAMPED
           </span>
         </Link>
 

@@ -89,7 +89,7 @@ export default function QrPoster() {
         <p className="mt-6 max-w-[150mm] text-[11pt] leading-snug text-neutral-700">{t("poster.never")}</p>
 
         <div className="mt-6 flex items-center gap-3 text-[11pt] text-neutral-600">
-          <span className="font-display text-[16pt] text-black">PILL CHECKR</span>
+          <span className="font-display text-[16pt] text-black">STAMPED</span>
           <span>·</span>
           <span>{SITE_URL.replace(/^https?:\/\//, "")}/go</span>
         </div>

@@ -31,7 +31,7 @@ export default function Go() {
   return (
     <Layout>
       <SEOHead
-        title="Pill Checkr — Identify a Pill, Find Test Strips & Naloxone"
+        title="Stamped — Identify a Pill, Find Test Strips & Naloxone"
         description="A photo can't detect fentanyl. A $1 test strip can. Identify a pill by its imprint, see what's being faked near you, and find strips and naloxone. Free, anonymous, no account."
         path="/go"
       />

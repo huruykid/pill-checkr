@@ -118,10 +118,10 @@ export default function Settings() {
   return (
     <Layout>
       <SEOHead
-        title="Settings | Pill Checkr"
+        title="Settings | Stamped"
         description="Manage your account settings, emergency contacts, and notification preferences."
         path="/settings"
-        jsonLd={makeWebPage("Settings", "/settings", "Manage your Pill Checkr account settings.")}
+        jsonLd={makeWebPage("Settings", "/settings", "Manage your Stamped account settings.")}
       />
       <div className="container py-8 md:py-12">
         <div className="mx-auto max-w-2xl">
@@ -146,7 +146,7 @@ export default function Settings() {
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Sign in to save people who can check on you when a high-risk pill is detected.
-                  Everything else in Pill Checkr works without an account.
+                  Everything else in Stamped works without an account.
                 </p>
               </CardHeader>
               <CardContent>

@@ -3,11 +3,11 @@ import { forwardRef, useEffect } from "react";
 /**
  * Canonical origin for links that leave the app (share text, canonicals,
  * OG URLs, the QR landing page). Set VITE_SITE_URL once the custom domain
- * (pillcheckr.app) is connected; nothing else needs to change.
+ * is connected; nothing else needs to change.
  */
 export const SITE_URL: string = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") || "https://pill-checkr.lovable.app";
 const BASE_URL = SITE_URL;
-const SITE_NAME = "Pill Checkr";
+const SITE_NAME = "Stamped";
 
 interface SEOHeadProps {
   title: string;

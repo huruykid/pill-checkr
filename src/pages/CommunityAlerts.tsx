@@ -7,6 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCard, type CommunityAlert } from "@/components/alerts/AlertCard";
 import { AdvisoryCard, type OfficialAdvisory } from "@/components/alerts/AdvisoryCard";
+import { LabResultCard } from "@/components/alerts/LabResultCard";
+import { DataSourcesSheet } from "@/components/alerts/DataSourcesSheet";
+import { LabResultsMap } from "@/components/alerts/LabResultsMap";
+import { EarlyWarningStrip } from "@/components/alerts/EarlyWarningStrip";
+import { fetchExternalReports, fetchExternalSources, fetchExternalStates, fetchOverdoseCounties, type ExternalLabReport, type ExternalStateCount, type OverdoseCounty } from "@/lib/externalData";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { AreaAlertsToggle } from "@/components/alerts/AreaAlertsToggle";
 import { detectWithToast, getSavedLocation, saveLocation, type CityState } from "@/lib/location";
@@ -14,7 +19,7 @@ import { isNative } from "@/lib/platform";
 import { track } from "@/lib/analytics";
 import { useI18n } from "@/hooks/useI18n";
 import { cn } from "@/lib/utils";
-import { Radio, LocateFixed, Loader2, Plus, X, FlaskConical, BarChart3, ShieldCheck } from "lucide-react";
+import { Radio, LocateFixed, Loader2, Plus, X, FlaskConical, BarChart3, ShieldCheck, Info, List, Map as MapIcon } from "lucide-react";
 
 type Scope = "near" | "all";
 const PAGE = 50;
@@ -31,6 +36,15 @@ export default function CommunityAlerts() {
   const [scope, setScope] = useState<Scope>(() => (getSavedLocation() ? "near" : "all"));
   const [geo, setGeo] = useState(false);
   const [sheet, setSheet] = useState(false);
+  const [feed, setFeed] = useState<"community" | "lab">("community");
+  const [labReports, setLabReports] = useState<ExternalLabReport[]>([]);
+  const [labLoading, setLabLoading] = useState(true);
+  const [sourceNames, setSourceNames] = useState<Record<string, string>>({});
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [labView, setLabView] = useState<"list" | "map">("list");
+  const [labState, setLabState] = useState<string | null>(null); // national by default; independent of community "near me"
+  const [labStates, setLabStates] = useState<ExternalStateCount[]>([]);
+  const [heat, setHeat] = useState<OverdoseCounty[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -80,6 +94,38 @@ export default function CommunityAlerts() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Lab results are NATIONAL reference data — never gated behind the community
+  // "near me" location. Optional labState filter is the user's own explicit choice.
+  useEffect(() => {
+    if (feed !== "lab") return;
+    let on = true;
+    setLabLoading(true);
+    fetchExternalReports({ state: labState, limit: 1000 }).then((reports) => {
+      if (!on) return;
+      setLabReports(reports);
+      setLabLoading(false);
+    });
+    return () => { on = false; };
+  }, [feed, labState]);
+
+  // Source names are needed by every external layer (early warnings, lab cards,
+  // map popups), so they load once on mount.
+  useEffect(() => {
+    fetchExternalSources().then((sources) =>
+      setSourceNames(Object.fromEntries(sources.map((s) => [s.id, s.name]))));
+  }, []);
+
+  useEffect(() => {
+    if (feed !== "lab" || labStates.length) return;
+    fetchExternalStates().then(setLabStates);
+  }, [feed, labStates.length]);
+
+  // CDC county overdose heat layer — loaded once when the map is first shown.
+  useEffect(() => {
+    if (feed !== "lab" || labView !== "map" || heat.length) return;
+    fetchOverdoseCounties().then(setHeat);
+  }, [feed, labView, heat.length]);
+
   const locate = async () => {
     setGeo(true);
     const l = await detectWithToast();
@@ -112,7 +158,7 @@ export default function CommunityAlerts() {
   return (
     <Layout>
       <SEOHead
-        title="Community Alerts | Pill Checkr"
+        title="Community Alerts | Stamped"
         description="See what counterfeit pills and fentanyl-positive test strips are being reported near you. Anonymous, city-level, community-sourced."
         path="/trends"
         jsonLd={makeWebPage("Community Alerts", "/trends", "Anonymous community reports of counterfeit pills and fentanyl test strip results by city.")}
@@ -142,6 +188,9 @@ export default function CommunityAlerts() {
             </Link>
           )}
         </div>
+
+        {/* National early-warning notice (forensic labs), independent of feed/scope */}
+        <EarlyWarningStrip sourceNames={sourceNames} />
 
         {/* Scope chips */}
         <div className="mb-4 flex items-center gap-2 overflow-x-auto">
@@ -177,7 +226,37 @@ export default function CommunityAlerts() {
         {/* Area alert push opt-in (native only, needs a known state). */}
         <AreaAlertsToggle loc={loc} className="mb-4" />
 
-        {loading ? (
+        {/* Feed toggle: community reports vs verified lab results */}
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex rounded-full border bg-card p-1" role="tablist" aria-label="Alert type">
+            <button
+              type="button" role="tab" aria-selected={feed === "community"}
+              onClick={() => setFeed("community")}
+              className={cn("min-h-[40px] rounded-full px-4 text-sm font-medium",
+                feed === "community" ? "bg-foreground text-background" : "text-muted-foreground")}
+            >
+              Community
+            </button>
+            <button
+              type="button" role="tab" aria-selected={feed === "lab"}
+              onClick={() => setFeed("lab")}
+              className={cn("min-h-[40px] rounded-full px-4 text-sm font-medium",
+                feed === "lab" ? "bg-foreground text-background" : "text-muted-foreground")}
+            >
+              Lab results
+            </button>
+          </div>
+          <button
+            type="button" onClick={() => setSourcesOpen(true)}
+            className="ml-auto flex min-h-[40px] items-center gap-1.5 rounded-full px-3 text-sm font-medium text-muted-foreground"
+          >
+            <Info className="h-4 w-4" />
+            Sources
+          </button>
+        </div>
+
+        {/* Feed */}
+        {feed === "community" && (loading ? (
           <ul className="space-y-3">
             {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
           </ul>
@@ -228,9 +307,83 @@ export default function CommunityAlerts() {
               <p className="mt-3 text-center text-sm text-muted-foreground">{t("alerts.emptyCta")}</p>
             )}
           </>
-        )}
+        ))}
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">{t("alerts.disclaimer")}</p>
+        {feed === "lab" && (labLoading ? (
+          <ul className="space-y-3">
+            {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          </ul>
+        ) : labReports.length === 0 ? (
+          <div className="rounded-xl border border-dashed p-8 text-center">
+            <FlaskConical className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+            <p className="font-semibold">
+              {labState ? `No lab results in ${labState} yet` : "No lab results yet"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Verified results appear here as partner labs publish new data.
+            </p>
+            {labState && (
+              <Button variant="link" className="mt-2" onClick={() => setLabState(null)}>Show all states</Button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <label htmlFor="labState" className="sr-only">Filter lab results by state</label>
+                <select
+                  id="labState"
+                  value={labState ?? ""}
+                  onChange={(e) => setLabState(e.target.value || null)}
+                  className="min-h-[40px] rounded-full border bg-card px-4 text-sm font-medium"
+                >
+                  <option value="">All states (national)</option>
+                  {labStates.map((st) => (
+                    <option key={st.state} value={st.state}>{st.state} ({st.n})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex rounded-full border bg-card p-1" role="tablist" aria-label="Lab results view">
+                <button
+                  type="button" role="tab" aria-selected={labView === "list"}
+                  onClick={() => setLabView("list")}
+                  className={cn("flex min-h-[40px] items-center gap-1.5 rounded-full px-4 text-sm font-medium",
+                    labView === "list" ? "bg-foreground text-background" : "text-muted-foreground")}
+                >
+                  <List className="h-4 w-4" />List
+                </button>
+                <button
+                  type="button" role="tab" aria-selected={labView === "map"}
+                  onClick={() => setLabView("map")}
+                  className={cn("flex min-h-[40px] items-center gap-1.5 rounded-full px-4 text-sm font-medium",
+                    labView === "map" ? "bg-foreground text-background" : "text-muted-foreground")}
+                >
+                  <MapIcon className="h-4 w-4" />Map
+                </button>
+              </div>
+            </div>
+            {labView === "map" ? (
+              <LabResultsMap reports={labReports} sourceNames={sourceNames} heat={heat} />
+            ) : (
+              <ul className="space-y-3">
+                {labReports.slice(0, 60).map((r) => (
+                  <LabResultCard key={r.id} r={r} sourceName={sourceNames[r.source_id] || "Verified lab"} />
+                ))}
+                {labReports.length > 60 && (
+                  <li className="py-2 text-center text-sm text-muted-foreground">
+                    Showing the 60 most recent — switch to Map to see everything
+                  </li>
+                )}
+              </ul>
+            )}
+          </>
+        ))}
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          {feed === "community"
+            ? t("alerts.disclaimer")
+            : "Lab results describe individual samples, not every pill near you. No result proves a pill is safe."}
+        </p>
       </div>
 
       {/* Primary action: report. Sits above the tab bar. */}
@@ -245,6 +398,7 @@ export default function CommunityAlerts() {
       </div>
 
       <ReportFoundSheet open={sheet} onOpenChange={setSheet} defaultLocation={loc} onSubmitted={load} />
+      <DataSourcesSheet open={sourcesOpen} onOpenChange={setSourcesOpen} />
     </Layout>
   );
 }

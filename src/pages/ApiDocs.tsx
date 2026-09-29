@@ -288,8 +288,8 @@ export default function ApiDocs() {
   return (
     <Layout>
       <SEOHead
-        title="API Documentation — Pill Checkr"
-        description="Integrate pill identification, drug interaction checks, and harm reduction tools into your platform with the Pill Checkr API."
+        title="API Documentation — Stamped"
+        description="Integrate pill identification, drug interaction checks, and harm reduction tools into your platform with the Stamped API."
         path="/api-docs"
       />
 
@@ -305,7 +305,7 @@ export default function ApiDocs() {
             </Badge>
           </div>
           <h1 className="text-4xl md:text-5xl font-display text-background mb-4">
-            PILL CHECKR API
+            STAMPED API
           </h1>
           <p className="text-lg text-background/70 max-w-2xl mb-8">
             Pill identification, drug interactions, and harm reduction data — built for

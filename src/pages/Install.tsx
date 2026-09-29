@@ -48,8 +48,8 @@ export default function Install() {
   return (
     <Layout>
       <SEOHead
-        title="Get the Pill Checkr App | iOS and Web"
-        description="Get Pill Checkr on iPhone, or add the web app to your home screen. Identify pills, log fentanyl test strips, and see counterfeit alerts near you."
+        title="Get the Stamped App | iOS and Web"
+        description="Get Stamped on iPhone, or add the web app to your home screen. Identify pills, log fentanyl test strips, and see counterfeit alerts near you."
         path="/install"
       />
       <div className="container py-12">
@@ -61,7 +61,7 @@ export default function Install() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Apple className="h-5 w-5" />
-                Pill Checkr for iPhone and iPad
+                Stamped for iPhone and iPad
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -87,7 +87,7 @@ export default function Install() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Install Pill Checkr on your device for quick access. Education content and safety checklists are available offline.
+                Install Stamped on your device for quick access. Education content and safety checklists are available offline.
               </p>
 
               {isInstalled ? (

@@ -1,17 +1,11 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
   <rect width="1024" height="1024" fill="#0a0a0a"/>
-  <!-- capsule, rotated 45deg around center -->
-  <g transform="rotate(-45 512 512)">
-    <!-- bottom half (amber) -->
-    <path d="M 362 512 L 662 512 L 662 662 A 150 150 0 0 1 362 662 Z" fill="#f59e0b"/>
-    <!-- top half (off-white) -->
-    <path d="M 362 512 L 662 512 L 662 362 A 150 150 0 0 0 362 362 Z" fill="#fafafa"/>
-    <!-- seam -->
-    <rect x="362" y="504" width="300" height="16" fill="#0a0a0a" opacity="0.25"/>
+  <g transform="translate(512 500) scale(36) translate(-12 -12)">
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z" fill="#F9C31F"/>
   </g>
-  <!-- imprint dots on the amber half suggest an imprint code -->
-  <g transform="rotate(-45 512 512)" fill="#0a0a0a" opacity="0.55">
-    <circle cx="472" cy="600" r="16"/>
-    <circle cx="552" cy="600" r="16"/>
+  <g transform="rotate(-45 512 490)">
+    <path d="M 407 490 L 617 490 L 617 595 A 105 105 0 0 1 407 595 Z" fill="#C91D1D"/>
+    <path d="M 407 490 L 617 490 L 617 385 A 105 105 0 0 0 407 385 Z" fill="#1a1a1a"/>
+    <rect x="407" y="484" width="210" height="12" fill="#0a0a0a" opacity="0.35"/>
   </g>
 </svg>

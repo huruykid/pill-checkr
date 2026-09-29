@@ -2,7 +2,7 @@ import { isNative } from "@/lib/platform";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-/** Apple ID for Pill Checkr: ID & Test (permanent, see RELEASING.md). */
+/** Apple ID for the App Store listing (permanent, see RELEASING.md). */
 export const APP_STORE_ID = "6804091193";
 
 /**

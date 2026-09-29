@@ -330,6 +330,24 @@ export type Database = {
           },
         ]
       }
+      county_centroids: {
+        Row: {
+          fips: string
+          lat: number
+          lon: number
+        }
+        Insert: {
+          fips: string
+          lat: number
+          lon: number
+        }
+        Update: {
+          fips?: string
+          lat?: number
+          lon?: number
+        }
+        Relationships: []
+      }
       drug_info_cache: {
         Row: {
           adverse_events_data: Json | null
@@ -411,6 +429,190 @@ export type Database = {
           name?: string
           phone?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      external_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          pdf_url: string | null
+          published_on: string | null
+          raw: Json
+          region: string
+          severity: string
+          shape_version: number
+          source_id: string
+          source_record_id: string
+          substances: string[]
+          summary: string | null
+          synced_at: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          raw?: Json
+          region?: string
+          severity?: string
+          shape_version?: number
+          source_id: string
+          source_record_id: string
+          substances?: string[]
+          summary?: string | null
+          synced_at?: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          raw?: Json
+          region?: string
+          severity?: string
+          shape_version?: number
+          source_id?: string
+          source_record_id?: string
+          substances?: string[]
+          summary?: string | null
+          synced_at?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_alerts_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_reports: {
+        Row: {
+          collected_on: string | null
+          completed_on: string | null
+          county: string | null
+          geo_precision: string
+          id: string
+          image_url: string | null
+          is_pill: boolean
+          lab_flags: Json
+          lat: number | null
+          lon: number | null
+          raw: Json
+          sample_type: string | null
+          shape_version: number
+          source_id: string
+          source_record_id: string
+          state: string | null
+          substance_expected: string | null
+          substances_detected: string[]
+          substances_trace: string[]
+          synced_at: string
+        }
+        Insert: {
+          collected_on?: string | null
+          completed_on?: string | null
+          county?: string | null
+          geo_precision?: string
+          id?: string
+          image_url?: string | null
+          is_pill?: boolean
+          lab_flags?: Json
+          lat?: number | null
+          lon?: number | null
+          raw?: Json
+          sample_type?: string | null
+          shape_version?: number
+          source_id: string
+          source_record_id: string
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[]
+          substances_trace?: string[]
+          synced_at?: string
+        }
+        Update: {
+          collected_on?: string | null
+          completed_on?: string | null
+          county?: string | null
+          geo_precision?: string
+          id?: string
+          image_url?: string | null
+          is_pill?: boolean
+          lab_flags?: Json
+          lat?: number | null
+          lon?: number | null
+          raw?: Json
+          sample_type?: string | null
+          shape_version?: number
+          source_id?: string
+          source_record_id?: string
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[]
+          substances_trace?: string[]
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_reports_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_sources: {
+        Row: {
+          attribution_text: string
+          created_at: string
+          data_url: string
+          description: string
+          enabled: boolean
+          homepage_url: string
+          id: string
+          last_synced_at: string | null
+          license_note: string
+          name: string
+          organization: string
+        }
+        Insert: {
+          attribution_text: string
+          created_at?: string
+          data_url: string
+          description: string
+          enabled?: boolean
+          homepage_url: string
+          id: string
+          last_synced_at?: string | null
+          license_note: string
+          name: string
+          organization: string
+        }
+        Update: {
+          attribution_text?: string
+          created_at?: string
+          data_url?: string
+          description?: string
+          enabled?: boolean
+          homepage_url?: string
+          id?: string
+          last_synced_at?: string | null
+          license_note?: string
+          name?: string
+          organization?: string
         }
         Relationships: []
       }
@@ -551,6 +753,42 @@ export type Database = {
           state?: string
           summary?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      overdose_county_periods: {
+        Row: {
+          county: string | null
+          data_as_of: string | null
+          deaths: number | null
+          fips: string
+          footnote: string | null
+          pct_pending: number | null
+          period_end: string
+          state: string | null
+          synced_at: string
+        }
+        Insert: {
+          county?: string | null
+          data_as_of?: string | null
+          deaths?: number | null
+          fips: string
+          footnote?: string | null
+          pct_pending?: number | null
+          period_end: string
+          state?: string | null
+          synced_at?: string
+        }
+        Update: {
+          county?: string | null
+          data_as_of?: string | null
+          deaths?: number | null
+          fips?: string
+          footnote?: string | null
+          pct_pending?: number | null
+          period_end?: string
+          state?: string | null
+          synced_at?: string
         }
         Relationships: []
       }
@@ -1030,6 +1268,147 @@ export type Database = {
         }
         Relationships: []
       }
+      external_alerts_public: {
+        Row: {
+          id: string | null
+          image_url: string | null
+          pdf_url: string | null
+          published_on: string | null
+          region: string | null
+          severity: string | null
+          source_id: string | null
+          source_record_id: string | null
+          substances: string[] | null
+          summary: string | null
+          synced_at: string | null
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          id?: string | null
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          region?: string | null
+          severity?: string | null
+          source_id?: string | null
+          source_record_id?: string | null
+          substances?: string[] | null
+          summary?: string | null
+          synced_at?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          id?: string | null
+          image_url?: string | null
+          pdf_url?: string | null
+          published_on?: string | null
+          region?: string | null
+          severity?: string | null
+          source_id?: string | null
+          source_record_id?: string | null
+          substances?: string[] | null
+          summary?: string | null
+          synced_at?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_alerts_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_reports_public: {
+        Row: {
+          collected_on: string | null
+          county: string | null
+          geo_precision: string | null
+          id: string | null
+          image_url: string | null
+          is_pill: boolean | null
+          lab_flags: Json | null
+          lat: number | null
+          lon: number | null
+          sample_type: string | null
+          source_id: string | null
+          state: string | null
+          substance_expected: string | null
+          substances_detected: string[] | null
+          substances_trace: string[] | null
+        }
+        Insert: {
+          collected_on?: string | null
+          county?: string | null
+          geo_precision?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_pill?: boolean | null
+          lab_flags?: Json | null
+          lat?: number | null
+          lon?: number | null
+          sample_type?: string | null
+          source_id?: string | null
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[] | null
+          substances_trace?: string[] | null
+        }
+        Update: {
+          collected_on?: string | null
+          county?: string | null
+          geo_precision?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_pill?: boolean | null
+          lab_flags?: Json | null
+          lat?: number | null
+          lon?: number | null
+          sample_type?: string | null
+          source_id?: string | null
+          state?: string | null
+          substance_expected?: string | null
+          substances_detected?: string[] | null
+          substances_trace?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_reports_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_reports_state_counts: {
+        Row: {
+          n: number | null
+          state: string | null
+        }
+        Relationships: []
+      }
+      overdose_county_latest: {
+        Row: {
+          county: string | null
+          data_as_of: string | null
+          deaths: number | null
+          deaths_prior: number | null
+          fips: string | null
+          footnote: string | null
+          lat: number | null
+          lon: number | null
+          pct_pending: number | null
+          period_end: string | null
+          state: string | null
+        }
+        Relationships: []
+      }
       report_map_public: {
         Row: {
           evidence_tier: string | null
@@ -1171,12 +1550,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1200,11 +1579,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1225,11 +1604,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1250,11 +1629,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1267,11 +1646,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
