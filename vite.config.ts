@@ -26,8 +26,8 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
-        name: "Pill Checkr - Pill ID & Harm Reduction",
-        short_name: "Pill Checkr",
+        name: "Stamped - Pill ID & Harm Reduction",
+        short_name: "Stamped",
         description: "Identify any pill by its imprint, see if it's a commonly counterfeited type, and find fentanyl test strips, naloxone, and help near you. A free harm reduction tool — not a safety guarantee.",
         theme_color: "#0a0a0a",
         background_color: "#0a0a0a",

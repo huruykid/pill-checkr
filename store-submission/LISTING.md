@@ -1,9 +1,13 @@
-# App Store Connect — Pill Checkr 1.0 submission package
+# App Store Connect — Stamped 1.0 submission package
 
 Everything below is ready to paste into App Store Connect
-(appstoreconnect.apple.com → My Apps → Pill Checkr, Apple ID 6804091193).
+(appstoreconnect.apple.com → My Apps → the app record created as "Pill Checkr", Apple ID 6804091193;
+rename it to the Name below — the bundle ID never changes).
 Screenshots are in `store-submission/ios/screenshots/`, already at exact
-Apple sizes, RGB, no alpha, named in upload order.
+Apple sizes, RGB, no alpha, named in upload order. **They were captured on
+30 Aug, before the Stamped rename — recapture from the simulator on the
+current build before submitting**, or the in-app name won't match the
+listing (Guideline 2.3.7 metadata mismatch).
 
 ---
 
@@ -25,7 +29,7 @@ populated-state practice and every screen is the real app UI.
 
 | Field | Value |
 |---|---|
-| Name | `Pill Checkr: ID & Test` |
+| Name | `Stamped: Pill ID & Test` |
 | Subtitle | `Fentanyl Strips & Naloxone` |
 | Primary category | Medical |
 | Secondary category | Health & Fitness |
@@ -43,12 +47,12 @@ populated-state practice and every screen is the real app UI.
 ```
 A photo cannot detect fentanyl. A $1 test strip can.
 
-Pill Checkr is a free harm-reduction tool that answers one question:
+Stamped is a free harm-reduction tool that answers one question:
 what is this pill stamped to be, is that type being counterfeited near
 me, and how do I test it?
 
 IDENTIFY
-Type an imprint (like "M 30") or snap a photo. Pill Checkr matches it
+Type an imprint (like "M 30") or snap a photo. Stamped matches it
 against reference data and tells you what the pill is stamped to be —
 and warns you when that imprint is a commonly counterfeited one.
 It never tells you a pill is safe, because no photo can.
@@ -74,7 +78,7 @@ Location on reports is city-level by default; exact locations are
 opt-in per report, never shown publicly, and hard-deleted after 30
 days. Delete your account and data in-app at any time.
 
-Pill Checkr is an educational harm-reduction tool, not medical advice
+Stamped is an educational harm-reduction tool, not medical advice
 and not lab testing. It cannot confirm fentanyl and cannot guarantee
 any pill's contents. If you suspect an overdose, call 911.
 Guidance draws on SAMHSA and CDC harm-reduction resources.
@@ -93,7 +97,7 @@ pill identifier,fentanyl,test strips,naloxone,narcan,imprint,counterfeit,harm re
 | Support URL | https://pill-checkr.lovable.app |
 | Marketing URL | https://pill-checkr.lovable.app |
 | Privacy Policy URL | https://pill-checkr.lovable.app/privacy |
-| Copyright | © 2026 Pill Checkr |
+| Copyright | © 2026 Stamped |
 
 (Swap in pillcheckr.app URLs when the custom domain is connected.)
 
@@ -152,7 +156,7 @@ privacy policy describes the token, its purpose, and its deletion.
 **Notes for reviewer (paste as-is):**
 
 ```
-Pill Checkr is a harm-reduction tool built on SAMHSA/CDC guidance. It
+Stamped is a harm-reduction tool built on SAMHSA/CDC guidance. It
 helps people identify what a pill is stamped to be, warns when that
 imprint is commonly counterfeited, and directs users to fentanyl test
 strips, naloxone, and treatment.

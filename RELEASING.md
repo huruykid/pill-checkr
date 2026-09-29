@@ -1,4 +1,4 @@
-# Releasing Pill Checkr iOS
+# Releasing Stamped iOS (formerly Pill Checkr)
 
 The facts that must never be re-derived, and the loop that ships a build.
 Read CLAUDE.md first for product rules; this file is mechanics only.
@@ -10,7 +10,7 @@ Read CLAUDE.md first for product rules; this file is mechanics only.
 | Bundle ID | `app.pillcheckr.ios` (PERMANENT — released to App Store Connect) |
 | Apple ID | 6804091193 |
 | SKU | pillcheckr-ios |
-| Store name | "Pill Checkr: ID & Test" |
+| Store name | "Stamped: Pill ID & Test" (app record was created as "Pill Checkr"; rename it in App Information) |
 | Subtitle | "Fentanyl Strips & Naloxone" |
 | Xcode project | `ios/App/App.xcodeproj` — scheme **App** |
 | Package manager | **SPM only** (`ios/App/CapApp-SPM/Package.swift`). There is no Podfile; never run `pod install`, never add one. |
@@ -91,7 +91,7 @@ Code is in the repo (plugin, AppDelegate forwarders, `App.entitlements`,
 `20260919100000_area_alert_push.sql`). What only you can do:
 
 1. **APNs key.** Apple Developer → Certificates, IDs & Profiles → Keys → +,
-   name it "Pill Checkr APNs", tick Apple Push Notifications service, download
+   name it "Stamped APNs", tick Apple Push Notifications service, download
    the `.p8` ONCE and keep it. Note the Key ID and your Team ID.
 2. **Supabase secrets** (project ptisltjfqomavvlnghcm → Edge Functions → Secrets):
    `APNS_KEY_P8` (the whole PEM including BEGIN/END lines), `APNS_KEY_ID`,
