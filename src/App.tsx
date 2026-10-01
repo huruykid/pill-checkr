@@ -28,6 +28,7 @@ import QrPoster from "./pages/QrPoster";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
+import RouteAnnouncer from "./components/RouteAnnouncer";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = forwardRef(function App(_props, ref) {
         <BrowserRouter>
         <AppGates>
           <ScrollToTop />
+          <RouteAnnouncer />
           <PushNavigation />
           <Routes>
             <Route path="/" element={<Index />} />

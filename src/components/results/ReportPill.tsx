@@ -143,9 +143,9 @@ export function ReportPill({ reportId, drugName, riskLevel, photoUrl, className 
                 <Label className="text-sm font-medium">Risk Level</Label>
                 <div className={cn(
                   "rounded-md px-3 py-2 text-sm font-medium capitalize",
-                  riskLevel === "high" && "bg-destructive/10 text-destructive",
-                  riskLevel === "medium" && "bg-warning/10 text-warning",
-                  riskLevel === "low" && "bg-success/10 text-success",
+                  riskLevel === "high" && "bg-destructive/10 text-danger-text",
+                  // "low" renders amber too: nothing in the product is ever green/"safe".
+                  (riskLevel === "medium" || riskLevel === "low") && "bg-warning/10 text-warning-text",
                 )}>
                   {riskLevel} risk (auto-filled from analysis)
                 </div>

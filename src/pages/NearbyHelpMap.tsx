@@ -16,7 +16,9 @@ import {
   ExternalLink,
   List,
   Map,
+  X,
 } from "lucide-react";
+import { useI18n } from "@/hooks/useI18n";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { track } from "@/lib/analytics";
@@ -52,6 +54,7 @@ function matchesFilter(facility: Facility, filter: FilterType): boolean {
 }
 
 export default function NearbyHelpMap() {
+  const { t } = useI18n();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [facilities, setFacilities] = useState<Facility[]>([]);
@@ -297,8 +300,8 @@ export default function NearbyHelpMap() {
                 <span className="text-sm font-semibold text-foreground">
                   {filteredFacilities.length} result{filteredFacilities.length !== 1 ? "s" : ""}
                 </span>
-                <Button variant="ghost" size="sm" onClick={() => setShowList(false)} className="h-7 w-7 p-0">
-                  ✕
+                <Button variant="ghost" size="icon" onClick={() => setShowList(false)} aria-label={t("common.close")}>
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
               {/* Drag handle (mobile) */}

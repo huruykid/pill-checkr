@@ -35,11 +35,13 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-md hover:bg-secondary/90 hover:shadow-lg",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 rounded-sm px-4",
-        lg: "h-12 rounded-sm px-8 text-base",
-        xl: "h-14 rounded-sm px-10 text-lg",
-        icon: "h-10 w-10",
+        // 44pt floor on every size (HIG). min-h so long labels can wrap
+        // when a caller opts into `whitespace-normal`.
+        default: "min-h-11 px-5 py-2",
+        sm: "min-h-11 rounded-sm px-4 py-2",
+        lg: "min-h-12 rounded-sm px-8 py-2 text-base",
+        xl: "min-h-14 rounded-sm px-10 py-3 text-lg",
+        icon: "h-11 w-11 p-0",
       },
     },
     defaultVariants: {

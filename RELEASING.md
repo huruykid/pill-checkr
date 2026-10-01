@@ -32,7 +32,7 @@ mode `native` in vite.config.ts — a SW inside the shell serves stale bundles).
 
 Run in this exact order; the audit BEFORE archive is the whole trick.
 
-1. `npm run typecheck && npm run lint` — clean before anything native.
+1. `npm run preflight` (typecheck, lint, `check:i18n`) — clean before anything native. `check:i18n` fails on any `t()` key missing from English and on an enabled locale below 100%; English rendering raw keys on the test-strip card is exactly the bug it exists to catch.
 2. `npm run ios:sync` — builds the native bundle and syncs to `ios/App/App/public`
    (use `ios:copy` when no plugin/config changed — it skips the native update).
 3. Open `ios/App/App.xcodeproj` in Xcode (NOT a workspace — SPM resolves
@@ -62,6 +62,14 @@ archive, on an **iPad simulator**, tap:
       safety countdown appears once, not on the next result.
 - [ ] Share button on a guest result opens the iOS share sheet; the text
       contains no "safe".
+- [ ] Alerts at 320 / 375 / 430 pt: the "Report what you found" dock and the
+      red emergency button never touch; the last card and the disclaimer are
+      fully visible above them.
+- [ ] Results in English: test-strip card shows real text (no `testStrip.`
+      keys), the negative button is neutral (no green, no shield), the strip
+      card sits directly under the summary.
+- [ ] VoiceOver on Results: the safety modal is announced as a dialog, swipe
+      stays inside it, after dismissal focus is on the risk summary.
 - [ ] The report flow: Results → log a strip → "Report it" nudge → sheet
       opens, submits, and toasts.
 - [ ] Emergency FAB → naloxone/help actions.
@@ -166,4 +174,5 @@ Provide the demo account credentials current at submission time.
 |---|---|---|---|
 | 1 | — | 1.0 (1) | Initial Capacitor shell: SPM, 4 plugins (app, haptics, splash-screen, status-bar), compliance plist, native auth gate, icons/splash. |
 | 2–7 | Sept 2026 | 1.0 (7) | On main (Lovable): renamed to **Stamped**, new icon, UNC lab results feed and map, CDC county overdose heat layer, CFSRE NPS early-warning strip, TestRI import. |
-| 8 (next) | 2026-09-29 | 1.0 (8) | Growth pass merged onto build 7: guest-reachable Settings/Privacy on native, one-screen WelcomeGate with "Try M 30", first-party analytics, owner/viewer results + native share sheet, California official advisories + visible everywhere fallback, Spanish for the alerts loop, Smart App Banner meta, and area alert push (needs the APNs key and secrets before it sends anything). Bump `CURRENT_PROJECT_VERSION` to 8 before archiving. |
+| 8 (next) | 2026-10-01 | 1.0 (8) | Pre-archive fix pass (external review verified): English test-strip keys restored, fr/pt hidden until complete, `check:i18n` gate, 44pt touch targets, `--warning-text`/`--danger-text` contrast tokens, no green on negative strips, strip logger directly under the summary, SafetyThresholdModal on AlertDialog, FloatingDock so the Alerts action never overlaps the emergency FAB, native menu de-duplicated, reduced-motion CSS, route announcer. |
+| 8 (prev note) | 2026-09-29 | 1.0 (8) | Growth pass merged onto build 7: guest-reachable Settings/Privacy on native, one-screen WelcomeGate with "Try M 30", first-party analytics, owner/viewer results + native share sheet, California official advisories + visible everywhere fallback, Spanish for the alerts loop, Smart App Banner meta, and area alert push (needs the APNs key and secrets before it sends anything). Bump `CURRENT_PROJECT_VERSION` to 8 before archiving. |

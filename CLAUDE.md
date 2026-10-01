@@ -85,6 +85,21 @@ I test it?" The home screen answers it above the fold.
   `src/lib/push.ts` (dynamic import, native only) + `AreaAlertsToggle`.
   `pc_push_state` holds the token locally. Turning off deletes the row.
   Privacy.tsx describes the token; change both together.
+- Enabled languages are `en` and `es` (`LANGUAGES` in useI18n.tsx). fr/pt
+  dictionaries exist but are hidden until 100%. Every new user-facing string
+  gets en + es. `npm run check:i18n` (part of `preflight` and `ios:sync`)
+  fails on any `t()` key missing from en — English used to render
+  `TESTSTRIP.TITLE` on the moat card for months.
+- Floating controls: the emergency FAB owns bottom-right. A page's primary
+  floating action goes in `FloatingDock` (src/components/layout), never a
+  second fixed-bottom element. Layout reserves `--fab-size + 2*--fab-gap`
+  under `<main>` so the last item always clears both.
+- Color: amber (`warning`) and red (`danger`) are for fills, borders, icons.
+  Text on light surfaces uses `text-warning-text` / `text-danger-text`
+  (≥4.5:1 in both themes). `text-warning` on `bg-warning-light` is 1.49:1 —
+  never do that again. Negative strips are NEUTRAL (flask icon), never green.
+- Buttons/inputs/selects are 44pt minimum (`min-h-11`); never add `h-8`/`h-7`
+  overrides to interactive elements.
 - `VITE_APP_STORE_LIVE=true` turns on the AppStoreBadge everywhere;
   `VITE_SITE_URL` is the canonical origin (set when pillcheckr.app connects);
   `VITE_ASC_PROVIDER_TOKEN` adds `pt=` to App Store campaign links.

@@ -428,16 +428,6 @@ const translations: Record<Language, Record<string, string>> = {
     "feedback.error": "Couldn't save feedback",
     "feedback.submitted": "Thanks — your feedback helps improve results.",
 
-    // Onboarding Walkthrough
-    "onboarding.step1Title": "THIS IS NOT A LAB TEST",
-    "onboarding.step1Desc": "This tool uses visual comparison and AI to check pills against known references. It cannot detect fentanyl or confirm what's inside a pill. Only lab testing can do that.",
-    "onboarding.step2Title": "WHAT WE DO",
-    "onboarding.step2Desc": "We compare your pill's photo, shape, color, and imprint against a database of known legitimate pills. We flag inconsistencies that may indicate counterfeiting.",
-    "onboarding.step3Title": "STAY SAFE",
-    "onboarding.step3Desc": "Always use fentanyl test strips. Never use alone. Have naloxone (Narcan) ready. If someone is overdosing, call 911 immediately.",
-    "onboarding.next": "Next",
-    "onboarding.getStarted": "I Understand — Get Started",
-    "onboarding.skip": "Skip intro",
 
     // Disclaimer Gate
     "gate.title": "IMPORTANT SAFETY NOTICE",
@@ -451,6 +441,22 @@ const translations: Record<Language, Record<string, string>> = {
     "welcome.tryHint": "Runs a real check on a commonly counterfeited imprint so you can see what a result looks like.",
 
     // Safety Threshold Modal
+    // Test strip logger (the moat interaction). Never the word "safe".
+    "testStrip.title": "Did you test this pill with a strip?",
+    "testStrip.subtitle": "Log your fentanyl test strip result. No account needed.",
+    "testStrip.negative": "Negative on this strip",
+    "testStrip.positive": "Positive — fentanyl detected",
+    "testStrip.invalid": "Invalid / redo",
+    "testStrip.logged": "Result logged",
+    "testStrip.error": "Could not save the result",
+    "testStrip.recorded": "Result recorded.",
+    "testStrip.negativeNote": "One strip tests one spot. Other pills — or other parts of this pill — can still contain fentanyl.",
+    "testStrip.indicator.positive": "Fentanyl +",
+    "testStrip.indicator.negative": "Negative strip",
+    "testStrip.indicator.invalid": "Invalid",
+    "common.close": "Close",
+    "check.analysisProgress": "Analysis progress",
+
     "safety.modal.title": "⚠️ Before You View These Results",
     "safety.modal.bullet1": "Visual analysis is NOT a lab test.",
     "safety.modal.bullet2": "Lethal counterfeits can look identical to real pills.",
@@ -768,14 +774,18 @@ const translations: Record<Language, Record<string, string>> = {
     // Test Strip Logger
     "testStrip.title": "¿Probaste químicamente esta pastilla?",
     "testStrip.subtitle": "Registra el resultado de tu tira de fentanilo.",
-    "testStrip.negative": "Negativo (Sin Fentanilo)",
+    "testStrip.negative": "Negativo en esta tira",
     "testStrip.positive": "Positivo (Fentanilo Detectado)",
     "testStrip.invalid": "Inválido / Repetir",
     "testStrip.logged": "Resultado registrado",
     "testStrip.error": "Error al registrar resultado",
     "testStrip.recorded": "Resultado registrado",
     "testStrip.indicator.positive": "Fentanilo +",
-    "testStrip.indicator.negative": "Fentanilo −",
+    "testStrip.indicator.negative": "Tira negativa",
+    "testStrip.indicator.invalid": "Inválido",
+    "testStrip.negativeNote": "Una tira analiza un solo punto. Otras pastillas — u otras partes de esta pastilla — pueden contener fentanilo.",
+    "common.close": "Cerrar",
+    "check.analysisProgress": "Progreso del análisis",
 
     // History
     "history.title": "Historial de Verificaciones",
@@ -874,6 +884,22 @@ const translations: Record<Language, Record<string, string>> = {
     "hr.freeByMail": "Gratis por Correo (NEXT Distro)",
     "hr.findNaloxone": "Encontrar Naloxona Cerca",
 
+    "check.overlay.pill": "Pastilla",
+    "check.overlay.coin": "Moneda",
+    "check.overlay.center": "Centra la pastilla aquí",
+    "feedback.question": "¿Te sirvió esta coincidencia?",
+    "feedback.yes": "Sí",
+    "feedback.no": "No",
+    "feedback.thanks": "¡Gracias por tu opinión!",
+    "feedback.error": "No se pudo guardar tu opinión",
+    "feedback.submitted": "Gracias — tu opinión ayuda a mejorar los resultados.",
+    "gate.title": "AVISO IMPORTANTE DE SEGURIDAD",
+    "gate.item1": "Esta herramienta <strong>no</strong> es consejo médico y <strong>no</strong> es una prueba de laboratorio",
+    "gate.item2": "Esta herramienta <strong>no puede</strong> confirmar fentanilo ni garantizar que una pastilla pueda consumirse",
+    "gate.item3": "Si una pastilla <strong>no se puede identificar con confianza</strong>, trátala como de mayor riesgo",
+    "gate.item4": "Si sospechas una sobredosis, <strong>llama al 911 de inmediato</strong>",
+    "gate.checkbox": "Entiendo que esta herramienta no puede garantizar seguridad y es solo para educación y reducción de daños.",
+    "gate.accept": "Acepto — Continuar",
     "safety.modal.title": "⚠️ Antes de Ver Estos Resultados",
     "safety.modal.bullet1": "El análisis visual NO es una prueba de laboratorio.",
     "safety.modal.bullet2": "Las falsificaciones letales pueden verse idénticas a las pastillas reales.",
@@ -1078,14 +1104,14 @@ const translations: Record<Language, Record<string, string>> = {
     // Test Strip Logger
     "testStrip.title": "Avez-vous testé chimiquement cette pilule ?",
     "testStrip.subtitle": "Enregistrez le résultat de votre bandelette de fentanyl.",
-    "testStrip.negative": "Négatif (Pas de Fentanyl)",
+    "testStrip.negative": "Négatif sur cette bandelette",
     "testStrip.positive": "Positif (Fentanyl Détecté)",
     "testStrip.invalid": "Invalide / Refaire",
     "testStrip.logged": "Résultat enregistré",
     "testStrip.error": "Échec de l'enregistrement",
     "testStrip.recorded": "Résultat enregistré",
     "testStrip.indicator.positive": "Fentanyl +",
-    "testStrip.indicator.negative": "Fentanyl −",
+    "testStrip.indicator.negative": "Bandelette négative",
 
     // History
     "history.title": "Historique des Vérifications",
@@ -1388,14 +1414,14 @@ const translations: Record<Language, Record<string, string>> = {
     // Test Strip Logger
     "testStrip.title": "Você testou quimicamente esta pílula?",
     "testStrip.subtitle": "Registre o resultado da sua fita de fentanil.",
-    "testStrip.negative": "Negativo (Sem Fentanil)",
+    "testStrip.negative": "Negativo nesta fita",
     "testStrip.positive": "Positivo (Fentanil Detectado)",
     "testStrip.invalid": "Inválido / Repetir",
     "testStrip.logged": "Resultado registrado",
     "testStrip.error": "Falha ao registrar resultado",
     "testStrip.recorded": "Resultado registrado",
     "testStrip.indicator.positive": "Fentanil +",
-    "testStrip.indicator.negative": "Fentanil −",
+    "testStrip.indicator.negative": "Fita negativa",
 
     // History
     "history.title": "Histórico de Verificações",
@@ -1503,7 +1529,10 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
-const LANGUAGES: Language[] = ["en", "es", "fr", "pt"];
+// Enabled languages. fr and pt dictionaries exist below but are ~138 keys
+// short of en (the whole alerts/report/share loop), so they are hidden until
+// complete. `npm run check:i18n` reports coverage; re-add here when 100%.
+const LANGUAGES: Language[] = ["en", "es"];
 const LANGUAGE_LABELS: Record<Language, string> = {
   en: "English",
   es: "Español",

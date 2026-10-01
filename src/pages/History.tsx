@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { History as HistoryIcon, Search, Trash2, AlertCircle, Loader2, ShieldAlert, ShieldCheck } from "lucide-react";
+import { History as HistoryIcon, Search, Trash2, AlertCircle, Loader2, ShieldAlert, FlaskConical } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
@@ -191,17 +191,17 @@ export default function History() {
                               className={cn(
                                 "text-[10px] gap-1 px-1.5 py-0",
                                 testStripResults[report.id] === "positive"
-                                  ? "border-danger/50 text-danger"
+                                  ? "border-danger/50 text-danger-text"
                                   : testStripResults[report.id] === "negative"
-                                    ? "border-success/50 text-success"
+                                    ? "border-border text-foreground"
                                     : "border-muted-foreground/50 text-muted-foreground"
                               )}
                             >
                               {testStripResults[report.id] === "positive" ? (
                                 <><ShieldAlert className="h-3 w-3" />{t("testStrip.indicator.positive")}</>
                               ) : testStripResults[report.id] === "negative" ? (
-                                <><ShieldCheck className="h-3 w-3" />{t("testStrip.indicator.negative")}</>
-                              ) : "Invalid"}
+                                <><FlaskConical className="h-3 w-3" />{t("testStrip.indicator.negative")}</>
+                              ) : t("testStrip.indicator.invalid")}
                             </Badge>
                           )}
                         </div>

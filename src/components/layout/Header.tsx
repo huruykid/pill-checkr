@@ -17,17 +17,19 @@ export const Header = forwardRef<HTMLElement>(function Header(_props, ref) {
 
   // All nav links for mobile menu
   const native = isNative();
-  const allNavLinks = [
-    { to: "/check", label: t("nav.checkPill"), icon: Search },
-    { to: "/history", label: t("nav.history"), icon: History },
-    { to: "/education", label: t("nav.learn"), icon: BookOpen },
-    { to: "/nearby-help", label: t("nav.findHelp"), icon: MapPin },
-    { to: "/trends", label: t("nav.trends"), icon: TrendingUp },
-    ...(native ? [] : [
-      { to: "/contribute", label: t("nav.contribute"), icon: Users },
-      { to: "/api-docs", label: t("nav.api"), icon: Code },
-    ]),
-  ];
+  // On native the bottom tab bar is the primary navigation (Identify, Alerts,
+  // Help, History); the menu only carries what the tabs do not.
+  const allNavLinks = native
+    ? [{ to: "/education", label: t("nav.learn"), icon: BookOpen }]
+    : [
+        { to: "/check", label: t("nav.checkPill"), icon: Search },
+        { to: "/history", label: t("nav.history"), icon: History },
+        { to: "/education", label: t("nav.learn"), icon: BookOpen },
+        { to: "/nearby-help", label: t("nav.findHelp"), icon: MapPin },
+        { to: "/trends", label: t("nav.trends"), icon: TrendingUp },
+        { to: "/contribute", label: t("nav.contribute"), icon: Users },
+        { to: "/api-docs", label: t("nav.api"), icon: Code },
+      ];
 
   // Desktop: main nav (excluding CTA and "More" items)
   const mainNavLinks = [

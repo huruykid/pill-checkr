@@ -17,21 +17,21 @@ const badgeVariants = cva(
         outline: 
           "text-foreground",
         warning:
-          "border-warning/20 bg-warning-light text-warning",
+          "border-warning/20 bg-warning-light text-warning-text",
         success:
           "border-success/20 bg-success-light text-success",
         danger:
-          "border-danger/20 bg-danger-light text-danger",
+          "border-danger/20 bg-danger-light text-danger-text",
         "risk-low":
           "border-success/20 bg-success-light text-success",
         "risk-medium":
-          "border-warning/20 bg-warning-light text-warning",
+          "border-warning/20 bg-warning-light text-warning-text",
         "risk-high":
-          "border-danger/20 bg-danger-light text-danger",
+          "border-danger/20 bg-danger-light text-danger-text",
         "confidence-low":
-          "border-danger/20 bg-danger-light text-danger",
+          "border-danger/20 bg-danger-light text-danger-text",
         "confidence-medium":
-          "border-warning/20 bg-warning-light text-warning",
+          "border-warning/20 bg-warning-light text-warning-text",
         "confidence-high":
           "border-success/20 bg-success-light text-success",
       },

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertTriangle, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,11 @@ export function WelcomeGate({ onAccept }: WelcomeGateProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
+  const checkboxRef = useRef<HTMLButtonElement>(null);
+
+  // Nothing renders behind the gate, so no inert handling is needed; it only
+  // has to be announced as a dialog and start focus on the one decision.
+  useEffect(() => { checkboxRef.current?.focus(); }, []);
 
   const accept = () => {
     localStorage.setItem(ACCEPTED_KEY, "true");
@@ -49,15 +54,21 @@ export function WelcomeGate({ onAccept }: WelcomeGateProps) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border-2 border-warning/30 bg-card p-6 md:p-8 shadow-xl animate-fade-in">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gate-title"
+        aria-describedby="gate-items"
+        className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border-2 border-warning/30 bg-card p-6 md:p-8 shadow-xl animate-fade-in"
+      >
         <div className="flex flex-col items-center text-center gap-5">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-warning-light">
             <Shield className="h-8 w-8 text-warning" />
           </div>
 
-          <h2 className="text-2xl font-bold text-foreground">{t("gate.title")}</h2>
+          <h2 id="gate-title" className="text-2xl font-bold text-foreground">{t("gate.title")}</h2>
 
-          <div className="space-y-3 text-left w-full">
+          <div id="gate-items" className="space-y-3 text-left w-full">
             {[t("gate.item1"), t("gate.item2"), t("gate.item3"), t("gate.item4")].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground font-sans normal-case">
                 <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
@@ -68,11 +79,14 @@ export function WelcomeGate({ onAccept }: WelcomeGateProps) {
 
           <label className="flex items-start gap-3 w-full rounded-lg border border-border bg-muted/30 p-3 cursor-pointer">
             <Checkbox
+              ref={checkboxRef}
+              id="gate-accept"
+              aria-labelledby="gate-accept-label"
               checked={checked}
               onCheckedChange={(v) => setChecked(v === true)}
               className="mt-0.5"
             />
-            <span className="text-sm text-foreground font-sans normal-case leading-relaxed">
+            <span id="gate-accept-label" className="text-sm text-foreground font-sans normal-case leading-relaxed">
               {t("gate.checkbox")}
             </span>
           </label>

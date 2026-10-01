@@ -11,8 +11,10 @@
     "preview": "vite preview",
     "build:native": "vite build --mode native",
     "typecheck": "tsc --noEmit",
-    "ios:sync": "npm run build:native && cap sync ios",
-    "ios:copy": "npm run build:native && cap copy ios"
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "preflight": "npm run typecheck && npm run lint && npm run check:i18n",
+    "ios:sync": "npm run check:i18n && npm run build:native && cap sync ios",
+    "ios:copy": "npm run check:i18n && npm run build:native && cap copy ios"
   },
   "dependencies": {
     "@capacitor/app": "^7.1.2",

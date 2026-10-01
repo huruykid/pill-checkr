@@ -535,7 +535,7 @@ export default function CheckPill() {
                                 issue.severity === "major" 
                                   ? "bg-danger/20 text-danger" 
                                   : issue.severity === "moderate"
-                                  ? "bg-warning/20 text-warning"
+                                  ? "bg-warning/20 text-warning-text"
                                   : "bg-muted text-muted-foreground"
                               }`}>
                                 {issue.severity}
@@ -718,34 +718,42 @@ export default function CheckPill() {
                 </div>
               </div>
 
+              {/* Whole row is the hit target (checkbox alone is 16px). */}
               {mode === "photo" && (
-              <div className="flex items-center space-x-3 rounded-lg bg-muted/50 p-4">
+              <label htmlFor="reference" className="flex min-h-[44px] cursor-pointer items-center space-x-3 rounded-lg bg-muted/50 p-4">
                 <Checkbox
                   id="reference"
                   checked={hasReference}
                   onCheckedChange={(checked) => setHasReference(!!checked)}
                 />
                 <div className="space-y-1">
-                  <Label htmlFor="reference" className="cursor-pointer font-medium">
+                  <span className="font-medium">
                     {t("check.referenceObject")}
-                  </Label>
+                  </span>
                   <p className="text-sm text-muted-foreground">
                     {t("check.referenceHint")}
                   </p>
                 </div>
-              </div>
+              </label>
               )}
             </div>
 
             {/* Analysis Progress */}
             {isAnalyzing && (
-              <div className="rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in">
+              <div className="rounded-xl border border-border bg-card p-5 space-y-4 animate-fade-in" role="status" aria-live="polite">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-foreground">{t("check.analyzing")}</span>
                     <span className="text-muted-foreground">{Math.round(((analysisStep + 1) / ANALYSIS_STEPS.length) * 100)}%</span>
                   </div>
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-label={t("check.analysisProgress")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(((analysisStep + 1) / ANALYSIS_STEPS.length) * 100)}
+                  >
                     <div
                       className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
                       style={{ width: `${((analysisStep + 1) / ANALYSIS_STEPS.length) * 100}%` }}
