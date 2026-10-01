@@ -14,6 +14,7 @@ import { EarlyWarningStrip } from "@/components/alerts/EarlyWarningStrip";
 import { fetchExternalReports, fetchExternalSources, fetchExternalStates, fetchOverdoseCounties, type ExternalLabReport, type ExternalStateCount, type OverdoseCounty } from "@/lib/externalData";
 import { ReportFoundSheet } from "@/components/alerts/ReportFoundSheet";
 import { AreaAlertsToggle } from "@/components/alerts/AreaAlertsToggle";
+import { FloatingDock } from "@/components/layout/FloatingDock";
 import { detectWithToast, getSavedLocation, saveLocation, type CityState } from "@/lib/location";
 import { isNative } from "@/lib/platform";
 import { track } from "@/lib/analytics";
@@ -386,16 +387,17 @@ export default function CommunityAlerts() {
         </p>
       </div>
 
-      {/* Primary action: report. Sits above the tab bar. */}
-      <div
-        className="fixed inset-x-0 z-40 flex justify-center px-4 pointer-events-none"
-        style={{ bottom: "calc(var(--tab-bar-space, 56px) + env(safe-area-inset-bottom) + 12px)" }}
-      >
-        <Button size="lg" className="pointer-events-auto gap-2 shadow-lg rounded-full px-6 min-h-[48px]" onClick={() => setSheet(true)}>
+      {/* Primary action: report. Lives in the layout dock, left of the emergency FAB. */}
+      <FloatingDock>
+        <Button
+          size="lg"
+          className="pointer-events-auto w-full max-w-xs gap-2 whitespace-normal rounded-full px-5 text-center leading-tight shadow-lg"
+          onClick={() => setSheet(true)}
+        >
           <Plus className="h-5 w-5" />
           {t("alerts.reportFab")}
         </Button>
-      </div>
+      </FloatingDock>
 
       <ReportFoundSheet open={sheet} onOpenChange={setSheet} defaultLocation={loc} onSubmitted={load} />
       <DataSourcesSheet open={sourcesOpen} onOpenChange={setSourcesOpen} />

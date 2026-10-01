@@ -369,7 +369,7 @@ export default function Admin() {
                       <CardContent className="flex items-center justify-between p-4">
                         <div className="flex items-center gap-3">
                           {(pill as any).requires_higher_confidence && (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-xs font-semibold text-warning">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-xs font-semibold text-warning-text">
                               <AlertTriangle className="h-3 w-3" />
                               Flagged
                             </span>

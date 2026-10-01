@@ -41,15 +41,23 @@
     --accent: 45 90% 92%;
     --accent-foreground: 45 95% 25%;
 
-    /* Warning - Golden amber */
+    /* Warning - Golden amber. `--warning` is for fills, borders and icons;
+       text on light surfaces uses `--warning-text` (6.7:1 on warning-light). */
     --warning: 45 95% 55%;
     --warning-foreground: 45 100% 10%;
     --warning-light: 45 95% 92%;
+    --warning-text: 38 95% 24%;
 
-    /* Danger - Deep red */
+    /* Danger - Deep red. Same split: `--danger-text` for text. */
     --danger: 0 75% 45%;
     --danger-foreground: 0 0% 100%;
     --danger-light: 0 80% 95%;
+    --danger-text: 0 75% 45%;
+
+    /* Floating controls: the emergency FAB owns bottom-right; page actions
+       render in FloatingDock to its left. Layout reserves this much room. */
+    --fab-size: 56px;
+    --fab-gap: 12px;
 
     /* Success - Forest green */
     --success: 145 60% 35%;
@@ -127,10 +135,12 @@
     --warning: 45 90% 50%;
     --warning-foreground: 45 100% 10%;
     --warning-light: 45 50% 15%;
+    --warning-text: 45 95% 75%;
 
     --danger: 0 70% 50%;
     --danger-foreground: 0 0% 100%;
     --danger-light: 0 50% 15%;
+    --danger-text: 0 90% 72%;
 
     --success: 145 55% 40%;
     --success-foreground: 145 50% 10%;
@@ -191,20 +201,20 @@
   }
   
   .risk-medium {
-    @apply bg-warning-light text-warning border-warning/20;
+    @apply bg-warning-light text-warning-text border-warning/20;
   }
   
   .risk-high {
-    @apply bg-danger-light text-danger border-danger/20;
+    @apply bg-danger-light text-danger-text border-danger/20;
   }
 
   /* Confidence badge utilities */
   .confidence-low {
-    @apply bg-danger-light text-danger;
+    @apply bg-danger-light text-danger-text;
   }
   
   .confidence-medium {
-    @apply bg-warning-light text-warning;
+    @apply bg-warning-light text-warning-text;
   }
   
   .confidence-high {
@@ -305,4 +315,26 @@
 /* Selection */
 ::selection {
   @apply bg-secondary/40 text-foreground;
+}
+
+/* Reduced motion: collapse decorative animation to a single near-instant
+   frame. Near-zero rather than `none` so Radix Presence still receives
+   animationend and unmounts closed dialogs/sheets. Spinners are kept —
+   they carry information. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-pulse-subtle,
+  .animate-bounce,
+  .animate-pulse,
+  .animate-in,
+  .animate-out {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .transition-all,
+  .transition-smooth,
+  .card-hover {
+    transition-duration: 0.01ms !important;
+  }
 }

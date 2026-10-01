@@ -175,7 +175,7 @@ export function ReportFoundSheet({ open, onOpenChange, defaultLocation, onSubmit
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>{t("report.where")}</Label>
-              <Button type="button" variant="ghost" size="sm" className="h-8 gap-1.5" onClick={locate} disabled={geo}>
+              <Button type="button" variant="ghost" size="sm" className="-mr-3 gap-1.5" onClick={locate} disabled={geo}>
                 {geo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LocateFixed className="h-3.5 w-3.5" />}
                 {t("report.useMyCity")}
               </Button>

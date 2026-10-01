@@ -157,7 +157,7 @@ export function DrugInfoCard({ drugName, className }: DrugInfoCardProps) {
                 {adverse_events.deaths > 0 && (
                   <div className="flex flex-col items-center rounded-lg bg-destructive/10 p-2">
                     <Skull className="h-4 w-4 text-destructive mb-1" />
-                    <span className="text-lg font-bold text-destructive">
+                    <span className="text-lg font-bold text-danger-text">
                       {adverse_events.deaths.toLocaleString()}
                     </span>
                     <span className="text-[10px] text-muted-foreground">Deaths</span>
@@ -166,7 +166,7 @@ export function DrugInfoCard({ drugName, className }: DrugInfoCardProps) {
                 {adverse_events.hospitalizations > 0 && (
                   <div className="flex flex-col items-center rounded-lg bg-warning/10 p-2">
                     <Building2 className="h-4 w-4 text-warning mb-1" />
-                    <span className="text-lg font-bold text-warning">
+                    <span className="text-lg font-bold text-warning-text">
                       {adverse_events.hospitalizations.toLocaleString()}
                     </span>
                     <span className="text-[10px] text-muted-foreground">Hospitalizations</span>

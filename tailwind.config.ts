@@ -60,11 +60,13 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
           light: "hsl(var(--warning-light))",
+          text: "hsl(var(--warning-text))",
         },
         danger: {
           DEFAULT: "hsl(var(--danger))",
           foreground: "hsl(var(--danger-foreground))",
           light: "hsl(var(--danger-light))",
+          text: "hsl(var(--danger-text))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useI18n } from "@/hooks/useI18n";
 import { Layout } from "@/components/layout/Layout";
@@ -108,6 +108,8 @@ export default function Results() {
   const [warnOpen, setWarnOpen] = useState(false);
   const [counterfeitAlerts, setCounterfeitAlerts] = useState<Array<{ drug_name: string; state: string; city: string | null; risk_level: string | null; count: number; latest: string }>>([]);
   const [advisories, setAdvisories] = useState<OfficialAdvisory[]>([]);
+  // Focus lands here after the safety modal closes and on route entry.
+  const summaryRef = useRef<HTMLDivElement>(null);
 
   const hasCounterfeitRisk = useMemo(() => {
     return data?.matches.some(
@@ -299,12 +301,14 @@ export default function Results() {
       />
       <SafetyThresholdModal
         open={safetyModalOpen}
+        restoreFocusTo={summaryRef}
         onDismiss={() => {
           setSafetyModalOpen(false);
           localStorage.setItem(SAFETY_MODAL_SEEN_KEY, "1");
         }}
       />
-      <div className={cn("container py-8 md:py-12 transition-all duration-300", safetyModalOpen && "blur-xl pointer-events-none select-none")}>
+      {/* Radix owns inertness while the modal is open; the blur is cosmetic. */}
+      <div className={cn("container py-8 md:py-12 transition-all duration-300", safetyModalOpen && "blur-sm")}>
         <div className="mx-auto max-w-3xl">
           <Link to="/check" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
@@ -350,11 +354,18 @@ export default function Results() {
                 };
 
             return (
-              <div className={cn("mb-6 rounded-xl border-l-4 p-4 md:p-5", config.border, config.bg)}>
+              <div
+                ref={summaryRef}
+                id="risk-summary"
+                tabIndex={-1}
+                role="region"
+                aria-labelledby="risk-summary-text"
+                className={cn("mb-6 rounded-xl border-l-4 p-4 md:p-5 outline-none focus-visible:ring-2 focus-visible:ring-ring", config.border, config.bg)}
+              >
                 <div className="flex items-start gap-3">
                   {config.icon}
                   <div className="space-y-2">
-                    <p className="text-base font-semibold text-foreground leading-snug">{config.message}</p>
+                    <p id="risk-summary-text" className="text-base font-semibold text-foreground leading-snug">{config.message}</p>
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                       <AlertTriangle className="h-3 w-3 shrink-0" />
                       {t("results.notLabTesting")}
@@ -387,6 +398,97 @@ export default function Results() {
             </div>
           )}
 
+          {/* PRIMARY ACTION: log the test strip result. This is the moat interaction.
+              It sits directly under the one-sentence verdict (and the emergency items
+              on high-risk results), above all evidence. See CLAUDE.md. */}
+          {isOwner && (
+          <TestStripLogger
+            reportId={report.id}
+            className="mb-3"
+            onLogged={(r) => { if (r !== "invalid") { setLoggedStrip(r); setWarnOpen(r === "positive"); } }}
+          />
+          )}
+          {isOwner && loggedStrip && (
+            <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="text-sm">
+                <p className="font-semibold">{t("results.warnTitle")}</p>
+                <p className="text-muted-foreground">{t("results.warnBody")}</p>
+              </div>
+              <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setWarnOpen(true)}>
+                <Radio className="h-4 w-4" />{t("results.warnPost")}
+              </Button>
+            </div>
+          )}
+          <ReportFoundSheet
+            open={warnOpen}
+            onOpenChange={setWarnOpen}
+            prefill={{ imprint: report.imprint_text, drug: matches[0]?.drug_name, strip: loggedStrip, reportId: report.id }}
+          />
+
+          {/* Share: the emotional peak is right after logging a strip. */}
+          {isOwner && (
+            <ShareResultCard
+              className="mb-6"
+              reportId={report.id}
+              imprint={report.imprint_text}
+              drugName={matches[0]?.drug_name || null}
+              strip={loggedStrip}
+              shared={(report as { shared?: boolean }).shared ?? !report.user_id}
+              canToggle={canToggleShare}
+              onSharedChange={(shared) => setData({ ...data, report: { ...report, shared } })}
+            />
+          )}
+
+          {/* Section B: What this check can and cannot tell you (categorical, no scores) */}
+          <Card className="mb-6 border-warning/40">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldAlert className="h-5 w-5 text-warning" />
+                {t("results.verdictTitle")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg bg-warning-light border border-warning/30 p-4">
+                <p className="font-semibold text-foreground">
+                  {matches.length > 0
+                    ? t("results.verdict.identified").replaceAll("{drug}", matches[0].drug_name || "")
+                    : t("results.verdict.unidentified")}
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">{t("results.verdict.why")}</p>
+              </div>
+
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
+                  <span className="text-muted-foreground">{t("results.verdict.step1")}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
+                  <span className="text-muted-foreground">{t("results.verdict.step2")}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
+                  <span className="text-muted-foreground">{t("results.verdict.step3")}</span>
+                </li>
+              </ul>
+
+              {anomalyReasons.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">{t("results.consistencyNotes")}</p>
+                  <ul className="space-y-2">
+                    {anomalyReasons.map((reason, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm">
+                        <span className="mt-1.5 h-2 w-2 rounded-full bg-warning shrink-0" />
+                        <span className="text-muted-foreground">{reason}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Evidence from here down: photo, matches, advisories, regional reports. */}
           {/* Show pill photo if available */}
           {isOwner && signedPhotoUrl && (
             <Card className="mb-6 overflow-hidden">
@@ -521,94 +623,6 @@ export default function Results() {
 
           {/* Local test history for this exact imprint (danger-forward; no clean/safe framing) */}
           <ImprintTestHistory imprint={report.imprint_text} className="mb-6" />
-
-          {/* Section B: What this check can and cannot tell you (categorical, no scores) */}
-          <Card className="mb-6 border-warning/40">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShieldAlert className="h-5 w-5 text-warning" />
-                {t("results.verdictTitle")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg bg-warning-light border border-warning/30 p-4">
-                <p className="font-semibold text-foreground">
-                  {matches.length > 0
-                    ? t("results.verdict.identified").replaceAll("{drug}", matches[0].drug_name || "")
-                    : t("results.verdict.unidentified")}
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">{t("results.verdict.why")}</p>
-              </div>
-
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-3">
-                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
-                  <span className="text-muted-foreground">{t("results.verdict.step1")}</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
-                  <span className="text-muted-foreground">{t("results.verdict.step2")}</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1.5 h-2 w-2 rounded-full bg-danger shrink-0" />
-                  <span className="text-muted-foreground">{t("results.verdict.step3")}</span>
-                </li>
-              </ul>
-
-              {anomalyReasons.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">{t("results.consistencyNotes")}</p>
-                  <ul className="space-y-2">
-                    {anomalyReasons.map((reason, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm">
-                        <span className="mt-1.5 h-2 w-2 rounded-full bg-warning shrink-0" />
-                        <span className="text-muted-foreground">{reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* PRIMARY ACTION: log the test strip result. This is the moat interaction. */}
-          {isOwner && (
-          <TestStripLogger
-            reportId={report.id}
-            className="mb-3"
-            onLogged={(r) => { if (r !== "invalid") { setLoggedStrip(r); setWarnOpen(r === "positive"); } }}
-          />
-          )}
-          {isOwner && loggedStrip && (
-            <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
-              <div className="text-sm">
-                <p className="font-semibold">{t("results.warnTitle")}</p>
-                <p className="text-muted-foreground">{t("results.warnBody")}</p>
-              </div>
-              <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setWarnOpen(true)}>
-                <Radio className="h-4 w-4" />{t("results.warnPost")}
-              </Button>
-            </div>
-          )}
-          <ReportFoundSheet
-            open={warnOpen}
-            onOpenChange={setWarnOpen}
-            prefill={{ imprint: report.imprint_text, drug: matches[0]?.drug_name, strip: loggedStrip, reportId: report.id }}
-          />
-
-          {/* Share: the emotional peak is right after logging a strip. */}
-          {isOwner && (
-            <ShareResultCard
-              className="mb-6"
-              reportId={report.id}
-              imprint={report.imprint_text}
-              drugName={matches[0]?.drug_name || null}
-              strip={loggedStrip}
-              shared={(report as { shared?: boolean }).shared ?? !report.user_id}
-              canToggle={canToggleShare}
-              onSharedChange={(shared) => setData({ ...data, report: { ...report, shared } })}
-            />
-          )}
 
           {/* Section C: What To Do Next */}
           <Card className="mb-8">
