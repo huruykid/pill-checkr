@@ -114,15 +114,75 @@ export interface ExternalAlert {
   summary: string | null;
   substances: string[];
   severity: "danger" | "warning" | "info";
-  region: string;
+  region: string;                         // USPS state code, or "US" for national notices
+  locality: string | null;                // "Philadelphia", "New York City" — null for statewide/national
+  issuer: string | null;
+  date_precision: "day" | "month" | "year";
 }
 
-export async function fetchExternalAlerts(limit = 40): Promise<ExternalAlert[]> {
+// Newest first. Pass the person's state to pull their state's and national
+// alerts ahead of other regions; nothing is hidden, only reordered.
+export async function fetchExternalAlerts(limit = 40, state?: string | null): Promise<ExternalAlert[]> {
   const { data, error } = await db
     .from("external_alerts_public")
-    .select("id, source_id, title, published_on, url, pdf_url, image_url, summary, substances, severity, region")
+    .select("id, source_id, title, published_on, date_precision, url, pdf_url, image_url, summary, substances, severity, region, locality, issuer")
     .order("published_on", { ascending: false, nullsFirst: false })
-    .limit(limit);
+    .limit(limit * 3);
   if (error) { console.error(error); return []; }
-  return (data as unknown as ExternalAlert[]) || [];
+  const all = ((data as unknown as ExternalAlert[]) || []).map((a) => ({
+    ...a,
+    locality: a.locality ?? null, issuer: a.issuer ?? null, date_precision: a.date_precision ?? "day",
+  }));
+  const st = state ? state.toUpperCase() : null;
+  const rank = (a: ExternalAlert) => (a.region === "US" ? 1 : st && a.region === st ? 0 : 2);
+  return all.sort((a, b) => rank(a) - rank(b) || (b.published_on ?? "").localeCompare(a.published_on ?? "")).slice(0, limit);
+}
+
+// Medical-examiner / coroner drug deaths, rolling 12 months, aggregated per hex
+// cell or county (external_deaths_recent_cells). Never individual records on the map.
+export interface DeathCell {
+  state: string | null;
+  county: string | null;
+  hex_cell: string | null;
+  lat: number | null;
+  lon: number | null;
+  geo_precision: string;
+  deaths: number;
+  fentanyl_deaths: number;
+  xylazine_deaths: number;
+  medetomidine_deaths: number;
+  latest_death: string | null;
+}
+
+export async function fetchDeathCells(state?: string | null): Promise<DeathCell[]> {
+  let q = db.from("external_deaths_recent_cells")
+    .select("state, county, hex_cell, lat, lon, geo_precision, deaths, fentanyl_deaths, xylazine_deaths, medetomidine_deaths, latest_death")
+    .not("lat", "is", null).limit(5000);
+  if (state) q = q.ilike("state", state);
+  const { data, error } = await q;
+  if (error) { console.error(error); return []; }
+  return (data as unknown as DeathCell[]) || [];
+}
+
+// Nonfatal EMS / 911 overdose responses, last 30 days per hex cell.
+export interface IncidentCell {
+  state: string | null;
+  city: string | null;
+  hex_cell: string | null;
+  lat: number | null;
+  lon: number | null;
+  geo_precision: string;
+  incidents: number;
+  naloxone_incidents: number | null;
+  latest: string | null;
+}
+
+export async function fetchIncidentCells(state?: string | null): Promise<IncidentCell[]> {
+  let q = db.from("external_incidents_recent_cells")
+    .select("state, city, hex_cell, lat, lon, geo_precision, incidents, naloxone_incidents, latest")
+    .not("lat", "is", null).limit(5000);
+  if (state) q = q.ilike("state", state);
+  const { data, error } = await q;
+  if (error) { console.error(error); return []; }
+  return (data as unknown as IncidentCell[]) || [];
 }

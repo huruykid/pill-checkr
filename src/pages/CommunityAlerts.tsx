@@ -191,7 +191,7 @@ export default function CommunityAlerts() {
         </div>
 
         {/* National early-warning notice (forensic labs), independent of feed/scope */}
-        <EarlyWarningStrip sourceNames={sourceNames} />
+        <EarlyWarningStrip sourceNames={sourceNames} state={loc?.state ?? null} />
 
         {/* Scope chips */}
         <div className="mb-4 flex items-center gap-2 overflow-x-auto">

@@ -10,9 +10,19 @@ import { ChevronRight, ExternalLink, FileText, Siren } from "lucide-react";
 // with the full list. Every card names its source and links to the original
 // document — we never paraphrase a lab's warning without a way to read it.
 
-function fmtDate(d: string | null): string | null {
+function fmtDate(d: string | null, precision: ExternalAlert["date_precision"] = "day"): string | null {
   if (!d || isNaN(new Date(d + "T00:00:00").getTime())) return null;
-  return new Date(d + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const dt = new Date(d + "T00:00:00");
+  if (precision === "year") return String(dt.getFullYear());
+  if (precision === "month") return dt.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  return dt.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+// "Philadelphia, PA" · "Washington" · "National"
+function where(a: ExternalAlert): string {
+  if (a.region === "US") return "National";
+  if (a.locality && a.locality !== a.region) return `${a.locality}, ${a.region}`;
+  return a.region;
 }
 
 function isRecent(d: string | null, days: number): boolean {
@@ -50,7 +60,7 @@ function SubstanceChips({ a, max }: { a: ExternalAlert; max: number }) {
 }
 
 function AlertDetail({ a, sourceName }: { a: ExternalAlert; sourceName: string }) {
-  const when = fmtDate(a.published_on);
+  const when = fmtDate(a.published_on, a.date_precision);
   const doc = a.pdf_url || a.url;
   return (
     <li className={cn(
@@ -68,7 +78,7 @@ function AlertDetail({ a, sourceName }: { a: ExternalAlert; sourceName: string }
           />
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-muted-foreground">{[when, a.region].filter(Boolean).join(" · ")}</p>
+          <p className="text-xs text-muted-foreground">{[when, where(a)].filter(Boolean).join(" · ")}</p>
           <p className="mt-0.5 font-semibold leading-snug">{a.title}</p>
         </div>
       </div>
@@ -93,21 +103,21 @@ function AlertDetail({ a, sourceName }: { a: ExternalAlert; sourceName: string }
   );
 }
 
-export function EarlyWarningStrip({ sourceNames }: { sourceNames: Record<string, string> }) {
+export function EarlyWarningStrip({ sourceNames, state }: { sourceNames: Record<string, string>; state?: string | null }) {
   const [alerts, setAlerts] = useState<ExternalAlert[] | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let on = true;
-    fetchExternalAlerts(40).then((a) => { if (on) setAlerts(a); });
+    fetchExternalAlerts(40, state).then((a) => { if (on) setAlerts(a); });
     return () => { on = false; };
-  }, []);
+  }, [state]);
 
   if (alerts === null) return <Skeleton className="mb-4 h-[104px] rounded-xl" />; // reserve space: no layout jump
   if (alerts.length === 0) return null; // nothing to warn about, take no space
   const latest = alerts[0];
-  const when = fmtDate(latest.published_on);
-  const fresh = isRecent(latest.published_on, 45);
+  const when = fmtDate(latest.published_on, latest.date_precision);
+  const fresh = latest.date_precision === "day" && isRecent(latest.published_on, 45);
   const name = (id: string) => sourceNames[id] || "Early-warning program";
 
   return (
@@ -125,7 +135,7 @@ export function EarlyWarningStrip({ sourceNames }: { sourceNames: Record<string,
           <Siren className={cn("h-4 w-4", latest.severity === "danger" ? "text-danger" : "text-warning")} />
           <span>Early warning</span>
           {fresh && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] text-danger-foreground normal-case tracking-normal">New</span>}
-          <span className="ml-auto font-normal normal-case tracking-normal text-muted-foreground">{when}</span>
+          <span className="ml-auto truncate font-normal normal-case tracking-normal text-muted-foreground">{[where(latest), when].filter(Boolean).join(" · ")}</span>
         </div>
         <p className="mt-1.5 font-display text-lg leading-tight line-clamp-2">{latest.title}</p>
         <SubstanceChips a={latest} max={3} />
@@ -142,8 +152,8 @@ export function EarlyWarningStrip({ sourceNames }: { sourceNames: Record<string,
           <SheetHeader className="text-left">
             <SheetTitle className="font-display text-2xl">Early warnings</SheetTitle>
             <SheetDescription>
-              National notices from forensic labs about new substances showing up in the drug supply.
-              These describe trends, not a specific pill — nothing here can tell you a pill is safe.
+              Notices from forensic labs and health departments about what is showing up in the drug supply,
+              nationally and in your state. These describe trends, not a specific pill — nothing here can tell you a pill is safe.
             </SheetDescription>
           </SheetHeader>
           <ul className="mt-4 space-y-3">
