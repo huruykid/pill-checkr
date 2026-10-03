@@ -138,8 +138,8 @@ export type Database = {
           events: number
           installs: number
           platform: string
-          source: string | null
-          state: string | null
+          source: string
+          state: string
         }
         Insert: {
           day: string
@@ -147,8 +147,8 @@ export type Database = {
           events: number
           installs: number
           platform: string
-          source?: string | null
-          state?: string | null
+          source: string
+          state: string
         }
         Update: {
           day?: string
@@ -156,8 +156,8 @@ export type Database = {
           events?: number
           installs?: number
           platform?: string
-          source?: string | null
-          state?: string | null
+          source?: string
+          state?: string
         }
         Relationships: []
       }
@@ -435,8 +435,11 @@ export type Database = {
       external_alerts: {
         Row: {
           created_at: string
+          date_precision: string
           id: string
           image_url: string | null
+          issuer: string | null
+          locality: string | null
           pdf_url: string | null
           published_on: string | null
           raw: Json
@@ -453,8 +456,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          date_precision?: string
           id?: string
           image_url?: string | null
+          issuer?: string | null
+          locality?: string | null
           pdf_url?: string | null
           published_on?: string | null
           raw?: Json
@@ -471,8 +477,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          date_precision?: string
           id?: string
           image_url?: string | null
+          issuer?: string | null
+          locality?: string | null
           pdf_url?: string | null
           published_on?: string | null
           raw?: Json
@@ -490,6 +499,157 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "external_alerts_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_deaths: {
+        Row: {
+          cause_text: string | null
+          city: string | null
+          county: string | null
+          date_precision: string
+          death_date: string | null
+          flags: Json
+          geo_precision: string
+          hex_cell: string | null
+          id: string
+          lat: number | null
+          lon: number | null
+          manner: string | null
+          raw: Json
+          shape_version: number
+          source_id: string
+          source_record_id: string
+          state: string | null
+          substances: string[]
+          synced_at: string
+          zip: string | null
+        }
+        Insert: {
+          cause_text?: string | null
+          city?: string | null
+          county?: string | null
+          date_precision?: string
+          death_date?: string | null
+          flags?: Json
+          geo_precision?: string
+          hex_cell?: string | null
+          id?: string
+          lat?: number | null
+          lon?: number | null
+          manner?: string | null
+          raw?: Json
+          shape_version?: number
+          source_id: string
+          source_record_id: string
+          state?: string | null
+          substances?: string[]
+          synced_at?: string
+          zip?: string | null
+        }
+        Update: {
+          cause_text?: string | null
+          city?: string | null
+          county?: string | null
+          date_precision?: string
+          death_date?: string | null
+          flags?: Json
+          geo_precision?: string
+          hex_cell?: string | null
+          id?: string
+          lat?: number | null
+          lon?: number | null
+          manner?: string | null
+          raw?: Json
+          shape_version?: number
+          source_id?: string
+          source_record_id?: string
+          state?: string | null
+          substances?: string[]
+          synced_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_deaths_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_incidents: {
+        Row: {
+          city: string | null
+          count: number
+          county: string | null
+          geo_precision: string
+          hex_cell: string | null
+          id: string
+          incident_type: string
+          lat: number | null
+          lon: number | null
+          naloxone: boolean | null
+          occurred_at: string | null
+          occurred_on: string | null
+          raw: Json
+          shape_version: number
+          source_id: string
+          source_record_id: string
+          state: string | null
+          synced_at: string
+          zip: string | null
+        }
+        Insert: {
+          city?: string | null
+          count?: number
+          county?: string | null
+          geo_precision?: string
+          hex_cell?: string | null
+          id?: string
+          incident_type: string
+          lat?: number | null
+          lon?: number | null
+          naloxone?: boolean | null
+          occurred_at?: string | null
+          occurred_on?: string | null
+          raw?: Json
+          shape_version?: number
+          source_id: string
+          source_record_id: string
+          state?: string | null
+          synced_at?: string
+          zip?: string | null
+        }
+        Update: {
+          city?: string | null
+          count?: number
+          county?: string | null
+          geo_precision?: string
+          hex_cell?: string | null
+          id?: string
+          incident_type?: string
+          lat?: number | null
+          lon?: number | null
+          naloxone?: boolean | null
+          occurred_at?: string | null
+          occurred_on?: string | null
+          raw?: Json
+          shape_version?: number
+          source_id?: string
+          source_record_id?: string
+          state?: string | null
+          synced_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_incidents_source_id_fkey"
             columns: ["source_id"]
             isOneToOne: false
             referencedRelation: "external_sources"
@@ -1199,30 +1359,6 @@ export type Database = {
         }
         Relationships: []
       }
-      retention_d7: {
-        Row: {
-          cohort_day: string | null
-          installs: number | null
-          platform: string | null
-          returned_d7: number | null
-        }
-        Relationships: []
-      }
-      official_advisories_public: {
-        Row: {
-          city: string | null
-          drug_name: string | null
-          id: string | null
-          imprint: string | null
-          issuer: string | null
-          published_on: string | null
-          source_url: string | null
-          state: string | null
-          summary: string | null
-          title: string | null
-        }
-        Relationships: []
-      }
       counterfeit_reports_public: {
         Row: {
           city: string | null
@@ -1270,8 +1406,11 @@ export type Database = {
       }
       external_alerts_public: {
         Row: {
+          date_precision: string | null
           id: string | null
           image_url: string | null
+          issuer: string | null
+          locality: string | null
           pdf_url: string | null
           published_on: string | null
           region: string | null
@@ -1285,8 +1424,11 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          date_precision?: string | null
           id?: string | null
           image_url?: string | null
+          issuer?: string | null
+          locality?: string | null
           pdf_url?: string | null
           published_on?: string | null
           region?: string | null
@@ -1300,8 +1442,11 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          date_precision?: string | null
           id?: string | null
           image_url?: string | null
+          issuer?: string | null
+          locality?: string | null
           pdf_url?: string | null
           published_on?: string | null
           region?: string | null
@@ -1323,6 +1468,157 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      external_deaths_public: {
+        Row: {
+          city: string | null
+          county: string | null
+          date_precision: string | null
+          death_date: string | null
+          flags: Json | null
+          geo_precision: string | null
+          hex_cell: string | null
+          id: string | null
+          lat: number | null
+          lon: number | null
+          manner: string | null
+          source_id: string | null
+          state: string | null
+          substances: string[] | null
+          zip: string | null
+        }
+        Insert: {
+          city?: string | null
+          county?: string | null
+          date_precision?: string | null
+          death_date?: string | null
+          flags?: Json | null
+          geo_precision?: string | null
+          hex_cell?: string | null
+          id?: string | null
+          lat?: number | null
+          lon?: number | null
+          manner?: string | null
+          source_id?: string | null
+          state?: string | null
+          substances?: string[] | null
+          zip?: string | null
+        }
+        Update: {
+          city?: string | null
+          county?: string | null
+          date_precision?: string | null
+          death_date?: string | null
+          flags?: Json | null
+          geo_precision?: string | null
+          hex_cell?: string | null
+          id?: string | null
+          lat?: number | null
+          lon?: number | null
+          manner?: string | null
+          source_id?: string | null
+          state?: string | null
+          substances?: string[] | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_deaths_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_deaths_recent_cells: {
+        Row: {
+          county: string | null
+          deaths: number | null
+          fentanyl_deaths: number | null
+          geo_precision: string | null
+          hex_cell: string | null
+          lat: number | null
+          latest_death: string | null
+          lon: number | null
+          medetomidine_deaths: number | null
+          state: string | null
+          xylazine_deaths: number | null
+        }
+        Relationships: []
+      }
+      external_incidents_public: {
+        Row: {
+          city: string | null
+          count: number | null
+          county: string | null
+          geo_precision: string | null
+          hex_cell: string | null
+          id: string | null
+          incident_type: string | null
+          lat: number | null
+          lon: number | null
+          naloxone: boolean | null
+          occurred_on: string | null
+          source_id: string | null
+          state: string | null
+          zip: string | null
+        }
+        Insert: {
+          city?: string | null
+          count?: number | null
+          county?: string | null
+          geo_precision?: string | null
+          hex_cell?: string | null
+          id?: string | null
+          incident_type?: string | null
+          lat?: number | null
+          lon?: number | null
+          naloxone?: boolean | null
+          occurred_on?: string | null
+          source_id?: string | null
+          state?: string | null
+          zip?: string | null
+        }
+        Update: {
+          city?: string | null
+          count?: number | null
+          county?: string | null
+          geo_precision?: string | null
+          hex_cell?: string | null
+          id?: string | null
+          incident_type?: string | null
+          lat?: number | null
+          lon?: number | null
+          naloxone?: boolean | null
+          occurred_on?: string | null
+          source_id?: string | null
+          state?: string | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_incidents_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_incidents_recent_cells: {
+        Row: {
+          city: string | null
+          geo_precision: string | null
+          hex_cell: string | null
+          incidents: number | null
+          lat: number | null
+          latest: string | null
+          lon: number | null
+          naloxone_incidents: number | null
+          state: string | null
+        }
+        Relationships: []
       }
       external_reports_public: {
         Row: {
@@ -1393,6 +1689,45 @@ export type Database = {
         }
         Relationships: []
       }
+      official_advisories_public: {
+        Row: {
+          city: string | null
+          drug_name: string | null
+          id: string | null
+          imprint: string | null
+          issuer: string | null
+          published_on: string | null
+          source_url: string | null
+          state: string | null
+          summary: string | null
+          title: string | null
+        }
+        Insert: {
+          city?: string | null
+          drug_name?: string | null
+          id?: string | null
+          imprint?: string | null
+          issuer?: string | null
+          published_on?: string | null
+          source_url?: string | null
+          state?: string | null
+          summary?: string | null
+          title?: string | null
+        }
+        Update: {
+          city?: string | null
+          drug_name?: string | null
+          id?: string | null
+          imprint?: string | null
+          issuer?: string | null
+          published_on?: string | null
+          source_url?: string | null
+          state?: string | null
+          summary?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       overdose_county_latest: {
         Row: {
           county: string | null
@@ -1419,6 +1754,15 @@ export type Database = {
           report_type: string | null
           state: string | null
           strip_result: string | null
+        }
+        Relationships: []
+      }
+      retention_d7: {
+        Row: {
+          cohort_day: string | null
+          installs: number | null
+          platform: string | null
+          returned_d7: number | null
         }
         Relationships: []
       }
@@ -1498,13 +1842,19 @@ export type Database = {
         Returns: boolean
       }
       purge_expired_report_locations: { Args: never; Returns: number }
+      rollup_app_events: { Args: never; Returns: undefined }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       subscribe_area_alerts: {
-        Args: { p_token: string; p_state: string; p_city?: string | null; p_lang?: string | null }
+        Args: {
+          p_city?: string
+          p_lang?: string
+          p_state: string
+          p_token: string
+        }
         Returns: undefined
       }
       unsubscribe_area_alerts: { Args: { p_token: string }; Returns: undefined }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
