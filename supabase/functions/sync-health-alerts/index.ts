@@ -20,6 +20,10 @@ import {
 
 const SHAPE_VERSION = 1;
 
+// WA DOH lists 10 notices per page, newest first; six pages ≈ a year or more.
+const WA_PAGES = Array.from({ length: 6 }, (_, i) =>
+  `https://doh.wa.gov/public-health-provider-resources/washington-health-alert-network?page=${i}`);
+
 type Row = Record<string, unknown>;
 
 function toRows(sourceId: string, alerts: ParsedAlert[]): Row[] {
@@ -38,12 +42,24 @@ function toRows(sourceId: string, alerts: ParsedAlert[]): Row[] {
   return rows;
 }
 
+// `urls`: one listing page, or several (paginated archives). Each page is
+// parsed independently; a page that fails to load does not lose the others.
 async function scrape(
-  supabase: ReturnType<typeof serviceClient>, sourceId: string, url: string, parse: (html: string) => ParsedAlert[],
+  supabase: ReturnType<typeof serviceClient>, sourceId: string, urls: string | string[], parse: (html: string) => ParsedAlert[],
 ) {
-  const html = await fetchText(url, { headers: { Accept: "text/html,application/xhtml+xml" } });
-  const parsed = parse(html);
-  if (parsed.length === 0 && html.length < 5000) throw new Error(`suspiciously small page (${html.length} bytes) from ${url}`);
+  const parsed: ParsedAlert[] = [];
+  let pages = 0, bytes = 0;
+  for (const url of Array.isArray(urls) ? urls : [urls]) {
+    try {
+      const html = await fetchText(url, { headers: { Accept: "text/html,application/xhtml+xml" } });
+      bytes += html.length; pages++;
+      parsed.push(...parse(html));
+    } catch (e) {
+      if (pages === 0) throw e;          // first page must load; later pages are best-effort
+      console.warn(`${sourceId}: ${url}: ${e}`);
+    }
+  }
+  if (parsed.length === 0 && bytes < 5000) throw new Error(`suspiciously small listing (${bytes} bytes) for ${sourceId}`);
   const rows = toRows(sourceId, parsed);
   const upserted = await upsertChunked(supabase, "external_alerts", rows, "source_id,source_record_id");
   return { fetched: parsed.length, upserted, note: parsed.length === 0 ? "parser matched nothing — check the page layout" : undefined };
@@ -58,7 +74,7 @@ Deno.serve(async (req) => {
     const results = await runSources([
       { id: "philly_pdph_han", run: () => scrape(supabase, "philly_pdph_han", "https://hip.phila.gov/health-alerts/", parsePhillyHip) },
       { id: "nyc_dohmh_han", run: () => scrape(supabase, "nyc_dohmh_han", "https://www.nyc.gov/site/doh/providers/resources/health-alert-network.page", parseNycHan) },
-      { id: "wa_doh_han", run: () => scrape(supabase, "wa_doh_han", "https://doh.wa.gov/public-health-provider-resources/washington-health-alert-network", parseWaDohHan) },
+      { id: "wa_doh_han", run: () => scrape(supabase, "wa_doh_han", WA_PAGES, parseWaDohHan) },
       { id: "baltimore_bchd_news", run: () => scrape(supabase, "baltimore_bchd_news", "https://www.baltimorecity.gov/health/news", parseBaltimoreNews) },
     ], supabase, only);
     return jsonResponse({ ok: results.every((r) => r.ok), ms: Date.now() - started, results });

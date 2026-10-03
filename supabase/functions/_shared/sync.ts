@@ -75,7 +75,9 @@ export async function arcgisAll<T = Record<string, unknown>>(
   const page = opts.page ?? 2000;
   const max = opts.max ?? 200_000;
   const out: { attributes: T; geometry?: { x: number; y: number } }[] = [];
-  for (let offset = 0; offset < max; offset += page) {
+  // Servers cap each page at their own maxRecordCount (often 1000), so
+  // advance by what came back, never by the requested page size.
+  for (let offset = 0; offset < max;) {
     const qs = new URLSearchParams({
       where,
       outFields: opts.outFields ?? "*",
@@ -92,8 +94,9 @@ export async function arcgisAll<T = Record<string, unknown>>(
     if (data.error) throw new Error(`ArcGIS error from ${layerUrl}: ${data.error.message}`);
     const feats = data.features ?? [];
     out.push(...feats);
-    if (feats.length < page && !data.exceededTransferLimit) break;
     if (feats.length === 0) break;
+    if (feats.length < page && !data.exceededTransferLimit) break;
+    offset += feats.length;
   }
   return out;
 }
@@ -105,6 +108,12 @@ export async function upsertChunked(
   onConflict: string,
   chunk = 500,
 ): Promise<number> {
+  // Postgres refuses an upsert that touches the same key twice in one
+  // statement; dedupe on the conflict columns first, last write wins.
+  const keyCols = onConflict.split(",").map((c) => c.trim());
+  const byKey = new Map<string, Record<string, unknown>>();
+  for (const r of rows) byKey.set(keyCols.map((c) => String(r[c] ?? "")).join("|"), r);
+  rows = [...byKey.values()];
   let n = 0;
   for (let i = 0; i < rows.length; i += chunk) {
     const batch = rows.slice(i, i + chunk);

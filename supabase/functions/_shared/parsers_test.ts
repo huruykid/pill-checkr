@@ -29,11 +29,13 @@ Deno.test("Philly HIP: keeps drug alerts, drops measles, parses dates and ids", 
 
 Deno.test("NYC HAN: year-level dates, drug items only, stable ids", () => {
   const out = parseNycHan(fx("nyc.html"));
-  assertEquals(out.length, 2);
+  assertEquals(out.length, 3);
   assertEquals(out[0].date_precision, "year");
   assertEquals(out[0].published_on, "2026-01-01");
   assertEquals(out[0].source_record_id, "nyc-2026-han-advisory-2-medetomidine");
   assertEquals(out[1].source_record_id, "nyc-2025-han-alert-9-bromazolam");
+  assertEquals(out[2].source_record_id, "nyc-2024-han-advisory-20-carfentanil");
+  assertEquals(out[2].published_on, "2024-01-01");
   assert(out[1].substances.includes("Novel benzodiazepines"));
   assert(out[1].substances.includes("Fentanyl"));
 });

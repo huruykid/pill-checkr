@@ -57,6 +57,9 @@ function build(
   extraFlags: Record<string, boolean> = {}, precision: DeathRow["date_precision"] = "day",
 ): DeathRow {
   const substances = parseSubstances(cause);
+  // A county's own flag (e.g. San Diego "Opioid-Fentanyl", Sacramento's
+  // fentanyl-only dataset) names the substance even when the text does not.
+  if (extraFlags.fentanyl && !substances.includes("Fentanyl")) substances.unshift("Fentanyl");
   return {
     source_id, source_record_id: id, death_date, date_precision: precision,
     manner: manner(mannerText), substances, flags: { ...flagsFor(substances), ...extraFlags },
@@ -180,8 +183,9 @@ async function connecticut(supabase: ReturnType<typeof serviceClient>, cc: Count
     const last = data?.last_synced_at ? new Date(data.last_synced_at).getTime() : 0;
     if (last && Date.now() - last < 30 * 864e5) return { fetched: 0, upserted: 0, skipped: 0, note: "annual dataset, refreshed monthly" };
   }
-  const rows = await socrataAll<Row>("https://data.ct.gov/resource/rybz-nyjw.json", { $order: "date" });
+  const rows = await socrataAll<Row>("https://data.ct.gov/resource/rybz-nyjw.json", { $order: "date,cod,injurycity" });
   const out: DeathRow[] = [];
+  const seen = new Map<string, number>();
   let skipped = 0;
   for (const r of rows) {
     const date = isoDay(r.date);
@@ -193,8 +197,13 @@ async function connecticut(supabase: ReturnType<typeof serviceClient>, cc: Count
     const city = str(r.injurycity) ?? str(r.deathcity);
     const g = (r.injurycitygeo ?? r.deathcitygeo) as { latitude?: string; longitude?: string } | undefined;
     const geo = (g && cityGeo(g.latitude, g.longitude)) ?? countyGeo(cc, "CT", county);
-    // No upstream id: hash the stable public fields.
-    const id = await sha([date, cause, city, r.residencecity, r.age, r.sex, r.mannerofdeath].map((v) => String(v ?? "")).join("|"));
+    // No upstream id: hash the stable public fields, then disambiguate the
+    // rare exact duplicates (same day, town, cause, age, sex) with a running
+    // index so both deaths are kept. Rows are ordered by date upstream, so
+    // the index is stable between runs.
+    const base = await sha([date, cause, city, r.residencecity, r.injuryplace, r.descriptionofinjury, r.age, r.sex, r.race, r.mannerofdeath].map((v) => String(v ?? "")).join("|"));
+    const n = (seen.get(base) ?? 0) + 1; seen.set(base, n);
+    const id = n === 1 ? base : `${base}-${n}`;
     const substances = [...named];
     const row = build(SRC, id, date, r.mannerofdeath, cause, { city, county, state: "CT" }, geo, r,
       r.anyopioid === "Y" ? { any_opioid: true } : {});

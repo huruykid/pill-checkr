@@ -47,7 +47,7 @@ columns are merged in.
 | Source id | Jurisdiction | Platform | Upstream cadence | Geo | License |
 |---|---|---|---|---|---|
 | `seattle_fire_911` | Seattle, WA | Socrata `kzjm-xkqj` | every 5 min | point → hex | Public domain |
-| `cincinnati_fire_ems` | Cincinnati, OH | Socrata `vnsz-a3wp` | daily | point → hex | Public domain |
+| `cincinnati_fire_ems` | Cincinnati, OH | Socrata `vnsz-a3wp` | daily | point → hex | Public domain — **paused Oct 2026**: since Oct 2025 the feed publishes rows with no incident type, so overdose runs cannot be identified |
 | `tempe_fire_opioid` | Tempe, AZ | ArcGIS FeatureServer | continuous | randomized point → hex | CC BY 4.0 |
 | `baltimore_fire_naloxone` | Baltimore, MD | ArcGIS FeatureServer | monthly | zip (daily counts) | CC BY 3.0 |
 
@@ -97,6 +97,19 @@ Do not use:
 - DrugsData / Erowid (program on hiatus; declined).
 - Get Your Drugs Tested (Vancouver) — terms prohibit republication.
 - ODMAP — government agencies only.
+
+## First-run notes (Oct 3 2026)
+
+- Run backfills one source at a time (`only`). Running Cook County together
+  with other sources hit the edge-function memory limit (546
+  WORKER_RESOURCE_LIMIT) after Cook's 14.7k rows had already landed.
+- Cook County 14,706 · San Diego 7,936 · Allegheny 3,961 · Santa Clara 2,615 ·
+  Sacramento 1,494 · Connecticut 12.9k · Seattle 1,354 · Tempe 385 ·
+  Baltimore naloxone ~2.5k (13 months) · Philadelphia 19 alerts.
+- ArcGIS servers cap pages at their own maxRecordCount; `arcgisAll` advances
+  by rows returned, not by the requested page size (a first-run bug lost half
+  of Baltimore until fixed).
+- PostgREST caps any select at 1,000 rows; `loadCountyCentroids` pages.
 
 ## Operating the syncs
 

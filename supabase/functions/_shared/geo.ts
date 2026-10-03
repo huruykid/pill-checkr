@@ -68,17 +68,28 @@ export type CountyCentroids = Map<string, { lat: number; lon: number }>;
  */
 export async function loadCountyCentroids(supabase: SupabaseClient): Promise<CountyCentroids> {
   const map: CountyCentroids = new Map();
-  const { data, error } = await supabase.from("overdose_county_latest").select("state, county, lat, lon").not("lat", "is", null).limit(4000);
-  if (error) { console.warn("county centroids unavailable:", error.message); return map; }
-  for (const r of (data ?? []) as { state: string | null; county: string | null; lat: number; lon: number }[]) {
-    if (!r.state || !r.county) continue;
-    map.set(countyKey(r.state, r.county), { lat: r.lat, lon: r.lon });
+  // PostgREST caps a single select at 1,000 rows regardless of .limit(); page.
+  for (let from = 0; from < 10_000; from += 1000) {
+    const { data, error } = await supabase.from("overdose_county_latest")
+      .select("state, county, lat, lon").not("lat", "is", null).order("fips").range(from, from + 999);
+    if (error) { console.warn("county centroids unavailable:", error.message); break; }
+    const rows = (data ?? []) as { state: string | null; county: string | null; lat: number; lon: number }[];
+    for (const r of rows) {
+      if (!r.state || !r.county) continue;
+      map.set(countyKey(r.state, r.county), { lat: r.lat, lon: r.lon });
+    }
+    if (rows.length < 1000) break;
   }
   return map;
 }
 
 export function countyKey(state: string, county: string): string {
-  return `${state.toUpperCase()}|${county.toLowerCase().replace(/\s+(county|parish|borough|city and borough|census area|municipality)$/i, "").replace(/\s*\(.*\)$/, "").trim()}`;
+  // CDC spells independent cities "Baltimore (city)"; keep them distinct from
+  // the county of the same name ("baltimore city" vs "baltimore").
+  const name = county.toLowerCase().replace(/\s*\(city\)$/, " city")
+    .replace(/\s+(county|parish|borough|city and borough|census area|municipality)$/i, "")
+    .replace(/\s*\(.*\)$/, "").trim();
+  return `${state.toUpperCase()}|${name}`;
 }
 
 export function countyGeo(centroids: CountyCentroids, state: string | null, county: string | null): Geo {

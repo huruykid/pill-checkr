@@ -71,32 +71,31 @@ export function parsePhillyHip(html: string, base = "https://hip.phila.gov/"): P
 
 // ---------------------------------------------------------------------------
 // NYC DOHMH Health Alert Network archive
-// <h2>Alerts, 2026</h2><ul><li><a href="/assets/.../han-alert-26-slug.pdf">Alert #26: Title</a></li>...
-// Dates are not listed; the archive is organized by year.
+// Current-year sections are <h2>Alerts, 2026</h2><ul><li><a href=".../han/alert/2026/x.pdf">Alert #26: ...</a>
+// and older years sit in collapsible "Alerts Archive" / "Advisories Archive"
+// blocks with no year in the heading. The PDF path carries kind and year for
+// every item, so parse anchors by path rather than by section.
 // ---------------------------------------------------------------------------
 export function parseNycHan(html: string, base = "https://www.nyc.gov/"): ParsedAlert[] {
   const out: ParsedAlert[] = [];
-  const secRe = /<h2[^>]*>\s*(Alerts|Advisories|Updates|Notifications)[^<]*?(\d{4})\s*<\/h2>\s*<ul>([\s\S]*?)<\/ul>/gi;
-  let s: RegExpExecArray | null;
-  while ((s = secRe.exec(html))) {
-    const kind = s[1], year = s[2], body = s[3];
-    const liRe = /<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
-    let a: RegExpExecArray | null;
-    while ((a = liRe.exec(body))) {
-      const href = abs(base, a[1]);
-      const title = decodeHtml(a[2]);
-      if (!title || !isDrugAlert(title)) continue;
-      const file = href.split("/").pop()?.replace(/\.pdf$/i, "") ?? slugify(title);
-      out.push(finish({
-        source_record_id: `nyc-${year}-${slugify(file)}`,
-        title, published_on: `${year}-01-01`, date_precision: "year",
-        url: "https://www.nyc.gov/site/doh/providers/resources/health-alert-network.page",
-        pdf_url: /\.pdf/i.test(href) ? href : null,
-        summary: `${kind.replace(/s$/, "")} from the NYC Health Department, ${year}.`,
-        region: "NY", locality: "New York City", issuer: "NYC Department of Health and Mental Hygiene",
-        raw: { kind, year, href },
-      }));
-    }
+  const aRe = /<a[^>]*href="([^"]*\/han\/(alert|advisory|update|notification)s?\/(\d{4})\/[^"]+\.pdf)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let a: RegExpExecArray | null;
+  while ((a = aRe.exec(html))) {
+    const href = abs(base, a[1]);
+    const kind = a[2].charAt(0).toUpperCase() + a[2].slice(1).toLowerCase();
+    const year = a[3];
+    const title = decodeHtml(a[4]);
+    if (!title || !isDrugAlert(title)) continue;
+    const file = href.split("/").pop()?.replace(/\.pdf$/i, "") ?? slugify(title);
+    out.push(finish({
+      source_record_id: `nyc-${year}-${slugify(file)}`,
+      title, published_on: `${year}-01-01`, date_precision: "year",
+      url: "https://www.nyc.gov/site/doh/providers/resources/health-alert-network.page",
+      pdf_url: href,
+      summary: `${kind} from the NYC Health Department, ${year}.`,
+      region: "NY", locality: "New York City", issuer: "NYC Department of Health and Mental Hygiene",
+      raw: { kind, year, href },
+    }));
   }
   return out;
 }
