@@ -71,7 +71,7 @@ async function apnsJwt(): Promise<string> {
 
   const key = await crypto.subtle.importKey(
     "pkcs8",
-    pemToPkcs8(keyPem),
+    pemToPkcs8(keyPem) as BufferSource,
     { name: "ECDSA", namedCurve: "P-256" },
     false,
     ["sign"],
