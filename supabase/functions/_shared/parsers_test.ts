@@ -104,3 +104,28 @@ Deno.test("LAHAN: date from icon alt, issuer from kind line, CDC relays go natio
   assert(out[2].substances.includes("Kratom (mitragynine)"));
   assertEquals(out[2].severity, "danger");
 });
+
+import { FRESNO_CORONER_ANNUAL, FRESNO_DOCS, FRESNO_EDITION } from "./curated/fresno_coroner_annual.ts";
+Deno.test("Fresno coroner curated series: complete, consistent with the report's own arithmetic", () => {
+  const by = (cat: string) => FRESNO_CORONER_ANNUAL.filter((r) => r.category === cat).sort((a, b) => a.year - b.year);
+  const all = by("all"), fent = by("fentanyl"), meth = by("methamphetamine");
+  // every year 2009..EDITION present exactly once for "all"
+  assertEquals(all.map((r) => r.year), Array.from({ length: FRESNO_EDITION - 2008 }, (_, i) => 2009 + i));
+  assertEquals(fent.map((r) => r.year), Array.from({ length: FRESNO_EDITION - 2016 }, (_, i) => 2017 + i));
+  // anchors read from two editions of the PDF
+  assertEquals(all.find((r) => r.year === 2023)?.value, 278);
+  assertEquals(all.find((r) => r.year === 2024)?.value, 263);
+  assertEquals(fent.find((r) => r.year === 2024)?.value, 80);
+  // 2024: single-drug 37 + present in 43 combined = 80 fentanyl; 2023: 41 + 74 = 115
+  assertEquals(37 + 43, fent.find((r) => r.year === 2024)?.value);
+  assertEquals(41 + 74, fent.find((r) => r.year === 2023)?.value);
+  // a drug-specific count can never exceed that year's total
+  for (const r of [...fent, ...meth]) {
+    const tot = all.find((a) => a.year === r.year)!.value;
+    assert(r.value <= tot, `${r.category} ${r.year}: ${r.value} > ${tot}`);
+    assert(Number.isInteger(r.value) && r.value >= 0);
+  }
+  const ids = new Set(FRESNO_CORONER_ANNUAL.map((r) => `${r.year}|${r.category}`));
+  assertEquals(ids.size, FRESNO_CORONER_ANNUAL.length, "duplicate year/category");
+  for (const r of FRESNO_CORONER_ANNUAL) assert(FRESNO_DOCS[r.edition], `no document URL for edition ${r.edition}`);
+});

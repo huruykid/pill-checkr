@@ -4,6 +4,7 @@
 //   sf_ocme_monthly_deaths   Socrata jxrr-bmra  city  monthly deaths            CA (ODbL)
 //   sf_ems_overdose_911      Socrata ed3a-sn39  city  weekly EMS overdose calls CA (PDDL)
 //   la_county_zip_overdose   ArcGIS             zip   2018–19 / 2020–21 deaths by drug  CA
+//   fresno_sheriff_coroner_annual  curated (PDF) county annual deaths: all / fentanyl / meth  CA
 //
 // Body options: {"only":["sf_ocme_monthly_deaths"]}
 import {
@@ -11,6 +12,7 @@ import {
   corsHeaders, isoDay, num, zip5,
 } from "../_shared/sync.ts";
 import { round5 } from "../_shared/geo.ts";
+import { FRESNO_CORONER_ANNUAL, FRESNO_DOCS, FRESNO_EDITION } from "../_shared/curated/fresno_coroner_annual.ts";
 
 const SHAPE_VERSION = 1;
 type Row = Record<string, unknown>;
@@ -129,6 +131,30 @@ async function laZip(supabase: ReturnType<typeof serviceClient>) {
 }
 
 // ---------------------------------------------------------------------------
+// Fresno County Sheriff-Coroner annual statistics. The county publishes only a
+// PDF per year, so the numbers live in a curated module (see its header for
+// how they were verified). Nothing is fetched; the job exists so the source
+// goes through the same registry, enable flag and upsert path as the others.
+const FRESNO = { lat: 36.738918, lon: -119.767884 }; // overdose_county_latest centroid for FIPS 06019
+
+export function fresnoRows(now = new Date().toISOString()): AreaRow[] {
+  return FRESNO_CORONER_ANNUAL.map((r) => ({
+    source_id: "fresno_sheriff_coroner_annual", source_record_id: `06019|${r.year}|deaths|${r.category}`,
+    area_type: "county", area_id: "06019", area_name: "Fresno County", state: "CA", lat: FRESNO.lat, lon: FRESNO.lon,
+    period_start: `${r.year}-01-01`, period_end: `${r.year}-12-31`, period_label: String(r.year),
+    metric: "deaths", drug_category: r.category, value: r.value, rate: null,
+    raw: { document: FRESNO_DOCS[r.edition] ?? null, edition: r.edition, note: r.note },
+    shape_version: SHAPE_VERSION, synced_at: now,
+  }));
+}
+
+async function fresno(supabase: ReturnType<typeof serviceClient>) {
+  const out = fresnoRows();
+  const upserted = await upsertChunked(supabase, "overdose_area_periods", out as unknown as Row[], "source_id,source_record_id");
+  return { fetched: out.length, upserted, note: `curated from the Sheriff-Coroner ${FRESNO_EDITION} statistics PDF` };
+}
+
+// ---------------------------------------------------------------------------
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   const started = Date.now();
@@ -139,6 +165,7 @@ Deno.serve(async (req) => {
       { id: "sf_ocme_monthly_deaths", run: () => sfDeaths(supabase) },
       { id: "sf_ems_overdose_911", run: () => sfEms(supabase) },
       { id: "la_county_zip_overdose", run: () => laZip(supabase) },
+      { id: "fresno_sheriff_coroner_annual", run: () => fresno(supabase) },
     ], supabase, only);
     return jsonResponse({ ok: results.every((r) => r.ok), ms: Date.now() - started, results });
   } catch (e) {

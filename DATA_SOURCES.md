@@ -70,6 +70,7 @@ columns are merged in.
 | `sf_ocme_monthly_deaths` | San Francisco (city) | monthly, 2020→ | deaths, all drugs | ODbL (share-alike) |
 | `sf_ems_overdose_911` | San Francisco (city) | weekly, 2022→ | EMS overdose-related 911 responses | PDDL |
 | `la_county_zip_overdose` | LA County ZIPs | 2018–19, 2020–21 pooled | deaths: all, any opioid, fentanyl, heroin, methamphetamine, alcohol | LA County eGIS terms |
+| `fresno_sheriff_coroner_annual` | Fresno County | annual, 2009→ (fentanyl 2017→, meth 2023→) | deaths: all, fentanyl, methamphetamine — **curated**: hand-transcribed from the Sheriff-Coroner's yearly PDF (`_shared/curated/fresno_coroner_annual.ts`), refreshed by editing that module when the next report posts | Openly published county report, no terms posted |
 
 Only alerts about the drug supply are kept (`DRUG_ALERT_RE`). Titles and dates
 are the issuer's own words; every row links to the original document.
@@ -85,12 +86,35 @@ case-level open data; LA coverage is LAHAN alerts + the ZIP-level DPH layer
 + CDC county counts. Drug Checking Los Angeles (dashboard only) — ask
 checkingla@proton.me for a feed.
 
+### Fresno County and the Central Valley: what is and is not available
+
+Checked Oct 2026. Fresno County publishes **no machine-readable overdose
+data**: ArcGIS Online, the County of Fresno Hub (`datasharing-cofgisonline`)
+and the City of Fresno GIS Hub return zero public items for overdose / opioid /
+fentanyl / naloxone; there is no Socrata or CKAN portal. The county's own
+hosts block cloud runtimes: `fresnocountyca.gov` (Public Health mortality
+reports, Behavioral Health fentanyl page, provider health messages) is Akamai
+403, `fresno.gov` (Fresno Fire) is nginx 403, and `healthyfresnocountydata.org`
+(Conduent HCI indicator site, CDPH-derived annual rates) never answers. Fresno
+Fire's Oct 2026 overdose warning was a press statement with no figures. The
+only reachable Fresno-specific official source is the Sheriff-Coroner's annual
+statistics PDF (`fresnosheriff.org`, 2018→2024 editions), which is what
+`fresno_sheriff_coroner_annual` carries; the Coroner, not DPH, is the county's
+overdose counter and 2024's split was methamphetamine 172 / fentanyl 80 of 263.
+Kern, Tulare, Kings, Madera, Merced, Stanislaus and San Joaquin counties all
+point to the CDPH ODdash (no API); Kern Behavioral Health's ArcGIS items are
+naloxone *distribution sites*, not events. DHCS's Naloxone Distribution Project
+page (`californiaopioidresponse.org`, reachable WordPress) lists one 2023
+overdose rate and a cumulative naloxone rate per county as plain HTML — a
+single static snapshot, not worth a sync.
+
 ## Hosts that block cloud runtimes
 
 Verified from this project's database with `pg_net` (same AWS egress as the
 edge functions): **cdc.gov (403), dea.gov (403), health.ny.gov (403),
 fda.gov RSS (404 to non-browser clients), dhss.delaware.gov (blocked),
-cdph.ca.gov (TLS error).** Do not add direct scrapers for these; they will
+cdph.ca.gov (TLS error), fresnocountyca.gov (Akamai 403), fresno.gov (403),
+healthyfresnocountydata.org (timeout).** Do not add direct scrapers for these; they will
 fail silently in production. Options: the WA DOH relay (CDC HAN, done), a
 GitHub Actions runner that scrapes and POSTs to an ingest function, or
 official data feeds on data.cdc.gov / api.fda.gov (openFDA works).
@@ -105,6 +129,8 @@ High value, reachable, needs a parser or a schema decision:
 - **LA County LAHAN** (`publichealth.lacounty.gov/lahan/`) and **King County alerts**, **Maryland RAD** — reachable, HTML not yet inspected (the pg_net probe hit an unrelated header bug; fetch raw HTML with a browser and write a fixture first).
 - **Virginia VDH EMS substance-use incidents** (CKAN CSV) and **Orange County FL ME** (ArcGIS, geocoded but category-only).
 - **openFDA drug enforcement** (`api.fda.gov/drug/enforcement.json`, CC0) filtered to counterfeit.
+- **San Bernardino County coroner fatal fentanyl overdoses by ZCTA** (ArcGIS item `ed1444eea0b742869e454a8056bf3594`, `services7.arcgis.com/zaLZMEOGUnUT78nG/.../Coroner_Data_for_Fatal_Fentanyl_Overdoses/FeatureServer`, 2020–2022 + partial 2023, crude rate per 100k per ZCTA; reachable Oct 2026) → `overdose_area_periods`. Check the item's license text first.
+- **Riverside County Public Health "RODA Poison Control" linelist** (ArcGIS table `services1.arcgis.com/pWmBUdSlVpXStHU6/.../Poison_Control_Linelist/FeatureServer/0`, edited Jul 2026; reachable) — inspect fields for PII before deciding a table.
 - **America's Poison Centers RSS**, **TX DSHS**, **WI HAN**, **SNHD** — reachable listings, low drug-specific volume.
 
 Requires permission before any ingestion:
