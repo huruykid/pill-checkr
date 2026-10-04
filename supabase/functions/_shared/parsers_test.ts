@@ -86,3 +86,21 @@ Deno.test("text helpers", () => {
   assertEquals(zip5("N/A"), null);
   assertEquals(decodeHtml("Philadelphia&#8217;s <b>drug</b> supply"), "Philadelphia’s drug supply");
 });
+
+import { parseLahan } from "./alertParsers.ts";
+Deno.test("LAHAN: date from icon alt, issuer from kind line, CDC relays go national", () => {
+  const out = parseLahan(fx("lahan.html"));
+  assertEquals(out.length, 3);
+  assertEquals(out[0].source_record_id, "lahan-cdcmedetomidine040326");
+  assertEquals(out[0].published_on, "2026-04-03");
+  assertEquals(out[0].region, "US");
+  assertEquals(out[0].pdf_url, "https://publichealth.lacounty.gov/eprd/lahan/alerts/CDCMedetomidine040326.pdf");
+  assertEquals(out[1].region, "CA");
+  assertEquals(out[1].locality, "Los Angeles County");
+  assertEquals(out[1].published_on, "2026-01-15");
+  assert(out[1].substances.includes("Medetomidine"));
+  assertEquals(out[2].title, "Fatal Overdoses Associated with 7-Hydroxymitragynine (7-OH) in Los Angeles County");
+  assertEquals(out[2].published_on, "2025-09-12");
+  assert(out[2].substances.includes("Kratom (mitragynine)"));
+  assertEquals(out[2].severity, "danger");
+});

@@ -70,11 +70,11 @@ export async function socrataAll<T = Record<string, unknown>>(
 export async function arcgisAll<T = Record<string, unknown>>(
   layerUrl: string,
   where: string,
-  opts: { outFields?: string; geometry?: boolean; page?: number; max?: number; orderBy?: string } = {},
-): Promise<{ attributes: T; geometry?: { x: number; y: number } }[]> {
+  opts: { outFields?: string; geometry?: boolean; centroid?: boolean; page?: number; max?: number; orderBy?: string } = {},
+): Promise<{ attributes: T; geometry?: { x: number; y: number }; centroid?: { x: number; y: number } }[]> {
   const page = opts.page ?? 2000;
   const max = opts.max ?? 200_000;
-  const out: { attributes: T; geometry?: { x: number; y: number } }[] = [];
+  const out: { attributes: T; geometry?: { x: number; y: number }; centroid?: { x: number; y: number } }[] = [];
   // Servers cap each page at their own maxRecordCount (often 1000), so
   // advance by what came back, never by the requested page size.
   for (let offset = 0; offset < max;) {
@@ -88,6 +88,7 @@ export async function arcgisAll<T = Record<string, unknown>>(
       f: "json",
     });
     if (opts.orderBy) qs.set("orderByFields", opts.orderBy);
+    if (opts.centroid) qs.set("returnCentroid", "true");   // polygon layers: centroid in 4326, no ring payload
     const data = await fetchJson<{ features?: typeof out; error?: { message: string }; exceededTransferLimit?: boolean }>(
       `${layerUrl}/query?${qs}`,
     );

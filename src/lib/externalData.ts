@@ -135,7 +135,18 @@ export async function fetchExternalAlerts(limit = 40, state?: string | null): Pr
   }));
   const st = state ? state.toUpperCase() : null;
   const rank = (a: ExternalAlert) => (a.region === "US" ? 1 : st && a.region === st ? 0 : 2);
-  return all.sort((a, b) => rank(a) - rank(b) || (b.published_on ?? "").localeCompare(a.published_on ?? "")).slice(0, limit);
+  const sorted = all.sort((a, b) => rank(a) - rank(b) || (b.published_on ?? "").localeCompare(a.published_on ?? ""));
+  // The same CDC notice arrives through several relays (WA DOH, LA County);
+  // keep the best-ranked copy of any title that repeats.
+  const seen = new Set<string>();
+  const out: ExternalAlert[] = [];
+  for (const a of sorted) {
+    const key = a.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().slice(0, 80);
+    if (seen.has(key)) continue;
+    seen.add(key); out.push(a);
+    if (out.length >= limit) break;
+  }
+  return out;
 }
 
 // Medical-examiner / coroner drug deaths, rolling 12 months, aggregated per hex
@@ -185,4 +196,35 @@ export async function fetchIncidentCells(state?: string | null): Promise<Inciden
   const { data, error } = await q;
   if (error) { console.error(error); return []; }
   return (data as unknown as IncidentCell[]) || [];
+}
+
+// Aggregate overdose statistics per area and period (SF monthly deaths and
+// weekly EMS calls, LA County deaths by ZIP and drug, and future county /
+// state dashboards). These are counts, never case records.
+export interface AreaPeriodStat {
+  source_id: string;
+  area_type: string;
+  area_id: string;
+  area_name: string | null;
+  state: string | null;
+  lat: number | null;
+  lon: number | null;
+  period_start: string;
+  period_end: string;
+  period_label: string | null;
+  metric: "deaths" | "ems_calls" | "ed_visits" | "naloxone" | "hospitalizations";
+  drug_category: string;
+  value: number | null;
+  rate: number | null;
+}
+
+export async function fetchAreaStats(opts: { state?: string | null; metric?: AreaPeriodStat["metric"]; limit?: number } = {}): Promise<AreaPeriodStat[]> {
+  let q = db.from("overdose_area_periods_public")
+    .select("source_id, area_type, area_id, area_name, state, lat, lon, period_start, period_end, period_label, metric, drug_category, value, rate")
+    .order("period_end", { ascending: false }).limit(opts.limit ?? 2000);
+  if (opts.state) q = q.ilike("state", opts.state);
+  if (opts.metric) q = q.eq("metric", opts.metric);
+  const { data, error } = await q;
+  if (error) { console.error(error); return []; }
+  return (data as unknown as AreaPeriodStat[]) || [];
 }

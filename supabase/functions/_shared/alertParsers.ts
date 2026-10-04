@@ -159,3 +159,45 @@ export function parseBaltimoreNews(html: string, base = "https://www.baltimoreci
   }
   return out;
 }
+
+// ---------------------------------------------------------------------------
+// Los Angeles County DPH — LAHAN (publichealth.lacounty.gov/lahan/)
+// Items are <div class="col-2"><img alt="April 3, 2026"></div> followed by
+// <div class="col-10"><strong>Title</strong><br>Issuer Type<br><a href=x.pdf>PDF</a> | <a>Web/Mobile</a></div>.
+// LA DPH relays CDC and CDPH notices on the same list; `kind` names the issuer.
+// ---------------------------------------------------------------------------
+export function parseLahan(html: string, base = "https://publichealth.lacounty.gov/"): ParsedAlert[] {
+  const out: ParsedAlert[] = [];
+  const itemRe = /<div[^>]*class="col-2"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="col-10"[^>]*>([\s\S]*?)<\/div>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = itemRe.exec(html))) {
+    const date = isoDay((m[1].match(/<img[^>]*alt="([^"]+)"/i) || [, ""])[1]);
+    const body = m[2];
+    const strong = (body.match(/<strong>([\s\S]*?)<\/strong>/i) || [, ""])[1];
+    // Some rows put the issuer line inside <strong> on its own line.
+    const strongLines = decodeHtml(strong.replace(/\r?\n|\t/g, "\n")).split(/\s{2,}|\n/).map((s) => s.trim()).filter(Boolean);
+    const rawLines = strong.split(/\r?\n/).map((s) => decodeHtml(s)).filter(Boolean);
+    const title = rawLines[0] ?? strongLines[0] ?? "";
+    const kindInStrong = rawLines.slice(1).join(" ").trim();
+    const afterStrong = decodeHtml(body.replace(/<strong>[\s\S]*?<\/strong>/i, "").replace(/<a[\s\S]*$/i, ""));
+    const kind = (kindInStrong || afterStrong).replace(/\s+/g, " ").trim();
+    if (!title || !isDrugAlert(title)) continue;
+    const links = [...body.matchAll(/<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi)].map((a) => ({ href: abs(base, a[1].split("?")[0]), text: decodeHtml(a[2]) }));
+    const pdf = links.find((l) => /\.pdf$/i.test(l.href))?.href ?? null;
+    const web = links.find((l) => !/\.pdf$/i.test(l.href))?.href ?? null;
+    const isCdc = /^CDC\b/i.test(kind);
+    const isCdph = /^CDPH\b/i.test(kind);
+    const file = pdf ? pdf.split("/").pop()!.replace(/\.pdf$/i, "") : slugify(`${date ?? ""}-${title}`);
+    out.push(finish({
+      source_record_id: `lahan-${slugify(file)}`,
+      title, published_on: date, date_precision: "day",
+      url: web ?? "https://publichealth.lacounty.gov/lahan/", pdf_url: pdf,
+      summary: kind ? `${kind}, as distributed by the Los Angeles County Health Alert Network.` : null,
+      region: isCdc ? "US" : "CA",
+      locality: isCdc ? null : isCdph ? null : "Los Angeles County",
+      issuer: isCdc ? "CDC (via LA County DPH)" : isCdph ? "California Department of Public Health (via LA County DPH)" : "Los Angeles County Department of Public Health",
+      raw: { kind, pdf, web },
+    }));
+  }
+  return out;
+}

@@ -5,6 +5,7 @@
 //   nyc_dohmh_han        NYC HAN archive (year-level dates)           NY / New York City
 //   wa_doh_han           WA DOH HAN table, which relays CDC HAN too   WA + US
 //   baltimore_bchd_news  Baltimore City Health Department news        MD / Baltimore
+//   la_county_lahan      LA County DPH Health Alert Network           CA / Los Angeles County (relays CDC + CDPH)
 //
 // Why these and not cdc.gov / dea.gov / health.ny.gov directly: those hosts
 // return 403 to requests from cloud runtimes (verified from this project's
@@ -15,7 +16,7 @@ import {
   serviceClient, fetchText, upsertChunked, runSources, jsonResponse, readOptions, corsHeaders,
 } from "../_shared/sync.ts";
 import {
-  parsePhillyHip, parseNycHan, parseWaDohHan, parseBaltimoreNews, type ParsedAlert,
+  parsePhillyHip, parseNycHan, parseWaDohHan, parseBaltimoreNews, parseLahan, type ParsedAlert,
 } from "../_shared/alertParsers.ts";
 
 const SHAPE_VERSION = 1;
@@ -76,6 +77,7 @@ Deno.serve(async (req) => {
       { id: "nyc_dohmh_han", run: () => scrape(supabase, "nyc_dohmh_han", "https://www.nyc.gov/site/doh/providers/resources/health-alert-network.page", parseNycHan) },
       { id: "wa_doh_han", run: () => scrape(supabase, "wa_doh_han", WA_PAGES, parseWaDohHan) },
       { id: "baltimore_bchd_news", run: () => scrape(supabase, "baltimore_bchd_news", "https://www.baltimorecity.gov/health/news", parseBaltimoreNews) },
+      { id: "la_county_lahan", run: () => scrape(supabase, "la_county_lahan", "https://publichealth.lacounty.gov/lahan/", parseLahan) },
     ], supabase, only);
     return jsonResponse({ ok: results.every((r) => r.ok), ms: Date.now() - started, results });
   } catch (e) {

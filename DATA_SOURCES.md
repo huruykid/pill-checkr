@@ -12,6 +12,7 @@ supply, and an EMS dispatch is not a confirmed overdose.
 | `external_incidents` | Nonfatal EMS / 911 overdose responses | `sync-od-incidents` | hourly :20 |
 | `external_alerts` | Official advisories | `sync-nps-alerts`, `sync-health-alerts` | daily |
 | `overdose_county_periods` | CDC provisional county death counts | `sync-cdc-overdose` | weekly |
+| `overdose_area_periods` | Aggregate counts per area and period (city / ZIP / county) | `sync-area-stats` | daily 06:10 UTC |
 
 Every row keeps the upstream payload in `raw` (minus personal fields) and a
 `shape_version`, because open-data shapes drift. Every source has a row in
@@ -60,9 +61,29 @@ columns are merged in.
 | `nyc_dohmh_han` | NYC DOHMH | HTML archive by year | `date_precision = 'year'` |
 | `wa_doh_han` | Washington State DOH | HTML table | **also our reachable mirror of CDC HAN notices** (region `US`) |
 | `baltimore_bchd_news` | Baltimore City Health Dept. | HTML cards | drug-supply items only |
+| `la_county_lahan` | LA County DPH (LAHAN) | HTML rows, date in icon `alt` | relays CDC (→ `US`) and CDPH (→ `CA`) notices too |
+
+### Aggregates (`overdose_area_periods`)
+
+| Source id | Area | Period | Metric / categories | License |
+|---|---|---|---|---|
+| `sf_ocme_monthly_deaths` | San Francisco (city) | monthly, 2020→ | deaths, all drugs | ODbL (share-alike) |
+| `sf_ems_overdose_911` | San Francisco (city) | weekly, 2022→ | EMS overdose-related 911 responses | PDDL |
+| `la_county_zip_overdose` | LA County ZIPs | 2018–19, 2020–21 pooled | deaths: all, any opioid, fentanyl, heroin, methamphetamine, alcohol | LA County eGIS terms |
 
 Only alerts about the drug supply are kept (`DRUG_ALERT_RE`). Titles and dates
 are the issuer's own words; every row links to the original document.
+
+### California: what is and is not available
+
+The CDPH California Overdose Surveillance Dashboard (skylab.cdph.ca.gov/ODdash)
+is an R Shiny app with no API and no open-data mirror on data.ca.gov or
+data.chhs.ca.gov (searched Oct 2026: zero overdose datasets). County/ZIP
+statewide numbers by drug type exist only inside it. Treat it as a data
+request: opi@cdph.ca.gov. The LA County Medical Examiner publishes no
+case-level open data; LA coverage is LAHAN alerts + the ZIP-level DPH layer
++ CDC county counts. Drug Checking Los Angeles (dashboard only) — ask
+checkingla@proton.me for a feed.
 
 ## Hosts that block cloud runtimes
 
