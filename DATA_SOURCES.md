@@ -110,6 +110,9 @@ Do not use:
   by rows returned, not by the requested page size (a first-run bug lost half
   of Baltimore until fixed).
 - PostgREST caps any select at 1,000 rows; `loadCountyCentroids` pages.
+- WPRDC (Allegheny) reloads its table monthly and reassigns `_id`; the
+  upsert key is a hash of the public fields. When a key scheme changes,
+  delete the source's rows and re-run `full` so the old keys do not linger.
 
 ## Adding a source
 

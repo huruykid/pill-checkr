@@ -224,12 +224,15 @@ async function allegheny(supabase: ReturnType<typeof serviceClient>, cc: CountyC
   const RES = "1c59b26a-1684-4bfb-92f7-205b947530cf";
   const geo = countyGeo(cc, "PA", "Allegheny");
   const out: DeathRow[] = [];
+  // WPRDC reloads the whole table monthly and reassigns `_id`, so it is not a
+  // stable key. Hash the public fields instead (+ suffix for exact duplicates).
+  const seen = new Map<string, number>();
   let fetched = 0, skipped = 0;
   for (let offset = 0; offset < 100_000; offset += 5000) {
     const qs = new URLSearchParams({
       resource_id: RES, limit: "5000", offset: String(offset),
       filters: "{}",
-      sort: "death_date_and_time asc",
+      sort: "death_date_and_time asc, _id asc",
     });
     // CKAN's datastore_search_sql is often disabled; filter client-side on the window instead.
     const data = await fetchJson<{ success: boolean; result: { records: Row[] } }>(`https://data.wprdc.org/api/3/action/datastore_search?${qs}`);
@@ -243,7 +246,9 @@ async function allegheny(supabase: ReturnType<typeof serviceClient>, cc: CountyC
       for (let i = 1; i <= 10; i++) { const d = str(r[`combined_od${i}`]); if (d) drugs.push(d); }
       const cause = drugs.join("; ");
       if (!cause) { skipped++; continue; }
-      out.push(build(SRC, String(r._id), date, r.manner_of_death, cause,
+      const base = await sha([r.death_date_and_time, cause, r.incident_zip, r.age, r.sex, r.race, r.manner_of_death].map((v) => String(v ?? "")).join("|"));
+      const n = (seen.get(base) ?? 0) + 1; seen.set(base, n);
+      out.push(build(SRC, n === 1 ? base : `${base}-${n}`, date, r.manner_of_death, cause,
         { county: "Allegheny", state: "PA", zip: r.incident_zip }, geo, r));
     }
     if (recs.length < 5000) break;
