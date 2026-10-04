@@ -111,6 +111,14 @@ Do not use:
   of Baltimore until fixed).
 - PostgREST caps any select at 1,000 rows; `loadCountyCentroids` pages.
 
+## Adding a source
+
+The repo ships a subagent for this: `.claude/agents/data-source-onboarder.md`.
+From a Claude session in this repo, ask it to "add <source>" or "find more
+sources for <state>"; it verifies reachability from the Supabase runtime and
+the license first, then builds, tests, registers, deploys through Lovable,
+backfills one source at a time and reports counts.
+
 ## Operating the syncs
 
 Each function accepts `{"only":["<source_id>"],"full":true}`. `only` runs one
