@@ -916,6 +916,80 @@ export type Database = {
         }
         Relationships: []
       }
+      overdose_area_periods: {
+        Row: {
+          area_id: string
+          area_name: string | null
+          area_type: string
+          drug_category: string
+          id: string
+          lat: number | null
+          lon: number | null
+          metric: string
+          period_end: string
+          period_label: string | null
+          period_start: string
+          rate: number | null
+          raw: Json
+          shape_version: number
+          source_id: string
+          source_record_id: string
+          state: string | null
+          synced_at: string
+          value: number | null
+        }
+        Insert: {
+          area_id: string
+          area_name?: string | null
+          area_type: string
+          drug_category?: string
+          id?: string
+          lat?: number | null
+          lon?: number | null
+          metric: string
+          period_end: string
+          period_label?: string | null
+          period_start: string
+          rate?: number | null
+          raw?: Json
+          shape_version?: number
+          source_id: string
+          source_record_id: string
+          state?: string | null
+          synced_at?: string
+          value?: number | null
+        }
+        Update: {
+          area_id?: string
+          area_name?: string | null
+          area_type?: string
+          drug_category?: string
+          id?: string
+          lat?: number | null
+          lon?: number | null
+          metric?: string
+          period_end?: string
+          period_label?: string | null
+          period_start?: string
+          rate?: number | null
+          raw?: Json
+          shape_version?: number
+          source_id?: string
+          source_record_id?: string
+          state?: string | null
+          synced_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overdose_area_periods_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       overdose_county_periods: {
         Row: {
           county: string | null
@@ -1727,6 +1801,68 @@ export type Database = {
           title?: string | null
         }
         Relationships: []
+      }
+      overdose_area_periods_public: {
+        Row: {
+          area_id: string | null
+          area_name: string | null
+          area_type: string | null
+          drug_category: string | null
+          id: string | null
+          lat: number | null
+          lon: number | null
+          metric: string | null
+          period_end: string | null
+          period_label: string | null
+          period_start: string | null
+          rate: number | null
+          source_id: string | null
+          state: string | null
+          value: number | null
+        }
+        Insert: {
+          area_id?: string | null
+          area_name?: string | null
+          area_type?: string | null
+          drug_category?: string | null
+          id?: string | null
+          lat?: number | null
+          lon?: number | null
+          metric?: string | null
+          period_end?: string | null
+          period_label?: string | null
+          period_start?: string | null
+          rate?: number | null
+          source_id?: string | null
+          state?: string | null
+          value?: number | null
+        }
+        Update: {
+          area_id?: string | null
+          area_name?: string | null
+          area_type?: string | null
+          drug_category?: string | null
+          id?: string | null
+          lat?: number | null
+          lon?: number | null
+          metric?: string | null
+          period_end?: string | null
+          period_label?: string | null
+          period_start?: string | null
+          rate?: number | null
+          source_id?: string | null
+          state?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overdose_area_periods_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_sources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       overdose_county_latest: {
         Row: {
