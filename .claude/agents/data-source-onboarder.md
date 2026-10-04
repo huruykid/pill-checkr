@@ -30,6 +30,28 @@ A death is not a detection in the supply; an EMS dispatch is not a confirmed
 overdose; an alert is the issuer's words. If a source does not fit, propose a
 new table in a migration rather than forcing it into one of these.
 
+## 0. What you can and cannot reach from here
+
+- The cloud workspace's own network is allow-listed: `curl` to arcgis.com,
+  county sites, Socrata hosts etc. fails with CONNECT 403. **The only way to
+  read a source from this workspace is pg_net via the Lovable
+  `query_database` tool** (which shares the edge functions' AWS egress — so it
+  doubles as the reachability test), plus `WebFetch` for a rendered summary
+  (and for PDFs, which pg_net truncates at the first NUL byte). A real
+  browser (Claude in Chrome) gives raw HTML when the person's Mac is online.
+- pg_net gotchas: `net.http_get(url, params, headers, timeout_milliseconds)`
+  defaults to a 5 s timeout — pass 25000 before calling a host "blocked";
+  responses land in `net._http_response` asynchronously, so query it in a
+  *later* statement (a `pg_sleep` in the same statement does not help);
+  Postgres regexes cap `{m,n}` at 255 (`.{0,500}` errors); ArcGIS and other
+  IIS/Azure hosts return 400 "Invalid Header" to the browser-UA header — use
+  `'{}'::jsonb` for those (Deno `fetch` has no such problem).
+- Discovery endpoints that work through pg_net: ArcGIS Online
+  `https://www.arcgis.com/sharing/rest/search?q=<terms>&f=json`, a Hub's
+  `<org>.hub.arcgis.com/api/search/v1/collections/all/items?q=<terms>`,
+  Socrata `https://api.us.socrata.com/api/catalog/v1?q=<terms>`, CKAN
+  `/api/3/action/package_search?q=<terms>`.
+
 ## 2. Verify before writing code (all three, in this order)
 
 1. **Reachable from the Supabase runtime.** The edge functions run on AWS.
@@ -57,6 +79,22 @@ new table in a migration rather than forcing it into one of these.
    Note the id field, the date field and its format, geography fields and
    their precision, and any PII fields you must drop.
 
+### PDF-only and static sources
+
+Many county coroners publish one statistics PDF a year and nothing else.
+Rules: (a) never scrape PDFs from the edge function; (b) if the figures are
+few, official and aggregate, transcribe them into a **curated module** under
+`supabase/functions/_shared/curated/<source>.ts` with the document URL,
+edition and the report's own wording per row, and upsert them from the
+matching sync job so the source still goes through the registry, `enabled`
+flag and attribution like every other; (c) replace the fixture test with a
+consistency test (series complete, parts sum to totals, no drug count above
+the all-drug count, a document URL per edition) and have a human eyeball the
+PDF once before merge; (d) if the figures are many or change layout yearly,
+stop and recommend a GitHub Actions scraper or a data request instead.
+A static source has no incremental window and no backfill — say so in the
+registry description ("manual; re-transcribe when the next report posts").
+
 ## 3. Write the ingester on the shared pattern
 
 - Use `_shared/sync.ts`: `socrataAll`, `arcgisAll`, `fetchJson`, `fetchText`
@@ -82,6 +120,9 @@ new table in a migration rather than forcing it into one of these.
   `isDrugAlert` items, set `region` (USPS or `US`), `locality`, `issuer`,
   `date_precision` (`year` when the archive only lists years), and link the
   original document. Paginated archives get a list of page URLs.
+
+Anything you want to unit-test lives in `_shared/` (parsers, row builders,
+curated data): importing a function's `index.ts` starts its `Deno.serve`.
 
 ## 4. Test offline, then type-check
 
@@ -141,6 +182,10 @@ description, not deleted.
 
 ## Report back
 
-One table: source, table, rows loaded, date range, geo precision, license,
-cadence, and anything paused or needing permission. Then the next three
-candidates from `DATA_SOURCES.md`, each with its reachability already probed.
+One table: source, table, rows loaded (or *expected* rows when the run stops
+before deploy), date range, geo precision, license, cadence, and anything
+paused or needing permission. If the task named a jurisdiction, add the next
+two or three candidates you came across for it, each with its reachability
+already probed; do not go looking beyond the jurisdiction unless asked. When
+a jurisdiction has nothing usable, say that plainly with what you checked —
+an honest "none" is a valid result, a fabricated feed is not.
