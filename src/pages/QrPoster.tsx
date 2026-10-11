@@ -29,10 +29,13 @@ export default function QrPoster() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // mode=test codes go on strip packets: they stay on the web flow even once
+  // the App Store is live, because an install is the friction they remove.
+  const packet = params.get("mode") === "test";
   const target = useMemo(() => {
-    const web = `${SITE_URL}/go?c=${campaign}${lang !== "en" ? `&lang=${lang}` : ""}`;
-    return APP_STORE_LIVE ? appStoreUrl(campaign) : web;
-  }, [campaign, lang]);
+    const web = `${SITE_URL}/go?c=${campaign}${packet ? "&mode=test" : ""}${lang !== "en" ? `&lang=${lang}` : ""}`;
+    return APP_STORE_LIVE && !packet ? appStoreUrl(campaign) : web;
+  }, [campaign, lang, packet]);
 
   useEffect(() => {
     // Lazy import keeps the QR library out of the main bundle.

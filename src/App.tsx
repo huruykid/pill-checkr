@@ -3,10 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { IS_NATIVE_BUILD, isNative } from "@/lib/platform";
 import { AuthProvider } from "@/hooks/useAuth";
-import { I18nProvider } from "@/hooks/useI18n";
+import { I18nProvider, useI18n, LANGUAGES, type Language } from "@/hooks/useI18n";
 import { WelcomeGate, useDisclaimerAccepted } from "@/components/shared/WelcomeGate";
 import Index from "./pages/Index";
 import CheckPill from "./pages/CheckPill";
@@ -39,9 +39,21 @@ const queryClient = new QueryClient();
 function AppGates({ children }: { children: React.ReactNode }) {
   const disclaimerAccepted = useDisclaimerAccepted();
   const [gateAccepted, setGateAccepted] = useState(disclaimerAccepted);
+  const location = useLocation();
+  const { lang, setLang } = useI18n();
+  const params = new URLSearchParams(location.search);
+  const packet = location.pathname === "/go" && params.get("mode") === "test";
+
+  // A ?lang= link (Spanish posters and packets) has to apply before the gate,
+  // or the first screen a Spanish speaker sees is English.
+  const wantedLang = params.get("lang");
+  useEffect(() => {
+    if (wantedLang && LANGUAGES.includes(wantedLang as Language) && wantedLang !== lang) setLang(wantedLang as Language);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantedLang]);
 
   if (!gateAccepted) {
-    return <WelcomeGate onAccept={() => setGateAccepted(true)} />;
+    return <WelcomeGate packet={packet} onAccept={() => setGateAccepted(true)} />;
   }
 
   return <>{children}</>;

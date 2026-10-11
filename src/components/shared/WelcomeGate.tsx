@@ -29,9 +29,11 @@ export function useDisclaimerAccepted(): boolean {
 
 interface WelcomeGateProps {
   onAccept: () => void;
+  /** Arrived from a strip-packet QR: one action that continues to their own pill, no sample. */
+  packet?: boolean;
 }
 
-export function WelcomeGate({ onAccept }: WelcomeGateProps) {
+export function WelcomeGate({ onAccept, packet = false }: WelcomeGateProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
@@ -93,13 +95,15 @@ export function WelcomeGate({ onAccept }: WelcomeGateProps) {
 
           <div className="w-full space-y-2">
             <Button onClick={accept} disabled={!checked} size="lg" className="w-full">
-              {t("gate.accept")}
+              {packet ? t("packet.gateContinue") : t("gate.accept")}
             </Button>
+            {!packet && (<>
             <Button onClick={tryIt} disabled={!checked} size="lg" variant="outline" className="w-full gap-2">
               <Zap className="h-4 w-4" />
               {t("welcome.try").replace("{imprint}", SAMPLE_IMPRINT)}
             </Button>
             <p className="text-xs text-muted-foreground font-sans normal-case">{t("welcome.tryHint")}</p>
+            </>)}
           </div>
         </div>
       </div>
