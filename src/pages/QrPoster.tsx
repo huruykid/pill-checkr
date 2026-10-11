@@ -12,6 +12,7 @@ import { Printer } from "lucide-react";
  * dependency. Each poster gets its own ?c= code so its scans are separable.
  *
  *   /qr?c=ssp-downtown&lang=es
+ *   /qr?c=ssp-downtown&layout=stickers   20 packet stickers (50 mm), mode=test
  *
  * QR target: the App Store campaign link once the listing is live, else the
  * web landing page. Both work forever; the landing page also works before
@@ -31,7 +32,9 @@ export default function QrPoster() {
 
   // mode=test codes go on strip packets: they stay on the web flow even once
   // the App Store is live, because an install is the friction they remove.
-  const packet = params.get("mode") === "test";
+  // Stickers only ever go on packets, so they always use packet mode.
+  const stickers = params.get("layout") === "stickers";
+  const packet = stickers || params.get("mode") === "test";
   const target = useMemo(() => {
     const web = `${SITE_URL}/go?c=${campaign}${packet ? "&mode=test" : ""}${lang !== "en" ? `&lang=${lang}` : ""}`;
     return APP_STORE_LIVE && !packet ? appStoreUrl(campaign) : web;
@@ -51,7 +54,7 @@ export default function QrPoster() {
   return (
     <div className="min-h-dvh bg-white text-black">
       <style>{`
-        @page { size: auto; margin: 12mm; }
+        @page { size: auto; margin: ${stickers ? "6mm" : "12mm"}; }
         @media print {
           .no-print { display: none !important; }
           .poster { box-shadow: none !important; border: none !important; }
@@ -73,6 +76,9 @@ export default function QrPoster() {
         </div>
       </div>
 
+      {stickers ? (
+        <StickerSheet svg={svg} />
+      ) : (
       <article className="poster mx-auto flex w-[210mm] max-w-full flex-col items-center border border-neutral-200 bg-white px-[16mm] py-[14mm] text-center shadow-lg print:w-auto">
         <h1 className="font-display text-[44pt] leading-[0.95] tracking-wide">{t("poster.headline")}</h1>
         <p className="mt-3 font-display text-[30pt] leading-none text-red-600">{t("poster.sub")}</p>
@@ -97,6 +103,35 @@ export default function QrPoster() {
           <span>{SITE_URL.replace(/^https?:\/\//, "")}/go</span>
         </div>
       </article>
+      )}
+    </div>
+  );
+}
+
+const STICKERS_PER_SHEET = 20;
+
+/**
+ * 4 × 5 grid of 50 mm squares: fits both Letter and A4 inside 6 mm margins.
+ * Print on full-sheet label paper and cut on the dashed lines (or plain paper
+ * and tape). Every sticker on a sheet shares the sheet's ?c= code.
+ */
+function StickerSheet({ svg }: { svg: string }) {
+  const { t } = useI18n();
+  return (
+    <div className="poster mx-auto grid w-[200mm] grid-cols-4 bg-white shadow-lg print:shadow-none">
+      {Array.from({ length: STICKERS_PER_SHEET }, (_, i) => (
+        <div
+          key={i}
+          className="flex h-[50mm] w-[50mm] flex-col items-center justify-between border border-dashed border-neutral-400 px-[3mm] py-[2.5mm] text-center"
+        >
+          <p className="font-display text-[13pt] leading-none">{t("sticker.top")}</p>
+          <div className="w-[29mm] [&_svg]:h-auto [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: svg }} aria-hidden="true" />
+          <div className="leading-tight">
+            <p className="text-[7.5pt] font-semibold">{t("sticker.scan")}</p>
+            <p className="text-[7.5pt] font-bold text-red-700">{t("sticker.key")}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
