@@ -157,7 +157,7 @@ iPhone. Reviewers use iPad.
 linked from the footer (web) AND from Settings (native, where there is no
 footer). Both links must be tapped on an iPad before every archive; a dead
 "Privacy Policy" tap is exactly what got Juice rejected under 2.1.
-Contact address used: privacy@pillcheckr.app — this mailbox must exist.
+Contact address used: huruydesigns@gmail.com (switch to privacy@pillcheckr.app once that mailbox exists).
 
 ## Location & the map (the contract)
 - Precise coordinates NEVER go on `counterfeit_reports`. They live in

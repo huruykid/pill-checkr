@@ -198,7 +198,7 @@ Demo account (optional — every feature works logged out):
 - [ ] Alerts screenshot (04) retaken with real advisories, not sample reports
 - [ ] `npm run preflight` clean (typecheck, lint, check:i18n) on the commit being archived
 - [ ] All 10 screenshots recaptured on that build: say "Stamped", no raw `testStrip.` keys, Alerts shows the dock and emergency button apart
-- [ ] privacy@pillcheckr.app mailbox exists (policy references it)
+- [x] Privacy contact uses an existing mailbox (huruydesigns@gmail.com)
 - [ ] Demo account created; credentials pasted into review notes
 - [ ] iPad simulator dead-tap pass (RELEASING.md checklist, incl. logged-out Settings → Privacy)
 - [ ] TestFlight pass on a real device

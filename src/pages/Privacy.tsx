@@ -246,8 +246,8 @@ export default function Privacy() {
             <p>
               If we make a material change to this policy we will update the date at the top and note the change in
               the app. Questions, requests, or concerns:{" "}
-              <a href="mailto:privacy@pillcheckr.app" className="text-primary underline underline-offset-4">
-                privacy@pillcheckr.app
+              <a href="mailto:huruydesigns@gmail.com" className="text-primary underline underline-offset-4">
+                huruydesigns@gmail.com
               </a>
               .
             </p>
