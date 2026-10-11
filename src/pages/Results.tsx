@@ -447,6 +447,9 @@ export default function Results() {
             prefill={{ imprint: report.imprint_text, drug: matches[0]?.drug_name, strip: loggedStrip, reportId: report.id }}
           />
 
+          {/* Never use alone: right after testing, before the person uses. */}
+          {isOwner && <BuddyAlert className="mb-6" />}
+
           {/* Share: the emotional peak is right after logging a strip. */}
           {isOwner && (
             <ShareResultCard
@@ -674,16 +677,6 @@ export default function Results() {
           {/* Drug Interaction Checker */}
           {matches.length > 0 && (
             <InteractionChecker drugName={matches[0].drug_name} className="mb-6" />
-          )}
-
-          {/* Buddy Alert System */}
-          {isOwner && (
-          <BuddyAlert
-            reportId={report.id}
-            drugName={matches.length > 0 ? matches[0].drug_name : undefined}
-            riskLevel={riskLevel}
-            className="mb-6"
-          />
           )}
 
           {/* Report This Pill */}
