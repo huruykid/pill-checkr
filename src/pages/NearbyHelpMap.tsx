@@ -37,11 +37,11 @@ interface Facility {
 
 type FilterType = "all" | "treatment" | "naloxone" | "harm-reduction";
 
-const filterConfig: { value: FilterType; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "treatment", label: "Treatment Centers" },
-  { value: "naloxone", label: "Naloxone Access" },
-  { value: "harm-reduction", label: "Harm Reduction" },
+const filterConfig: { value: FilterType; labelKey: string }[] = [
+  { value: "all", labelKey: "help.filter.all" },
+  { value: "treatment", labelKey: "help.filter.treatment" },
+  { value: "naloxone", labelKey: "help.filter.naloxone" },
+  { value: "harm-reduction", labelKey: "help.filter.harmReduction" },
 ];
 
 function matchesFilter(facility: Facility, filter: FilterType): boolean {
@@ -124,7 +124,7 @@ export default function NearbyHelpMap() {
       });
       L.marker([center.lat, center.lng], { icon: userIcon })
         .addTo(map)
-        .bindPopup("Your location");
+        .bindPopup(t("help.yourLocation"));
     }
 
     const bounds = L.latLngBounds([]);
@@ -150,7 +150,7 @@ export default function NearbyHelpMap() {
             <span style="font-size:12px;color:#666">${f.address}</span><br/>
             ${f.phone ? `<a href="tel:${f.phone}" style="font-size:12px">📞 ${f.phone}</a><br/>` : ""}
             ${f.services.length > 0 ? `<span style="font-size:11px;color:#888">${f.services.slice(0, 2).join(", ")}</span><br/>` : ""}
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.address)}" target="_blank" rel="noopener noreferrer" style="font-size:12px">Get Directions →</a>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.address)}" target="_blank" rel="noopener noreferrer" style="font-size:12px">${t("help.directions")} →</a>
           </div>
         `;
 
@@ -187,7 +187,7 @@ export default function NearbyHelpMap() {
       addMarkersToMap(facs.filter((f: Facility) => matchesFilter(f, filter)), center || undefined);
     } catch (e) {
       console.error("Error finding treatment:", e);
-      setLocationError("Unable to find facilities. Try a different ZIP code.");
+      setLocationError(t("help.error.search"));
       setSearched(true);
     } finally {
       setLoading(false);
@@ -196,7 +196,7 @@ export default function NearbyHelpMap() {
 
   const useGeolocation = () => {
     if (!navigator.geolocation) {
-      setLocationError("Geolocation not supported. Please enter a ZIP code.");
+      setLocationError(t("help.error.noGeo"));
       return;
     }
     setLoading(true);
@@ -208,7 +208,7 @@ export default function NearbyHelpMap() {
       },
       () => {
         setLoading(false);
-        setLocationError("Location access denied. Please enter a ZIP code.");
+        setLocationError(t("help.error.denied"));
       },
       { timeout: 10000 }
     );
@@ -245,12 +245,13 @@ export default function NearbyHelpMap() {
               size="sm"
             >
               <Navigation className="h-4 w-4" />
-              Use My Location
+              {t("help.useLocation")}
             </Button>
 
             <form onSubmit={handleZipSearch} className="flex gap-2 flex-1 max-w-xs">
               <Input
-                placeholder="ZIP code"
+                placeholder={t("help.zip")}
+                aria-label={t("help.zip")}
                 value={zipcode}
                 onChange={(e) => setZipcode(e.target.value)}
                 maxLength={10}
@@ -272,7 +273,7 @@ export default function NearbyHelpMap() {
               onClick={() => setShowList(!showList)}
             >
               {showList ? <Map className="h-4 w-4" /> : <List className="h-4 w-4" />}
-              {showList ? "Map View" : "List View"}
+              {showList ? t("help.mapView") : t("help.listView")}
             </Button>
           </div>
 
@@ -286,12 +287,12 @@ export default function NearbyHelpMap() {
                 onClick={() => setFilter(f.value)}
                 className="text-xs px-3"
               >
-                {f.label}
+                {t(f.labelKey)}
               </Button>
             ))}
             {searched && (
               <span className="text-xs text-muted-foreground self-center ml-2">
-                {filteredFacilities.length} result{filteredFacilities.length !== 1 ? "s" : ""}
+                {t(filteredFacilities.length === 1 ? "help.result" : "help.results").replace("{n}", String(filteredFacilities.length))}
               </span>
             )}
           </div>
@@ -313,7 +314,7 @@ export default function NearbyHelpMap() {
               {/* Panel header */}
               <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border shrink-0">
                 <span className="text-sm font-semibold text-foreground">
-                  {filteredFacilities.length} result{filteredFacilities.length !== 1 ? "s" : ""}
+                  {t(filteredFacilities.length === 1 ? "help.result" : "help.results").replace("{n}", String(filteredFacilities.length))}
                 </span>
                 <Button variant="ghost" size="icon" onClick={() => setShowList(false)} aria-label={t("common.close")}>
                   <X className="h-4 w-4" />
@@ -326,7 +327,7 @@ export default function NearbyHelpMap() {
               <div className="flex-1 overflow-auto p-4 space-y-3">
                 {!searched && (
                   <p className="text-sm text-muted-foreground text-center py-8">
-                    Search by location to find nearby facilities.
+                    {t("help.searchPrompt")}
                   </p>
                 )}
                 {searched && filteredFacilities.length === 0 && filter !== "naloxone" && (
@@ -376,7 +377,7 @@ export default function NearbyHelpMap() {
                         {f.website && (
                           <a href={f.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 px-1 text-sm text-primary hover:underline">
                             <ExternalLink className="h-3 w-3" />
-                            Website
+                            {t("help.website")}
                           </a>
                         )}
                         <a
@@ -386,7 +387,7 @@ export default function NearbyHelpMap() {
                           className="inline-flex min-h-11 items-center gap-1.5 px-1 text-sm text-primary hover:underline"
                         >
                           <Navigation className="h-3 w-3" />
-                          Get Directions
+                          {t("help.directions")}
                         </a>
                       </div>
                       {f.services.length > 0 && (
@@ -404,13 +405,13 @@ export default function NearbyHelpMap() {
                 <Card className="border-primary/20">
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="flex-1">
-                      <h3 className="font-bold text-sm text-foreground">SAMHSA Helpline</h3>
-                      <p className="text-xs text-muted-foreground">Free, 24/7 referral service</p>
+                      <h3 className="font-bold text-sm text-foreground">{t("help.samhsa")}</h3>
+                      <p className="text-xs text-muted-foreground">{t("help.samhsaDesc")}</p>
                     </div>
                     <a href="tel:18006624357">
                       <Button variant="default" size="sm" className="gap-1.5">
                         <Phone className="h-3.5 w-3.5" />
-                        Call
+                        {t("help.call")}
                       </Button>
                     </a>
                   </CardContent>
