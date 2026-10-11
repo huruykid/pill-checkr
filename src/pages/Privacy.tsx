@@ -84,7 +84,9 @@ export default function Privacy() {
                 language, and the state you chose for alerts, tied to the random device identifier above. Never your
                 IP address, exact location, imprint text, or photos. We collect this ourselves, with no third-party
                 analytics service, to see whether the app works and where it is being used. Raw events are deleted
-                after 90 days; only daily counts are kept.
+                after 90 days; only daily counts are kept. If you first found Stamped through an outreach group's QR
+                code, that group can see total counts for its own code (scans, first checks, strip results logged),
+                never anything about an individual person, their location, the pill, or the strip result.
               </li>
               <li>
                 <strong className="text-foreground">Location, at the detail you choose.</strong> Location is only

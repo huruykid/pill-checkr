@@ -865,6 +865,30 @@ export type Database = {
           },
         ]
       }
+      partner_links: {
+        Row: {
+          created_at: string
+          label: string | null
+          revoked_at: string | null
+          source: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          label?: string | null
+          revoked_at?: string | null
+          source: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          label?: string | null
+          revoked_at?: string | null
+          source?: string
+          token?: string
+        }
+        Relationships: []
+      }
       official_advisories: {
         Row: {
           city: string | null
@@ -1976,6 +2000,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      partner_stats: {
+        Args: { p_token: string }
+        Returns: {
+          first_checks: number
+          label: string | null
+          period: string
+          scans: number
+          source: string
+          strips_logged: number
+          updated_through: string | null
+        }[]
       }
       purge_expired_report_locations: { Args: never; Returns: number }
       rollup_app_events: { Args: never; Returns: undefined }

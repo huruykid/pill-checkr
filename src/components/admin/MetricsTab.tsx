@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { PartnerLinksCard } from "@/components/admin/PartnerLinksCard";
 
 type Daily = Database["public"]["Tables"]["app_events_daily"]["Row"];
 type Funnel = Database["public"]["Views"]["activation_funnel_30d"]["Row"];
@@ -145,6 +146,8 @@ export function MetricsTab() {
           </table>
         </CardContent>
       </Card>
+
+      <PartnerLinksCard />
 
       <Card>
         <CardHeader><CardTitle className="text-base">Week-one retention by cohort day</CardTitle></CardHeader>
