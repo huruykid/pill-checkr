@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/useI18n";
 import { useAuth } from "@/hooks/useAuth";
-import { FlaskConical, ShieldAlert, RotateCcw, CheckCircle } from "lucide-react";
+import { FlaskConical, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { hapticSuccess } from "@/lib/platform";
 import { track } from "@/lib/analytics";
+import { StripDiagram, StripGuide } from "@/components/results/StripGuide";
 
 interface TestStripLoggerProps {
   reportId: string;
@@ -24,6 +25,7 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [savedResult, setSavedResult] = useState<TestResult | null>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(() => {
     // Check if a test result already exists for this report
@@ -68,6 +70,8 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
       }
 
       setSavedResult(result);
+      // An invalid strip tells you nothing: send them straight back to the steps.
+      if (result === "invalid") setGuideOpen(true);
       hapticSuccess();
       track("strip_logged", { result });
       toast.success(t("testStrip.logged"));
@@ -81,21 +85,18 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
   };
 
   // A negative strip is NOT a green/"safe" state: it reads as neutral, with a
-  // flask (the test), never a shield. See CLAUDE.md non-negotiables.
-  const buttons: { result: TestResult; icon: React.ReactNode; className: string }[] = [
+  // drawn strip, never a shield or green. See CLAUDE.md non-negotiables.
+  const buttons: { result: TestResult; className: string }[] = [
     {
       result: "negative",
-      icon: <FlaskConical className="h-5 w-5" />,
       className: "border-border bg-muted/40 hover:bg-muted text-foreground",
     },
     {
       result: "positive",
-      icon: <ShieldAlert className="h-5 w-5" />,
       className: "border-danger/40 bg-danger/10 hover:bg-danger/20 text-danger-text",
     },
     {
       result: "invalid",
-      icon: <RotateCcw className="h-5 w-5" />,
       className: "border-muted-foreground/30 bg-muted/50 hover:bg-muted text-muted-foreground",
     },
   ];
@@ -109,9 +110,11 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
         </CardTitle>
         <p className="text-sm text-muted-foreground">{t("testStrip.subtitle")}</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <StripGuide open={guideOpen} onOpenChange={setGuideOpen} />
+        <p className="text-sm font-medium text-foreground">{t("testStrip.readKey")}</p>
         <div className="grid grid-cols-3 gap-3" role="group" aria-label={t("testStrip.title")}>
-          {buttons.map(({ result, icon, className: btnClass }) => {
+          {buttons.map(({ result, className: btnClass }) => {
             const isActive = savedResult === result;
             return (
               <Button
@@ -121,12 +124,16 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
                 aria-pressed={isActive}
                 onClick={() => logResult(result)}
                 className={cn(
-                  "h-auto flex-col gap-2 py-4 text-sm font-semibold border-2 transition-all whitespace-normal",
+                  "h-auto flex-col gap-2 px-1 py-4 text-sm font-semibold border-2 transition-all whitespace-normal",
                   btnClass,
                   isActive && "ring-2 ring-offset-2 ring-primary"
                 )}
               >
-                {isActive ? <CheckCircle className="h-5 w-5" /> : icon}
+                <StripDiagram reading={result} />
+                <span className="flex items-center gap-1 text-sm font-bold whitespace-nowrap">
+                  {isActive && <CheckCircle className="h-4 w-4" />}
+                  {t(`testStrip.lines.${result}`)}
+                </span>
                 <span className="text-xs leading-tight text-center">
                   {t(`testStrip.${result}`)}
                 </span>
@@ -135,13 +142,18 @@ export function TestStripLogger({ reportId, className, onLogged }: TestStripLogg
           })}
         </div>
         {savedResult && (
-          <p className="mt-3 text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+          <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
             <CheckCircle className="h-3 w-3" />
             {t("testStrip.recorded")}
           </p>
         )}
         {savedResult === "negative" && (
-          <p className="mt-1 text-xs text-muted-foreground text-center">{t("testStrip.negativeNote")}</p>
+          <p className="text-xs text-muted-foreground text-center">{t("testStrip.negativeNote")}</p>
+        )}
+        {savedResult === "invalid" && (
+          <p className="rounded-lg border border-warning bg-warning-light p-3 text-sm font-medium text-warning-text">
+            {t("testStrip.invalidNote")}
+          </p>
         )}
       </CardContent>
     </Card>
