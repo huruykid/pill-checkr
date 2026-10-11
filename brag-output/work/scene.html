@@ -1,0 +1,189 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--red:#C91D1D;--gold:#F9C31F;--warnLight:hsl(45 95% 92%);--warnText:hsl(38 95% 24%);--dangerLight:hsl(0 80% 95%);--muted:hsl(0 0% 40%);--appbg:hsl(0 0% 95%);}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:#fff}
+.abs{position:absolute}
+.disp{font-family:'Bebas Neue',sans-serif;letter-spacing:.01em;line-height:.92}
+#glow{left:0;top:0;width:1920px;height:1080px;background:radial-gradient(900px 600px at 70% 50%,rgba(201,29,29,.22),transparent 70%)}
+/* S1 */
+#s1{left:0;top:0;width:1920px;height:1080px;display:flex;flex-direction:column;justify-content:center;padding-left:180px}
+#s1 .l{font-size:180px;white-space:nowrap}
+#s1 .gold{color:var(--gold)}
+/* S2 */
+#s2{left:0;top:0;width:1920px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#s2 img{width:220px;height:220px;border-radius:50px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.06)}
+#s2 .name{font-size:230px;margin-top:30px}
+#s2 .sub{font-size:44px;font-weight:500;color:#ddd;margin-top:14px}
+#s2 .sub b{color:var(--gold);font-weight:600}
+/* captions */
+.cap{left:180px;top:330px;width:860px}
+.cap .k{font-size:44px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
+.cap .h{font-size:150px;margin-top:18px}
+.cap .p{font-size:40px;color:#cfcfcf;margin-top:26px;line-height:1.3;font-weight:500}
+/* phone */
+#phone{left:1180px;top:60px;width:470px;height:960px;border-radius:72px;background:#151515;padding:16px;box-shadow:0 50px 120px rgba(0,0,0,.7),0 0 0 2px #2a2a2a inset}
+#screen{position:relative;width:100%;height:100%;border-radius:58px;overflow:hidden;background:var(--appbg);color:hsl(0 0% 10%)}
+.island{left:50%;top:14px;width:120px;height:34px;margin-left:-60px;background:#000;border-radius:20px;z-index:9}
+.hdr{left:0;top:0;width:100%;height:118px;background:#fff;border-bottom:1px solid hsl(0 0% 85%);display:flex;align-items:flex-end;padding:0 22px 16px;gap:10px}
+.hdr img{width:34px;height:34px;border-radius:9px}
+.hdr span{font-family:'Bebas Neue';font-size:34px;letter-spacing:.02em}
+.tabs{left:0;bottom:0;width:100%;height:86px;background:#fff;border-top:1px solid hsl(0 0% 85%);display:flex;justify-content:space-around;padding-top:12px;font-size:13px;font-weight:600;color:var(--muted)}
+.tabs div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.tabs i{width:24px;height:24px;border-radius:6px;border:2.5px solid currentColor;display:block}
+.tabs .on{color:var(--red)}
+.fab{right:18px;bottom:104px;width:56px;height:56px;border-radius:50%;background:var(--red);box-shadow:0 8px 20px rgba(201,29,29,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;z-index:5}
+.page{left:0;top:118px;width:100%;bottom:86px;padding:22px 20px}
+.ttl{font-family:'Bebas Neue';font-size:46px;line-height:1}
+.st{font-size:15px;color:var(--muted);margin-top:6px}
+.card{background:#fff;border-radius:16px;border:1px solid hsl(0 0% 88%);padding:16px;margin-top:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,.08)}
+.lbl{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.inp{margin-top:8px;height:58px;border-radius:12px;border:2px solid hsl(0 0% 85%);display:flex;align-items:center;padding:0 16px;font-size:28px;font-weight:700;letter-spacing:.05em}
+.caret{display:inline-block;width:3px;height:30px;background:var(--red);margin-left:3px}
+.btn{margin-top:14px;height:56px;border-radius:12px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px}
+.verdict{background:var(--warnLight);border:2px solid hsl(45 95% 55%);border-radius:16px;padding:16px;margin-top:16px}
+.verdict .vt{font-size:13px;font-weight:700;color:var(--warnText);text-transform:uppercase;letter-spacing:.08em}
+.verdict .vb{font-size:19px;font-weight:700;color:var(--warnText);margin-top:8px;line-height:1.3}
+.verdict .vw{font-size:13.5px;color:hsl(0 0% 30%);margin-top:8px;line-height:1.4}
+.step{display:flex;gap:10px;font-size:14px;color:hsl(0 0% 30%);margin-top:8px;align-items:flex-start}
+.step b{flex:0 0 22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.sbtn{height:54px;border-radius:12px;border:2px solid hsl(0 0% 85%);display:flex;align-items:center;padding:0 16px;font-weight:600;font-size:16px;margin-top:10px;background:#fff}
+.toast{left:20px;right:20px;bottom:180px;height:60px;border-radius:14px;background:#1a1a1a;color:#fff;display:flex;align-items:center;padding:0 18px;font-weight:600;font-size:17px;gap:10px;z-index:8}
+.chips{display:flex;gap:8px;margin-top:14px}
+.chip{height:40px;border-radius:20px;padding:0 16px;display:flex;align-items:center;font-weight:600;font-size:14px;border:2px solid hsl(0 0% 85%);background:#fff}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff}
+.banner{margin-top:14px;border-radius:12px;background:var(--dangerLight);border:2px solid var(--red);padding:12px 14px;font-weight:700;font-size:15px;color:var(--red)}
+.ac{background:#fff;border-radius:14px;border:1px solid hsl(0 0% 88%);padding:14px;margin-top:12px;display:flex;gap:12px}
+.ac .dot{flex:0 0 42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:20px}
+.ac .im{font-weight:700;font-size:18px}
+.ac .sd{font-size:13.5px;color:var(--muted);margin-top:2px}
+.ac .tag{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:8px}
+.sample{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+.tap{width:70px;height:70px;border-radius:50%;border:4px solid rgba(201,29,29,.8);z-index:20;margin:-35px 0 0 -35px}
+/* outro */
+#s6{left:0;top:0;width:1920px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#s6 .big{font-size:150px}
+#s6 .big em{font-style:normal;color:var(--gold)}
+#s6 .rules{display:flex;gap:28px;margin-top:40px}
+#s6 .rules div{font-size:40px;font-weight:600;padding:16px 30px;border-radius:16px;border:2px solid rgba(255,255,255,.18)}
+#s6 .brand{display:flex;align-items:center;gap:22px;margin-top:70px}
+#s6 .brand img{width:84px;height:84px;border-radius:20px}
+#s6 .brand span{font-family:'Bebas Neue';font-size:76px}
+#s6 .brand small{font-size:30px;color:#bbb;font-weight:500;margin-left:10px}
+</style></head><body>
+<div id="glow" class="abs"></div>
+
+<div id="s1" class="abs"><div id="s1a"><div class="l disp">A photo can't</div><div class="l disp">detect fentanyl.</div></div><div class="l disp gold" id="s1b">A $1 test strip can.</div></div>
+
+<div id="s2" class="abs"><img src="icon.svg" id="s2i"><div class="name disp" id="s2n">Stamped</div><div class="sub" id="s2s">Identify a pill. <b>Test it.</b> Warn others.</div></div>
+
+<div class="cap abs" id="c3"><div class="k">01 · Identify</div><div class="h disp">Type the imprint.</div><div class="p">See what it's stamped to be — and if that pill is commonly faked.</div></div>
+<div class="cap abs" id="c4"><div class="k">02 · Test</div><div class="h disp">Log your strip.</div><div class="p">Two taps. No account needed.</div></div>
+<div class="cap abs" id="c5"><div class="k">03 · Alerts</div><div class="h disp">Warn the next person.</div><div class="p">Anonymous, city-level reports of what's being found near you.</div></div>
+
+<div id="phone" class="abs"><div id="screen">
+  <div class="island abs"></div>
+  <div class="hdr abs"><img src="icon.svg"><span>Stamped</span></div>
+
+  <div class="page abs" id="p3">
+    <div class="ttl">Check a pill</div>
+    <div class="st">What is this pill stamped to be?</div>
+    <div class="card"><div class="lbl">Imprint</div><div class="inp"><span id="typed"></span><span class="caret" id="caret"></span></div><div class="btn" id="chk">Check imprint</div></div>
+    <div class="verdict" id="vd"><div class="vt">What This Check Means</div><div class="vb">Imprint matches Oxycodone 30 mg — a commonly counterfeited pill. Treat it as untested.</div><div class="vw">A photo cannot detect fentanyl. Pressed counterfeits copy the imprint, color, and shape exactly.</div>
+      <div class="step"><b>1</b>Test it with a fentanyl test strip before any use.</div>
+      <div class="step"><b>2</b>Have naloxone (Narcan) within reach.</div></div>
+  </div>
+
+  <div class="page abs" id="p4">
+    <div class="verdict" style="margin-top:0"><div class="vt">M 30 · Oxycodone 30 mg</div><div class="vb" style="font-size:16px">Commonly counterfeited. Treat it as untested.</div></div>
+    <div class="card"><div style="font-weight:700;font-size:20px">Did you test this pill with a strip?</div><div class="st">Log your fentanyl test strip result. No account needed.</div>
+      <div class="sbtn" id="bneg">⚗︎&nbsp; Negative on this strip</div>
+      <div class="sbtn" id="bpos">⚠︎&nbsp; Positive — fentanyl detected</div>
+      <div class="sbtn">↻&nbsp; Invalid / redo</div>
+    </div>
+  </div>
+  <div class="toast abs" id="toast">✓ Result logged</div>
+
+  <div class="page abs" id="p5">
+    <div class="ttl">Alerts</div>
+    <div class="st">What people are finding, reported anonymously</div>
+    <div class="chips"><div class="chip on">Near me</div><div class="chip">Everywhere</div></div>
+    <div class="banner" id="bn">3 fentanyl-positive strips reported in the last 7 days</div>
+    <div class="ac" id="a1"><div class="dot" style="background:var(--red)">!</div><div><div class="im">M 30</div><div class="sd">stamped as Oxycodone · Fresno, CA · 2h ago</div><span class="tag" style="background:var(--dangerLight);color:var(--red)">Fentanyl detected</span></div></div>
+    <div class="ac" id="a2"><div class="dot" style="background:hsl(45 95% 55%);color:#1a1a1a">?</div><div><div class="im">Unknown pill</div><div class="sd">Clovis, CA · 5h ago</div><span class="tag" style="background:var(--warnLight);color:var(--warnText)">Untested</span></div></div>
+    <div class="ac" id="a3"><div class="dot" style="background:var(--red)">!</div><div><div class="im">K9</div><div class="sd">stamped as Oxycodone · Fresno, CA · yesterday</div><span class="tag" style="background:var(--dangerLight);color:var(--red)">Fentanyl detected</span></div></div>
+    <div class="sample" id="smp">Sample reports for illustration</div>
+  </div>
+
+  <div class="fab abs">SOS</div>
+  <div class="tabs abs"><div id="t1" class="on"><i></i>Identify</div><div id="t2"><i></i>Alerts</div><div><i></i>Help</div><div><i></i>History</div></div>
+  <div class="tap abs" id="tap"></div>
+</div></div>
+
+<div id="s6" class="abs">
+  <div class="big disp">Stamped <em>never</em> says a pill is safe.</div>
+  <div class="rules" id="rules"><div>Test every time.</div><div>Never use alone.</div><div>Carry naloxone.</div></div>
+  <div class="brand" id="brand"><img src="icon.svg"><span>Stamped</span><small>Free · Anonymous · No account</small></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>{x=cl(x);return 1-Math.pow(1-x,3)};
+const io=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+// progress of t across [a,b]
+const p=(t,a,b)=>ease((t-a)/(b-a));
+// visibility window: fade in at a over d, out at b over d
+const win=(t,a,b,d=.35)=>Math.min(p(t,a,a+d),1-io((t-(b-d))/d));
+function set(el,o,tx=0,ty=0,s=1){el.style.opacity=o;el.style.transform=`translate(${tx}px,${ty}px) scale(${s})`}
+function tapAt(t,t0,id){const r=$(id).getBoundingClientRect(),R=$('screen').getBoundingClientRect();const x=r.left-R.left+r.width*.5,y=r.top-R.top+r.height/2;const e=$('tap');const k=(t-t0)/.45;if(k<0||k>1){e.style.opacity=0;return}e.style.left=x+'px';e.style.top=y+'px';e.style.opacity=1-k;e.style.transform=`scale(${.5+k*.9})`}
+
+window.render=function(t){
+  // glow drifts
+  $('glow').style.opacity=.6+.4*Math.sin(t*.6);
+  // S1
+  const a1=p(t,.1,.6), b1=p(t,1.3,1.8), o1=1-io((t-3.05)/.35);
+  set($('s1a'),Math.min(a1,o1),0,(1-a1)*40);
+  set($('s1b'),Math.min(b1,o1),0,(1-b1)*40);
+  // S2
+  const o2=win(t,3.45,6.0,.35);
+  set($('s2'),o2);
+  const ic=p(t,3.45,4.0);$('s2i').style.transform=`scale(${.7+.3*ic}) rotate(${(1-ic)*-12}deg)`;
+  const nm=p(t,3.65,4.15);set($('s2n'),nm,0,(1-nm)*30);
+  const sb=p(t,4.0,4.5);set($('s2s'),sb,0,(1-sb)*20);
+  // phone
+  const ph=win(t,6.05,17.8,.45);const phs=p(t,6.05,6.6);
+  set($('phone'),ph,0,(1-phs)*120);
+  // captions
+  [['c3',6.2,11.0],['c4',11.05,14.5],['c5',14.55,17.75]].forEach(([id,a,b])=>{const o=win(t,a,b,.3);const e=p(t,a,a+.4);set($(id),o,(1-e)*-40,0)});
+  // page 3
+  set($('p3'),win(t,6.0,11.0,.25));
+  const txt="M 30";const n=Math.floor(cl((t-6.7)/.18,0,4));$('typed').textContent=txt.slice(0,n);
+  $('caret').style.opacity=(t<7.6&&Math.floor(t*2.5)%2===0)||(t>6.6&&t<7.5&&n<4)?1:0;
+  const pressed=t>7.75&&t<7.95;$('chk').style.transform=`scale(${pressed?.96:1})`;
+  tapAt(t,7.75,'chk');
+  const v=p(t,8.0,8.5);set($('vd'),v,0,(1-v)*30);
+  // page 4
+  set($('p4'),win(t,11.0,14.5,.25));
+  const pos=t>12.6;const bp=$('bpos');bp.style.background=pos?'var(--red)':'#fff';bp.style.color=pos?'#fff':'';bp.style.borderColor=pos?'var(--red)':'';
+  bp.style.transform=`scale(${t>12.6&&t<12.8?.97:1})`;
+  if(t>11&&t<14.5)tapAt(t,12.6,'bpos');
+  const ts=win(t,12.9,14.3,.25);set($('toast'),ts,0,(1-p(t,12.9,13.2))*30);
+  // page 5
+  set($('p5'),win(t,14.5,17.8,.25));
+  const bn=p(t,14.85,15.2);set($('bn'),bn,0,(1-bn)*16);
+  ['a1','a2','a3'].forEach((id,i)=>{const k=p(t,15.15+i*.22,15.55+i*.22);set($(id),k,0,(1-k)*24)});
+  set($('smp'),p(t,15.9,16.2));
+  const onAlerts=t>14.5;$('t1').className=onAlerts?'':'on';$('t2').className=onAlerts?'on':'';
+  if(t>14.5)$('tap').style.opacity=0;
+  // outro
+  const o6=p(t,18.0,18.45);set($('s6'),o6,0,0,.97+.03*o6);
+  ['rules','brand'].forEach((id,i)=>{const k=p(t,19.0+i*.5,19.45+i*.5);set($(id),k,0,(1-k)*24)});
+  // hide outro before
+  $('s6').style.visibility=t<17.9?'hidden':'visible';
+};
+window.ready=Promise.all([document.fonts.ready,...[...document.images].map(i=>i.complete?1:new Promise(r=>i.onload=r))]);
+render(0);
+</script></body></html>
