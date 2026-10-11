@@ -27,7 +27,9 @@ const smsHref = (message: string, phone = "") =>
 // The message leaves from the person's own phone (share sheet, Messages, Mail).
 // Stamped sends and stores nothing, so it works for guests and never claims a
 // delivery it can't make.
-export function BuddyAlert({ riskLevel, className }: BuddyAlertProps) {
+// Shown on every owner result: no pill is known to be safe, so every use
+// benefits from someone checking in.
+export function BuddyAlert({ className }: BuddyAlertProps) {
   const { user } = useAuth();
   const { t } = useI18n();
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -43,9 +45,6 @@ export function BuddyAlert({ riskLevel, className }: BuddyAlertProps) {
         else setContacts(data || []);
       });
   }, [user]);
-
-  // Only show for high risk
-  if (riskLevel !== "high") return null;
 
   const message = t("buddy.message");
 
