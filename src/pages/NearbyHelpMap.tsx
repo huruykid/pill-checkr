@@ -66,7 +66,9 @@ export default function NearbyHelpMap() {
   const [searchParams] = useSearchParams();
   const initialFilter = (searchParams.get("filter") as FilterType) || "all";
   const [filter, setFilter] = useState<FilterType>(initialFilter);
-  const [showList, setShowList] = useState(false);
+  // Arriving from "Find naloxone" opens the list, so the OTC / by-mail
+  // fallback is visible before (or without) a location search.
+  const [showList, setShowList] = useState(initialFilter === "naloxone");
 
   const filteredFacilities = facilities.filter((f) => matchesFilter(f, filter));
 
@@ -227,7 +229,11 @@ export default function NearbyHelpMap() {
         path="/nearby-help"
         jsonLd={makeWebPage("Find Help Near You", "/nearby-help", "Locate naloxone, testing services, and treatment centers nearby.")}
       />
-      <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
+      <div
+        className="flex flex-col"
+        // Header (3.5rem + top inset) and the tab bar (--tab-bar-space + bottom inset) own their own space.
+        style={{ height: "calc(100dvh - 3.5rem - env(safe-area-inset-top) - var(--tab-bar-space) - env(safe-area-inset-bottom))" }}
+      >
         {/* Top bar: search + filters */}
         <div className="border-b border-border bg-card px-4 py-3 space-y-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center max-w-5xl mx-auto w-full">
@@ -296,7 +302,8 @@ export default function NearbyHelpMap() {
         </div>
 
         {/* Map / List area */}
-        <div className="flex-1 relative overflow-hidden">
+        {/* isolate: Leaflet panes and the z-[1000] list stay inside this box, under the emergency FAB. */}
+        <div className="flex-1 relative isolate overflow-hidden">
           {/* Map container — always visible */}
           <div ref={mapRef} className="absolute inset-0 w-full" />
 
@@ -327,7 +334,7 @@ export default function NearbyHelpMap() {
                     {t("help.noResults")}
                   </p>
                 )}
-                {searched && filter === "naloxone" && (
+                {filter === "naloxone" && (
                   <Card className="border-danger/40">
                     <CardContent className="p-4 space-y-2">
                       <h3 className="font-bold text-sm text-foreground">{t("help.naloxone.title")}</h3>
@@ -361,13 +368,13 @@ export default function NearbyHelpMap() {
                       )}
                       <div className="flex flex-wrap gap-2">
                         {f.phone && (
-                          <a href={`tel:${f.phone}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                          <a href={`tel:${f.phone}`} className="inline-flex min-h-11 items-center gap-1.5 px-1 text-sm text-primary hover:underline">
                             <Phone className="h-3 w-3" />
                             {f.phone}
                           </a>
                         )}
                         {f.website && (
-                          <a href={f.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                          <a href={f.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 px-1 text-sm text-primary hover:underline">
                             <ExternalLink className="h-3 w-3" />
                             Website
                           </a>
@@ -376,7 +383,7 @@ export default function NearbyHelpMap() {
                           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.address)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                          className="inline-flex min-h-11 items-center gap-1.5 px-1 text-sm text-primary hover:underline"
                         >
                           <Navigation className="h-3 w-3" />
                           Get Directions

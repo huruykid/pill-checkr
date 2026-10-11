@@ -42,6 +42,7 @@ const translations: Record<Language, Record<string, string>> = {
     "index.heroSubtitle": "Identify a pill by its imprint, learn if it's a type that's commonly faked, and find test strips, naloxone, and help nearby. A photo can't detect fentanyl — only a test can.",
     "index.checkPill": "Identify a Pill",
     "index.getTheFacts": "What's Being Found Near Me",
+    "index.readFacts": "Get the facts on fake pills",
     "index.safetyTitle": "PILL SAFETY 101",
     "index.safetyDesc": "Counterfeit pills are increasingly common and often contain deadly doses of fentanyl. This tool visually compares your pill photos against reference images of known legitimate pills — but only lab testing can confirm what's inside.",
     "index.stripUpload": "Upload",
@@ -518,6 +519,8 @@ const translations: Record<Language, Record<string, string>> = {
     "buddy.addContacts": "Save a contact in Settings for one-tap texting",
     "common.close": "Close",
     "common.search": "Search",
+    "tel.ipadHint": "If this iPad can't place calls, dial {number} from a phone.",
+    "tel.copy": "Copy number",
     "check.analysisProgress": "Analysis progress",
 
     "safety.modal.title": "⚠️ Before You View These Results",
@@ -560,6 +563,7 @@ const translations: Record<Language, Record<string, string>> = {
     "index.heroSubtitle": "Identifica una pastilla por su marca, descubre si es de un tipo que se falsifica con frecuencia y encuentra tiras de prueba, naloxona y ayuda cerca. Una foto no puede detectar fentanilo — solo una prueba puede.",
     "index.checkPill": "Identificar una Pastilla",
     "index.getTheFacts": "Qué Se Está Encontrando Cerca de Mí",
+    "index.readFacts": "Infórmate sobre las pastillas falsas",
     "index.safetyTitle": "SEGURIDAD 101",
     "index.safetyDesc": "Las pastillas falsificadas son cada vez más comunes y a menudo contienen dosis letales de fentanilo. Esta herramienta compara visualmente tus fotos de pastillas con imágenes de referencia — pero solo las pruebas de laboratorio pueden confirmar el contenido.",
     "index.stripUpload": "Subir",
@@ -911,6 +915,8 @@ const translations: Record<Language, Record<string, string>> = {
     "testStrip.guide.source": "Basado en la guía de los CDC sobre tiras de fentanilo. Si las instrucciones de tus tiras son diferentes, sigue esas.",
     "common.close": "Cerrar",
     "common.search": "Buscar",
+    "tel.ipadHint": "Si este iPad no puede hacer llamadas, marca {number} desde un teléfono.",
+    "tel.copy": "Copiar número",
     "check.analysisProgress": "Progreso del análisis",
 
     // History

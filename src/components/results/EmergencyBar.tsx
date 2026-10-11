@@ -10,7 +10,9 @@ export function EmergencyBar({ className }: EmergencyBarProps) {
   const { t } = useI18n();
 
   return (
-    <div className={`sticky top-14 z-40 rounded-lg border-2 border-destructive bg-destructive/10 p-4 space-y-3 ${className || ""}`}>
+    <div
+      style={{ top: "calc(3.5rem + 4px + env(safe-area-inset-top))" }}
+      className={`sticky z-40 rounded-lg border-2 border-destructive bg-destructive/10 p-4 space-y-3 ${className || ""}`}>
       <div className="flex items-center gap-2">
         <AlertTriangle className="h-5 w-5 text-destructive animate-pulse-subtle" />
         <h3 className="font-bold text-destructive uppercase tracking-wide text-sm">
