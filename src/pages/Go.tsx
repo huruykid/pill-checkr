@@ -121,6 +121,9 @@ function PacketLanding({ campaign, onToggleLang, nextLabel }: { campaign: string
             placeholder={t("packet.placeholder")}
             autoCapitalize="characters"
             autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="go"
             className="min-h-11 text-lg font-semibold"
           />
           <Button type="submit" size="xl" className="w-full gap-2 whitespace-normal h-auto py-4">

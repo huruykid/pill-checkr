@@ -79,6 +79,11 @@ I test it?" The home screen answers it above the fold.
   `partner_links` is the credential (codes are guessable); admins mint/revoke
   in Admin → Metrics. Never add per-day series, strip results or state to it.
   Privacy.tsx discloses it. Migration `20261011120000_partner_stats`.
+- "Worried about someone?" (`WorryShare`, Home/Settings/Results): the sender's
+  editable note (`share.worryNote`) + `/go?c=share&mode=test`, sent from their
+  own phone (share sheet → sms: → copy). Every share uses the same `share`
+  code, so the link never identifies the sender. Nothing is stored; only a
+  `share_tapped` event with `kind: "worry"`.
 - Official advisories (`official_advisories` + `_public` view) are the honest
   seed for an empty feed. They are NOT community reports: separate table,
   distinct `AdvisoryCard`, not under the community disclaimer. Enter them

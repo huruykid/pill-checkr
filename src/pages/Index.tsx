@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Search, BookOpen, ArrowRight, Heart, CheckCircle, ArrowDown, Radio, FlaskConical } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { AppStoreBadge } from "@/components/shared/AppStoreBadge";
+import { WorryShare } from "@/components/shared/WorryShare";
 
 const Index = () => {
   const { t } = useI18n();
@@ -65,6 +66,13 @@ const Index = () => {
               <ArrowDown className="h-8 w-8 text-muted-foreground animate-bounce" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Direction C: below the fold, so the hero still answers the one question. */}
+      <section className="bg-background pb-12">
+        <div className="container">
+          <WorryShare placement="home" className="mx-auto max-w-xl" />
         </div>
       </section>
 
@@ -169,7 +177,7 @@ const Index = () => {
                   key={feature}
                   className="flex items-center gap-3 rounded-sm bg-card p-4 border-2 border-border"
                 >
-                  <CheckCircle className="h-5 w-5 text-success shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                   <span className="text-foreground font-sans">{feature}</span>
                 </div>
               ))}

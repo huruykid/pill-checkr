@@ -248,9 +248,10 @@ export default function NearbyHelpMap() {
                 value={zipcode}
                 onChange={(e) => setZipcode(e.target.value)}
                 maxLength={10}
-                className="h-9"
+                inputMode="numeric"
+                autoComplete="postal-code"
               />
-              <Button type="submit" variant="outline" size="sm" disabled={zipcode.trim().length < 5 || loading}>
+              <Button type="submit" variant="outline" size="sm" disabled={zipcode.trim().length < 5 || loading} aria-label={t("common.search")}>
                 <Search className="h-4 w-4" />
               </Button>
             </form>
@@ -277,7 +278,7 @@ export default function NearbyHelpMap() {
                 variant={filter === f.value ? "default" : "outline"}
                 size="sm"
                 onClick={() => setFilter(f.value)}
-                className="text-xs h-7 px-3"
+                className="text-xs px-3"
               >
                 {f.label}
               </Button>
