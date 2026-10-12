@@ -8,6 +8,7 @@ import { IS_NATIVE_BUILD, isNative } from "@/lib/platform";
 import { AuthProvider } from "@/hooks/useAuth";
 import { I18nProvider, useI18n, LANGUAGES, type Language } from "@/hooks/useI18n";
 import { WelcomeGate, useDisclaimerAccepted } from "@/components/shared/WelcomeGate";
+import { TelFallback } from "@/components/shared/TelFallback";
 import Index from "./pages/Index";
 import CheckPill from "./pages/CheckPill";
 import Results from "./pages/Results";
@@ -81,6 +82,7 @@ const App = forwardRef(function App(_props, ref) {
       <AuthProvider>
         <Toaster />
         <Sonner />
+        <TelFallback />
         <BrowserRouter>
         <AppGates>
           <ScrollToTop />

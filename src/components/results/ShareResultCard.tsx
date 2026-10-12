@@ -52,30 +52,39 @@ export function ShareResultCard({
 
   const share = async () => {
     setBusy(true);
+    // Start the share-flag update but don't await it yet: WebKit drops the
+    // tap's user gesture across an await, and navigator.share then rejects.
+    // It resolves to an error instead of rejecting, so a cancelled sheet that
+    // never awaits it can't leave an unhandled rejection.
+    const markShared = canToggle && !shared
+      ? supabase.from("reports").update({ shared: true }).eq("id", reportId).then(({ error }) => {
+          if (!error) onSharedChange?.(true);
+          return error;
+        })
+      : Promise.resolve(null);
+    const text = buildText();
+    const kind = strip || "untested";
+    let method: "sheet" | "clipboard" | null = null;
     try {
-      if (canToggle && !shared) {
-        const { error } = await supabase.from("reports").update({ shared: true }).eq("id", reportId);
-        if (error) throw error;
-        onSharedChange?.(true);
-      }
-      const text = buildText();
-      const kind = strip || "untested";
-      const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void>; canShare?: (d: ShareData) => boolean };
+      const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
       if (nav.share) {
         try {
           await nav.share({ title: "Stamped", text, url });
-          track("share_tapped", { method: "sheet", kind });
-          setDone(true);
-          return;
+          method = "sheet";
         } catch (e) {
           // AbortError = user closed the sheet; anything else falls back to clipboard.
           if ((e as Error)?.name === "AbortError") return;
         }
       }
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      track("share_tapped", { method: "clipboard", kind });
+      if (!method) {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        method = "clipboard";
+      }
+      const err = await markShared;
+      if (err) throw err;
+      track("share_tapped", { method, kind });
       setDone(true);
-      toast.success(t("share.copied"));
+      if (method === "clipboard") toast.success(t("share.copied"));
     } catch (e) {
       console.error(e);
       toast.error(t("results.shareError"));

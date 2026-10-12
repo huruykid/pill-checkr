@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,15 @@ export function TestStripLogger({ reportId, className, onLogged, guideInitiallyO
   const [saving, setSaving] = useState(false);
   const [savedResult, setSavedResult] = useState<TestResult | null>(null);
   const [guideOpen, setGuideOpen] = useState(guideInitiallyOpen);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Packet flow: the guide is why they came, so bring it into view (it sits
+  // under the verdict and, on high-risk results, the emergency bar).
+  useEffect(() => {
+    if (!guideInitiallyOpen) return;
+    const id = window.setTimeout(() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 400);
+    return () => window.clearTimeout(id);
+  }, [guideInitiallyOpen]);
 
   useEffect(() => {
     // Check if a test result already exists for this report
@@ -106,7 +115,7 @@ export function TestStripLogger({ reportId, className, onLogged, guideInitiallyO
   ];
 
   return (
-    <Card className={cn("border-2 border-dashed border-primary/30", className)}>
+    <Card ref={cardRef} className={cn("scroll-mt-24 border-2 border-dashed border-primary/30", className)}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <FlaskConical className="h-5 w-5 text-primary" />

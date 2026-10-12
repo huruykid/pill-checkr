@@ -43,19 +43,19 @@ const Index = () => {
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to="/check">
-                <Button variant="default" size="xl" className="gap-2 w-full sm:w-auto">
-                  <Search className="h-5 w-5" />
+              <Button asChild variant="default" size="xl" className="gap-2 w-full sm:w-auto whitespace-normal h-auto min-h-14 py-3">
+                <Link to="/check">
+                  <Search className="h-5 w-5 shrink-0" />
                   {t("index.checkPill")}
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/trends">
-                <Button variant="outline" size="xl" className="gap-2 w-full sm:w-auto">
-                  <Radio className="h-5 w-5" />
+                  <ArrowRight className="h-5 w-5 shrink-0" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="xl" className="gap-2 w-full sm:w-auto whitespace-normal h-auto min-h-14 py-3">
+                <Link to="/trends">
+                  <Radio className="h-5 w-5 shrink-0" />
                   {t("index.getTheFacts")}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
 
             <div className="mt-6 flex justify-center">
@@ -88,12 +88,12 @@ const Index = () => {
               {t("index.safetyDesc")}
             </p>
 
-            <Link to="/education">
-              <Button variant="hero-outline" size="lg" className="gap-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                {t("index.getTheFacts")}
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
+            <Button asChild variant="hero-outline" size="lg" className="gap-2 whitespace-normal h-auto min-h-11 py-3 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+              <Link to="/education">
+                {t("index.readFacts")}
+                <ArrowRight className="h-5 w-5 shrink-0" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -101,7 +101,7 @@ const Index = () => {
       {/* How It Works - Accent stripe */}
       <section className="border-y-4 border-secondary bg-secondary/10 py-2">
         <div className="container">
-          <div className="flex items-center justify-center gap-4 text-sm font-semibold uppercase tracking-wider text-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm font-semibold uppercase tracking-wider text-foreground">
             <span className="h-2 w-2 rounded-full bg-secondary" />
             <span>{t("index.stripUpload")}</span>
             <span className="h-2 w-2 rounded-full bg-secondary" />

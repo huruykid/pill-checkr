@@ -55,13 +55,16 @@ export function WelcomeGate({ onAccept, packet = false }: WelcomeGateProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground/70 backdrop-blur-sm p-4">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground/70 backdrop-blur-sm"
+      style={{ padding: "max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left))" }}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="gate-title"
         aria-describedby="gate-items"
-        className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border-2 border-warning/30 bg-card p-6 md:p-8 shadow-xl animate-fade-in"
+        className="w-full max-w-lg max-h-full overflow-y-auto rounded-2xl border-2 border-warning/30 bg-card p-6 md:p-8 shadow-xl animate-fade-in"
       >
         <div className="flex flex-col items-center text-center gap-5">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-warning-light">
