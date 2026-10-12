@@ -1,7 +1,7 @@
 # Design: strip-packet companion, then "send this to someone you worry about"
 
 Office-hours session, 2026-10-11 (YC-style, following gstack's `/office-hours` startup mode).
-Status: **approved direction: A, then C.** Nothing below is built yet unless marked.
+Status: **approved direction: A, then C.** A is built (PRs #5, #6, #7); C is built (PR #8). Remaining: the open questions at the end.
 
 ## Why
 

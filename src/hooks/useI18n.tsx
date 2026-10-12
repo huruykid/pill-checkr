@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 type Language = "en" | "es" | "fr" | "pt";
 
@@ -298,6 +298,15 @@ const translations: Record<Language, Record<string, string>> = {
     "share.viewerTitle": "Someone shared this check with you",
     "share.viewerBody": "A photo cannot detect fentanyl. This page shows what the pill is stamped to be, not what is in it. Test before you use and keep naloxone within reach.",
     "share.viewerCta": "Check your own pill",
+    "share.worryNote": "Please test before you take anything. This shows you how, step by step, and it's free. I'd rather you text me than not.",
+    "worry.title": "Worried about someone? Send them this.",
+    "worry.body": "A link that shows them how to test a pill and read a fentanyl strip, with your note on top. It goes from your phone.",
+    "worry.noteLabel": "Your note (change it to sound like you)",
+    "worry.send": "Send it",
+    "worry.copy": "Copy instead",
+    "worry.copied": "Copied. Paste it in a message.",
+    "worry.copyFailed": "Couldn't copy. Press and hold the note to copy it.",
+    "worry.privacy": "Stamped doesn't see who you send it to or what you write, and the link doesn't say it came from you.",
     "go.title": "A photo can't detect fentanyl.",
     "go.subtitle": "A $1 test strip can. Stamped tells you what a pill is stamped to be, whether that type is being faked near you, and where to get strips and naloxone. Free, anonymous, no account.",
     "go.checkNow": "Check a pill now — no download",
@@ -508,6 +517,7 @@ const translations: Record<Language, Record<string, string>> = {
     "buddy.nuaDesc": "1-800-484-3731 · They stay on the line and send help if you stop responding.",
     "buddy.addContacts": "Save a contact in Settings for one-tap texting",
     "common.close": "Close",
+    "common.search": "Search",
     "check.analysisProgress": "Analysis progress",
 
     "safety.modal.title": "⚠️ Before You View These Results",
@@ -802,6 +812,15 @@ const translations: Record<Language, Record<string, string>> = {
     "share.viewerTitle": "Alguien compartió esta verificación contigo",
     "share.viewerBody": "Una foto no puede detectar fentanilo. Esta página muestra lo que la pastilla aparenta ser, no lo que contiene. Prueba antes de usar y ten naloxona a la mano.",
     "share.viewerCta": "Verifica tu propia pastilla",
+    "share.worryNote": "Por favor prueba antes de tomar cualquier cosa. Esto te enseña cómo, paso a paso, y es gratis. Prefiero que me escribas a que no.",
+    "worry.title": "¿Te preocupa alguien? Envíale esto.",
+    "worry.body": "Un enlace que le enseña cómo probar una pastilla y leer una tira de fentanilo, con tu nota arriba. Sale desde tu teléfono.",
+    "worry.noteLabel": "Tu nota (cámbiala para que suene a ti)",
+    "worry.send": "Enviar",
+    "worry.copy": "Copiar",
+    "worry.copied": "Copiado. Pégalo en un mensaje.",
+    "worry.copyFailed": "No se pudo copiar. Mantén presionada la nota para copiarla.",
+    "worry.privacy": "Stamped no ve a quién se lo envías ni lo que escribes, y el enlace no dice que vino de ti.",
     "go.title": "Una foto no puede detectar fentanilo.",
     "go.subtitle": "Una tira de prueba de $1 sí puede. Stamped te dice qué aparenta ser una pastilla, si ese tipo se está falsificando cerca de ti y dónde conseguir tiras y naloxona. Gratis, anónimo, sin cuenta.",
     "go.checkNow": "Verificar una pastilla ahora — sin descargar",
@@ -851,7 +870,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Test Strip Logger
     "testStrip.title": "¿Probaste químicamente esta pastilla?",
-    "testStrip.subtitle": "Registra el resultado de tu tira de fentanilo.",
+    "testStrip.subtitle": "Registra el resultado de tu tira de fentanilo. No necesitas cuenta.",
     "testStrip.negative": "Negativo en esta tira",
     "testStrip.positive": "Positivo (Fentanilo Detectado)",
     "testStrip.invalid": "Inválido / Repetir",
@@ -891,6 +910,7 @@ const translations: Record<Language, Record<string, string>> = {
     "testStrip.guide.timerDone": "Se acabó el tiempo — lee tu tira ahora.",
     "testStrip.guide.source": "Basado en la guía de los CDC sobre tiras de fentanilo. Si las instrucciones de tus tiras son diferentes, sigue esas.",
     "common.close": "Cerrar",
+    "common.search": "Buscar",
     "check.analysisProgress": "Progreso del análisis",
 
     // History
@@ -1658,6 +1678,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (saved && LANGUAGES.includes(saved as Language)) return saved as Language;
     return "en";
   });
+
+  // VoiceOver reads with the page language; keep <html lang> in step.
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
 
   const handleSetLang = (newLang: Language) => {
     setLang(newLang);

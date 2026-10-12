@@ -36,6 +36,8 @@ export function TestStripLogger({ reportId, className, onLogged, guideInitiallyO
         .from("test_strip_results")
         .select("result")
         .eq("report_id", reportId)
+        // Guests correct a result by inserting a new row; the latest one wins.
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (data) setSavedResult(data.result as TestResult);
@@ -115,7 +117,7 @@ export function TestStripLogger({ reportId, className, onLogged, guideInitiallyO
       <CardContent className="space-y-3">
         <StripGuide open={guideOpen} onOpenChange={setGuideOpen} />
         <p className="text-sm font-medium text-foreground">{t("testStrip.readKey")}</p>
-        <div className="grid grid-cols-3 gap-3" role="group" aria-label={t("testStrip.title")}>
+        <div className="grid grid-cols-3 gap-2" role="group" aria-label={t("testStrip.title")}>
           {buttons.map(({ result, className: btnClass }) => {
             const isActive = savedResult === result;
             return (
@@ -132,7 +134,7 @@ export function TestStripLogger({ reportId, className, onLogged, guideInitiallyO
                 )}
               >
                 <StripDiagram reading={result} />
-                <span className="flex items-center gap-1 text-sm font-bold whitespace-nowrap">
+                <span className="flex items-center justify-center gap-1 text-sm font-bold leading-tight">
                   {isActive && <CheckCircle className="h-4 w-4" />}
                   {t(`testStrip.lines.${result}`)}
                 </span>

@@ -48,6 +48,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/integrations/supabase/types";
 import { trackVerdictViewed, isMyReport } from "@/lib/analytics";
 import { ShareResultCard } from "@/components/results/ShareResultCard";
+import { WorryShare } from "@/components/shared/WorryShare";
 import { AdvisoryCard, type OfficialAdvisory } from "@/components/alerts/AdvisoryCard";
 import { AppStoreBadge } from "@/components/shared/AppStoreBadge";
 
@@ -468,6 +469,9 @@ export default function Results() {
               onSharedChange={(shared) => setData({ ...data, report: { ...report, shared } })}
             />
           )}
+
+          {/* Direction C: send the test flow to someone you worry about. */}
+          {isOwner && <WorryShare placement="results" className="mb-6" />}
 
           {/* Section B: What this check can and cannot tell you (categorical, no scores) */}
           <Card className="mb-6 border-warning/40">

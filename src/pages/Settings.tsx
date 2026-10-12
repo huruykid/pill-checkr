@@ -26,6 +26,7 @@ import { WebhookManager } from "@/components/settings/WebhookManager";
 import { DeleteAccount } from "@/components/settings/DeleteAccount";
 import { AreaAlertsToggle } from "@/components/alerts/AreaAlertsToggle";
 import { isNative } from "@/lib/platform";
+import { WorryShare } from "@/components/shared/WorryShare";
 
 interface Contact {
   id: string;
@@ -145,7 +146,7 @@ export default function Settings() {
                   Emergency Contacts
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Sign in to save people who can check on you when a high-risk pill is detected.
+                  Sign in to save people you can text in one tap from any result, so someone can check on you.
                   Everything else in Stamped works without an account.
                 </p>
               </CardHeader>
@@ -166,7 +167,7 @@ export default function Settings() {
                 Emergency Contacts
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                People who can check on you when a high-risk pill is detected.
+                People you can text in one tap from any result, so someone can check on you.
                 These contacts are used by the Buddy Alert feature on the Results page.
               </p>
             </CardHeader>
@@ -221,6 +222,7 @@ export default function Settings() {
                             size="icon"
                             className="shrink-0 text-muted-foreground hover:text-destructive"
                             onClick={() => deleteContact(c.id)}
+                            aria-label={`Delete ${c.name}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -315,6 +317,9 @@ export default function Settings() {
             </CardContent>
           </Card>
           )}
+
+          {/* Works for guests: nothing is saved, the note leaves from this phone. */}
+          <WorryShare placement="settings" className="mt-6" />
 
           {/* Area alert pushes — native only; renders once a state is saved */}
           <AreaAlertsToggle className="mt-6" />

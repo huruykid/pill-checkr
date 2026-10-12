@@ -15,7 +15,7 @@ export function StripDiagram({ reading, className }: { reading: StripReading; cl
   const showC = reading !== "invalid";
   const showT = reading === "negative";
   return (
-    <svg viewBox="0 0 72 22" className={cn("!h-6 !w-[78px] shrink-0", className)} aria-hidden="true">
+    <svg viewBox="0 0 72 22" className={cn("!h-auto !w-full !max-w-[78px]", className)} aria-hidden="true">
       <rect x="0.5" y="0.5" width="71" height="21" rx="4" fill="#fff" stroke="hsl(0 0% 70%)" />
       {/* wavy dip end */}
       <path d="M2 4 q3 3.5 0 7 q-3 3.5 0 7" fill="none" stroke="hsl(0 0% 70%)" />
@@ -97,9 +97,10 @@ export function StripGuide({ open, onOpenChange }: { open: boolean; onOpenChange
 
           <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
             <Timer className="h-5 w-5 shrink-0 text-primary" />
-            <div className="flex-1" aria-live="polite">
-              <p className="font-mono text-2xl font-bold tabular-nums text-foreground">{mm}:{ss}</p>
-              <p className="text-xs text-muted-foreground">
+            <div className="flex-1">
+              {/* role=timer is not announced every tick; only the hint/done line is live. */}
+              <p role="timer" className="font-mono text-2xl font-bold tabular-nums text-foreground">{mm}:{ss}</p>
+              <p aria-live="polite" className="text-xs text-muted-foreground">
                 {timer.done ? t("testStrip.guide.timerDone") : t("testStrip.guide.timerHint")}
               </p>
             </div>
