@@ -2,7 +2,7 @@
 // Prevent Overdose RI (https://preventoverdoseri.org/test-ri/). testRI tested
 // 203 community samples across Rhode Island in 2022-2024 at the Rhode Island
 // Hospital toxicology lab; the study has concluded, so there is no schedule -
-// re-run manually if the page changes. Same normalized shape as the UNC feed.
+// re-run manually if the page changes. Uses the shared normalized lab-report shape.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {

@@ -7,7 +7,7 @@ supply, and an EMS dispatch is not a confirmed overdose.
 
 | Table | Evidence | Sync function | Cadence |
 |---|---|---|---|
-| `external_reports` | Lab results on street samples | `sync-unc-drugchecking`, `import-testri` | see notes |
+| `external_reports` | Lab results on street samples | `import-testri` | see notes |
 | `external_deaths` | Medical examiner / coroner drug deaths | `sync-me-deaths` | daily 04:45 UTC |
 | `external_incidents` | Nonfatal EMS / 911 overdose responses | `sync-od-incidents` | hourly :20 |
 | `external_alerts` | Official advisories | `sync-nps-alerts`, `sync-health-alerts` | daily |
