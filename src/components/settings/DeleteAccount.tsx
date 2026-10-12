@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { isNative } from "@/lib/platform";
 
 /** In-app account deletion — required by App Store Guideline 5.1.1(v). */
 export function DeleteAccount() {
+  const { t } = useI18n();
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
@@ -45,11 +47,11 @@ export function DeleteAccount() {
         ...ANALYTICS_STORAGE_KEYS,
       ].forEach((k) => localStorage.removeItem(k));
       await supabase.auth.signOut();
-      toast.success("Your account and data have been deleted.");
+      toast.success(t("deleteAccount.done"));
       navigate("/", { replace: true });
     } catch (e) {
       console.error(e);
-      toast.error("Could not delete account. Please try again or contact support.");
+      toast.error(t("deleteAccount.failed"));
       setDeleting(false);
     }
   };
@@ -59,30 +61,29 @@ export function DeleteAccount() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-danger">
           <TriangleAlert className="h-5 w-5" />
-          Delete Account
+          {t("deleteAccount.title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Permanently deletes your account, check history, uploaded pill photos, emergency contacts,
-          test strip logs, and API keys. This cannot be undone.
+          {t("deleteAccount.body")}
         </p>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="gap-2">
               <Trash2 className="h-4 w-4" />
-              Delete my account
+              {t("deleteAccount.button")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+              <AlertDialogTitle>{t("deleteAccount.confirmTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                All of your data will be erased immediately. Type <strong>DELETE</strong> to confirm.
+                {t("deleteAccount.confirmBody")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-2">
-              <Label htmlFor="confirm-delete">Confirmation</Label>
+              <Label htmlFor="confirm-delete">{t("deleteAccount.confirmLabel")}</Label>
               <Input
                 id="confirm-delete"
                 value={confirmText}
@@ -92,13 +93,13 @@ export function DeleteAccount() {
               />
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={deleting}>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 disabled={confirmText !== "DELETE" || deleting}
                 onClick={(e) => { e.preventDefault(); handleDelete(); }}
                 className="bg-danger text-danger-foreground hover:bg-danger/90"
               >
-                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete permanently"}
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("deleteAccount.confirmButton")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import { Layout } from "@/components/layout/Layout";
 import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ interface Contact {
 }
 
 export default function Settings() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ export default function Settings() {
       setContacts(data || []);
     } catch (e) {
       console.error("Error fetching contacts:", e);
-      toast.error("Failed to load contacts");
+      toast.error(t("settings.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,7 @@ export default function Settings() {
 
   const addContact = async () => {
     if (!name.trim() || (!phone.trim() && !email.trim())) {
-      toast.error("Name and at least one contact method required");
+      toast.error(t("settings.needMethod"));
       return;
     }
     setSaving(true);
@@ -88,7 +90,7 @@ export default function Settings() {
         email: email.trim() || null,
       });
       if (error) throw error;
-      toast.success("Emergency contact added");
+      toast.success(t("settings.added"));
       setName("");
       setPhone("");
       setEmail("");
@@ -96,7 +98,7 @@ export default function Settings() {
       fetchContacts();
     } catch (e) {
       console.error("Error adding contact:", e);
-      toast.error("Failed to add contact");
+      toast.error(t("settings.addFailed"));
     } finally {
       setSaving(false);
     }
@@ -110,9 +112,9 @@ export default function Settings() {
         .eq("id", id);
       if (error) throw error;
       setContacts(contacts.filter((c) => c.id !== id));
-      toast.success("Contact removed");
+      toast.success(t("settings.removed"));
     } catch {
-      toast.error("Failed to remove contact");
+      toast.error(t("settings.removeFailed"));
     }
   };
 
@@ -129,11 +131,11 @@ export default function Settings() {
           <div className="mb-8 text-center">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
               <SettingsIcon className="h-4 w-4" />
-              Settings
+              {t("settings.badge")}
             </div>
-            <h1 className="mb-2 text-3xl font-bold md:text-4xl">Your Settings</h1>
+            <h1 className="mb-2 text-3xl font-bold md:text-4xl">{t("settings.title")}</h1>
             <p className="text-muted-foreground">
-              {user ? "Manage your emergency contacts and preferences" : "Privacy, legal, and account options"}
+              {user ? t("settings.subtitleUser") : t("settings.subtitleGuest")}
             </p>
           </div>
 
@@ -143,18 +145,17 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-primary" />
-                  Emergency Contacts
+                  {t("settings.contacts")}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Sign in to save people you can text in one tap from any result, so someone can check on you.
-                  Everything else in Stamped works without an account.
+                  {t("settings.contactsGuest")}
                 </p>
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" className="w-full gap-2">
                   <Link to="/auth">
                     <UserPlus className="h-4 w-4" />
-                    Sign in or create an account
+                    {t("settings.signIn")}
                   </Link>
                 </Button>
               </CardContent>
@@ -164,11 +165,10 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" />
-                Emergency Contacts
+                {t("settings.contacts")}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                People you can text in one tap from any result, so someone can check on you.
-                These contacts are used by the Buddy Alert feature on the Results page.
+                {t("settings.contactsUser")}
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -182,10 +182,10 @@ export default function Settings() {
                     <div className="rounded-lg border-2 border-dashed border-border py-8 text-center">
                       <Users className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground mb-1">
-                        No emergency contacts yet
+                        {t("settings.emptyTitle")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Add someone who can check on you in an emergency
+                        {t("settings.emptyBody")}
                       </p>
                     </div>
                   )}
@@ -222,7 +222,7 @@ export default function Settings() {
                             size="icon"
                             className="shrink-0 text-muted-foreground hover:text-destructive"
                             onClick={() => deleteContact(c.id)}
-                            aria-label={`Delete ${c.name}`}
+                            aria-label={t("settings.deleteContact").replace("{name}", c.name)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -236,24 +236,24 @@ export default function Settings() {
                     <div className="rounded-lg border border-border p-4 space-y-4">
                       <h3 className="font-medium text-foreground flex items-center gap-2">
                         <UserPlus className="h-4 w-4 text-primary" />
-                        New Emergency Contact
+                        {t("settings.newContact")}
                       </h3>
                       <div className="space-y-3">
                         <div className="space-y-1.5">
-                          <Label htmlFor="contact-name">Name *</Label>
+                          <Label htmlFor="contact-name">{t("settings.name")}</Label>
                           <Input
                             id="contact-name"
-                            placeholder="e.g. Sarah"
+                            placeholder={t("settings.namePh")}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             maxLength={100}
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="contact-phone">Phone number</Label>
+                          <Label htmlFor="contact-phone">{t("settings.phone")}</Label>
                           <Input
                             id="contact-phone"
-                            placeholder="e.g. (555) 123-4567"
+                            placeholder={t("settings.phonePh")}
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             maxLength={20}
@@ -261,10 +261,10 @@ export default function Settings() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="contact-email">Email</Label>
+                          <Label htmlFor="contact-email">{t("settings.email")}</Label>
                           <Input
                             id="contact-email"
-                            placeholder="e.g. sarah@example.com"
+                            placeholder={t("settings.emailPh")}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             maxLength={255}
@@ -272,7 +272,7 @@ export default function Settings() {
                           />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          * At least one contact method (phone or email) is required.
+                          {t("settings.methodNote")}
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -286,7 +286,7 @@ export default function Settings() {
                           ) : (
                             <Plus className="mr-2 h-4 w-4" />
                           )}
-                          Save Contact
+                          {t("settings.save")}
                         </Button>
                         <Button
                           variant="outline"
@@ -298,7 +298,7 @@ export default function Settings() {
                           }}
                           className="flex-1"
                         >
-                          Cancel
+                          {t("common.cancel")}
                         </Button>
                       </div>
                     </div>
@@ -309,7 +309,7 @@ export default function Settings() {
                       onClick={() => setShowForm(true)}
                     >
                       <UserPlus className="h-4 w-4" />
-                      Add Emergency Contact
+                      {t("settings.addContact")}
                     </Button>
                   )}
                 </>
@@ -341,7 +341,7 @@ export default function Settings() {
               >
                 <span className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  Privacy Policy
+                  {t("settings.privacy")}
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
