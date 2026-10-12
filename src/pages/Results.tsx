@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useI18n } from "@/hooks/useI18n";
 import { Layout } from "@/components/layout/Layout";
 import { SEOHead, makeWebPage } from "@/components/shared/SEOHead";
@@ -118,6 +118,10 @@ const harmReductionStepKeys = ["steps.1", "steps.2", "steps.3", "steps.4", "step
 
 export default function Results() {
   const { reportId } = useParams();
+  const [searchParams] = useSearchParams();
+  // Arrived from a strip-packet QR: the strip guide opens and carries the
+  // safety message, so the one-time countdown modal is skipped (not marked seen).
+  const packetFlow = searchParams.get("mode") === "test";
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useI18n();
@@ -173,7 +177,7 @@ export default function Results() {
 
       // Safety countdown once per device, not per report. The verdict card
       // and disclaimers still render on every result.
-      if (!localStorage.getItem(SAFETY_MODAL_SEEN_KEY)) {
+      if (!packetFlow && !localStorage.getItem(SAFETY_MODAL_SEEN_KEY)) {
         setSafetyModalOpen(true);
       }
 
@@ -426,6 +430,7 @@ export default function Results() {
           {isOwner && (
           <TestStripLogger
             reportId={report.id}
+            guideInitiallyOpen={packetFlow}
             className="mb-3"
             onLogged={(r) => { if (r !== "invalid") { setLoggedStrip(r); setWarnOpen(r === "positive"); } }}
           />

@@ -84,6 +84,9 @@ export default function CheckPill() {
   // action and needs no camera permission, so first-time users start there.
   const linkedImprint = searchParams.get("imprint");
   const autoRun = searchParams.get("auto") === "1";
+  // Strip-packet QR flow (/go?mode=test): Results opens the strip guide.
+  const testMode = searchParams.get("mode") === "test";
+  const resultsPath = (id: string) => `/results/${id}${testMode ? "?mode=test" : ""}`;
   const [mode, setMode] = useState<"photo" | "quick">(() => {
     if (linkedImprint) return "quick";
     const done = Number(localStorage.getItem(CHECKS_COMPLETED_KEY) || "0");
@@ -209,7 +212,7 @@ export default function CheckPill() {
 
       rememberMyReport(data.reportId);
       incrementChecksCompleted();
-      navigate(`/results/${data.reportId}`);
+      navigate(resultsPath(data.reportId));
     } catch (error) {
       console.error("Quick check error:", error);
       toast.error(t("check.failedCheck"));
@@ -301,7 +304,7 @@ export default function CheckPill() {
         return;
       }
 
-      navigate(`/results/${data.reportId}`);
+      navigate(resultsPath(data.reportId));
     } catch (error) {
       console.error("Analysis error:", error);
       toast.error(t("check.failedAnalyze"));
@@ -335,6 +338,9 @@ export default function CheckPill() {
         <div className="mx-auto max-w-2xl">
           <div className="mb-8 text-center">
             <h1 className="mb-2 text-3xl font-bold md:text-4xl">{t("check.title")}</h1>
+            {testMode && (
+              <p className="mb-2 text-sm font-semibold text-primary font-sans normal-case">{t("packet.checkHint")}</p>
+            )}
             <p className="text-muted-foreground font-sans normal-case">
               {mode === "photo" 
                 ? t("check.photoSubtitle")
@@ -573,7 +579,7 @@ export default function CheckPill() {
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        if (currentReportId) navigate(`/results/${currentReportId}`);
+                        if (currentReportId) navigate(resultsPath(currentReportId));
                       }}
                       className="flex-1"
                       disabled={!currentReportId}

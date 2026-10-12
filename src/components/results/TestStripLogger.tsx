@@ -16,16 +16,18 @@ interface TestStripLoggerProps {
   className?: string;
   /** Fired after a result is saved; Results uses it to offer "warn people near you". */
   onLogged?: (result: "positive" | "negative" | "invalid") => void;
+  /** Strip-packet QR flow: start with the how-to-test steps open. */
+  guideInitiallyOpen?: boolean;
 }
 
 type TestResult = "positive" | "negative" | "invalid";
 
-export function TestStripLogger({ reportId, className, onLogged }: TestStripLoggerProps) {
+export function TestStripLogger({ reportId, className, onLogged, guideInitiallyOpen = false }: TestStripLoggerProps) {
   const { t } = useI18n();
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [savedResult, setSavedResult] = useState<TestResult | null>(null);
-  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(guideInitiallyOpen);
 
   useEffect(() => {
     // Check if a test result already exists for this report
