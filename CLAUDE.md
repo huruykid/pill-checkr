@@ -71,6 +71,14 @@ I test it?" The home screen answers it above the fold.
   poster (web only; native redirects). Every printed poster gets its own
   code; `pc_acq_source` keeps first touch; Metrics shows first checks by
   source. Once live, the QR points at the App Store campaign link.
+- Strip packets: `/go?c=<code>&mode=test` lands in the test flow (guide opens
+  on Results); `/qr?c=<code>&layout=stickers` prints 20 packet stickers. Packet
+  codes stay on the web even once the App Store is live.
+- Partner stats: `/partner/<token>` (web only) shows 7d/30d/all totals for one
+  code from `app_events_daily` via `partner_stats()`. The token in
+  `partner_links` is the credential (codes are guessable); admins mint/revoke
+  in Admin → Metrics. Never add per-day series, strip results or state to it.
+  Privacy.tsx discloses it. Migration `20261011120000_partner_stats`.
 - Official advisories (`official_advisories` + `_public` view) are the honest
   seed for an empty feed. They are NOT community reports: separate table,
   distinct `AdvisoryCard`, not under the community disclaimer. Enter them

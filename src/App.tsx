@@ -25,6 +25,7 @@ import CommunityAlerts from "./pages/CommunityAlerts";
 import Install from "./pages/Install";
 import Go from "./pages/Go";
 import QrPoster from "./pages/QrPoster";
+import PartnerStats from "./pages/PartnerStats";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
@@ -109,6 +110,7 @@ const App = forwardRef(function App(_props, ref) {
                 <Route path="/analytics" element={<Navigate to="/trends" replace />} />
                 <Route path="/go" element={<Navigate to="/check" replace />} />
                 <Route path="/qr" element={<Navigate to="/" replace />} />
+                <Route path="/partner/:token" element={<Navigate to="/" replace />} />
               </>
             ) : (
               <>
@@ -120,6 +122,7 @@ const App = forwardRef(function App(_props, ref) {
                 {/* QR landing + printable poster for physical distribution. */}
                 <Route path="/go" element={<Go />} />
                 <Route path="/qr" element={<QrPoster />} />
+                <Route path="/partner/:token" element={<PartnerStats />} />
               </>
             )}
             <Route path="*" element={<NotFound />} />
