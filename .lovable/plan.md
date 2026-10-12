@@ -1,45 +1,79 @@
+## Stamped: brand-to-product shipping plan
 
+**Positioning:** the neighborhood alert system for the US drug supply. **Line:** “Check the stamp. Check the map.”
 
-## Plan: Forced-Friction Safety Modal
+Plan only: no source, database, deployment, screenshot or App Store changes made. Treat iOS 1.0 as frozen while in App Review; put native experience changes into 1.1. This audit covers current repo code and selected live configuration, not the binary or screenshots currently submitted to Apple.
 
-### New File: `src/components/results/SafetyThresholdModal.tsx`
+**Effort:** S = roughly 1–2 engineering days; M = 3–5; L = 1–2+ weeks. Estimates include targeted testing, but exclude provider setup, permission negotiations and Apple review time.
 
-A modal component with:
-- Darkened backdrop (`bg-black/80 backdrop-blur-sm`)
-- Warning-styled card with amber/yellow header and `AlertTriangle` icon
-- Three bullet points (translated): not a lab test, lethal fakes look identical, always have Narcan
-- "I Understand & View Results" button **disabled for 3 seconds** with countdown text ("Wait (3)…", "Wait (2)…", etc.)
-- After 3s, button activates with final text
-- Calls `onDismiss()` when clicked
-- Props: `{ open: boolean; onDismiss: () => void }`
+### Findings and proposed changes
 
-### Update: `src/pages/Results.tsx`
+#### 1. Area alerts as primary onboarding — Partly exists · M · Both, with native-only push
+- **Current:** `WelcomeGate.tsx:99–108` makes legal acceptance primary and offers “Try it: M 30.” No area selection or notification action there. `AreaAlertsToggle.tsx` exists in `CommunityAlerts.tsx:228` and `Settings.tsx:325`, only inside native and once a state is saved. `src/lib/push.ts` handles permission, registration, subscription and notification navigation. The live 15-minute sender schedule exists.
+- **Missing:** bring optional city/state selection and alert opt-in into the first-run experience, retaining legal acceptance, guest access and a visible skip. Ask for notification permission only after the person requests alerts; manual area entry must work without GPS. Handle denied permission and allow later enabling from Settings.
+- **Important:** the sender currently notifies **state-wide positive community strips**, not all alert types or city-specific changes (`notify-area-alerts:155–197`). Do not promise neighborhood-level delivery. APNs credentials are absent from the available project-secret listing; real delivery is unverified and must pass a production TestFlight test before this becomes the primary promise.
+- **Web:** offer “Choose my area” and the filtered feed, not a nonfunctional push button. Browser push would be separate L work, not included here. Native gets “Turn on alerts for my area” in 1.1 once delivery works.
 
-- Add state: `const [safetyModalOpen, setSafetyModalOpen] = useState(false)`
-- On data load (after `fetchResults` succeeds), check `localStorage` for `ff_safety_modal_${reportId}`. If not set, show modal.
-- When dismissed: set localStorage flag, hide modal.
-- While modal is open, wrap the main results content with a `blur-xl pointer-events-none` class so content is obscured.
-- Render `<SafetyThresholdModal open={safetyModalOpen} onDismiss={...} />` inside the Layout.
+#### 2. Homepage imprint search + first screenshot — Partly exists · M · Both + store assets
+- **Current:** `Index.tsx:45–59` links to Identify and Alerts but contains no imprint field. `CheckPill.tsx:69,183,319` already accepts text and `/check?imprint=…&auto=1`. `Go.tsx:113–135` has a reusable pattern for the packet imprint form.
+- **Missing:** place a labeled imprint field, submit action and map/alerts action above the fold under Stamped and the new line. Reuse the existing check flow rather than add another matching engine; keep camera access secondary and blank/error/loading states clear.
+- **Screenshot:** repo `01-home.png` shows the old Pill Checkr name and a link-based homepage; `LISTING.md:21` puts Home first. Recapture the real new native home with imprint entry as image 01 for iPhone and iPad. Do not imply repo assets are the images currently in App Review, or advertise a screen absent from the submitted binary.
 
-### Update: `src/hooks/useI18n.tsx`
+#### 3. Weekly “Supply Report” signup — Missing · M for signup; sending handled externally · Web + native Settings
+- **Current:** no newsletter signup or sending integration found in site/Settings/functions/dependencies. Email-domain check reports no configured sender domain; available connections include no newsletter service. Existing account email is for sign-in/reset, not list consent.
+- **Need:** a dedicated newsletter provider such as Brevo or Mailchimp; an owned, verified sender domain; a separate opted-in audience; confirmation/double opt-in, unsubscribe, suppression/bounce handling, consent records and an editorial owner. Optional area preference should be coarse and clearly explained. Never attach email to pill checks, report ownership, push tokens or install identifiers.
+- **Platform boundary:** a weekly report sent to a list is a newsletter, not an app email. **Lovable does not support marketing-email sending.** Mixing newsletters with app emails harms sender reputation and deliverability. Do not use Lovable’s app-email queue or create a bulk sender here; newsletter publishing and delivery belong in the dedicated provider.
+- **Proposed first version:** provider-hosted signup linked from the site and guest-reachable Settings; provider handles confirmation and list operations. An embedded form is optional after privacy review, not a third-party tracking SDK. No credentials or domain provisioning requested in this plan.
+- **Gate:** rewrite privacy disclosures and assess App Privacy purposes before any signup goes live. `Privacy.tsx:126` currently says “We do not send marketing email.” Include sender identity, expected weekly frequency and unsubscribe; confirmation required before claiming someone is subscribed. Provider subscription/usage charges are separate.
 
-Add keys for all 4 locales:
-- `safety.modal.title` — "⚠️ Before You View These Results"
-- `safety.modal.bullet1` — "Visual analysis is NOT a lab test."
-- `safety.modal.bullet2` — "Lethal counterfeits can look identical to real pills."
-- `safety.modal.bullet3` — "Always have Narcan ready and never use alone."
-- `safety.modal.button_wait` — "Wait ({seconds})…"
-- `safety.modal.button_ready` — "I Understand — View Results"
+#### 4. Confirmed / Unverified on every alert — Partly exists · M · Both + shared images
+- **Current:** `ReportFoundSheet.tsx:92–94` writes `lab/strip/suspected_opioid/visual`-compatible evidence. The live `counterfeit_reports_public` view includes `evidence_tier`, but `CommunityAlerts.tsx:57` and `AlertCard` do not read/display it. Cards currently show strip status; lab cards show “Lab result,” advisories show issuer and early warnings show source, not a shared two-label model.
+- **Missing:** one evidence-label rule applied to community cards, lab cards, advisory/early-warning summaries and details, map popups and exported images. Keep evidence method, test outcome and source separate from the badge.
+- **Conservative mapping proposed:** `lab` with attributable laboratory evidence → **Confirmed**; `strip` → **Unverified · reported test-strip result** unless independently validated; `suspected_opioid`, `visual`, missing/unknown → **Unverified**. Self-entered strips must not become independently confirmed merely because they have a test tier. Invalid strips never support confirmation.
+- **Official notices:** verified publication does not confirm a substance detection. Mark the underlying claim Confirmed only when the cited document supports it; otherwise Unverified with issuer/source still visible. External notices currently lack a dedicated evidence-tier field, so classification needs reviewed metadata rather than inference from severity or issuer.
+- **Meaning:** Confirmed describes evidence for the reported sample/event, never the identity or contents of someone else’s pill. No green, shield-of-safety treatment, “tested clean,” percentages or safety guarantee. Approving this plan accepts the conservative strip mapping; a broader mapping needs evidence-validation criteria first.
 
-### Files Changed
+#### 5. Instagram Story image sharing — Missing · L overall; M image/export first · Both, native handoff later
+- **Current:** `ShareResultCard.tsx:53–85` shares Results text/link using browser share or clipboard. Alert cards have no share action or image generator. `package.json` has no Capacitor Share plugin or dedicated Stories integration.
+- **Missing:** a branded 1080×1920 image containing alert title, coarse area, appropriately precise date, source/“via” credit, Confirmed/Unverified plus method, and brief harm-reduction caution. Render only already-public fields, never notes, private photos, coordinates, token or reporter identifiers. Provide preview, cancellation/error states and a downloadable image fallback.
+- **Ship in two parts:** first shared image generation + file share/download on web and native; then native Instagram Stories handoff. Direct Story composition needs native URL-scheme/pasteboard integration and a Meta App ID, and must be tested on a device with Instagram installed. No tracking SDK is needed. Web cannot promise a direct Story composer: offer supported file sharing or download.
+- **Dependencies:** evidence labels (#4), source rights/credit (#8) and excluded-source gate first. Credits and labels must be baked into the pixels, not merely the accompanying caption. No auto-posting, or claim that a handoff means the Story was published.
 
-| File | Action |
-|---|---|
-| `src/components/results/SafetyThresholdModal.tsx` | New component |
-| `src/pages/Results.tsx` | Add modal state, blur gate, render modal |
-| `src/hooks/useI18n.tsx` | Add 6 translation keys × 4 locales |
+#### 6. “Log your result” after how-to — Mostly exists · S · Both
+- **Current:** `TestStripLogger.tsx:127–156` already puts the how-to immediately before negative/positive/invalid logging buttons; it saves without an account. `Results.tsx:432–436` puts it below the verdict and connects successful logs to the reporting nudge. `StripGuide.tsx:104` ends its timer with “read your strip now,” but has no explicit log-result handoff. `/go?mode=test` also displays a guide without a logger.
+- **Missing:** add “Log your result” at the end of the guide and when the timer completes, moving focus/scroll to the existing result controls. Keep controls available without forcing a timer; never save automatically. Guide-only contexts should continue to a check/results flow before logging, not invent a report ID. Preserve guest corrections, neutral negatives and invalid-strip retry guidance.
 
-### Scope
-- 1 new file (~60 lines), 2 files modified
-- No database changes, no new dependencies
+#### 7. “Lookouts” + coarse area test count — Missing as requested · S naming + L aggregation · Both
+- **Current:** no Lookout terminology found. `CommunityAlerts.tsx:150–183` displays positive reports in seven days, calculated from a capped feed—not all tests logged. `test_strip_results` stores logs but no area. First-party `app_events_daily` has state-level `strip_logged` activity counts; `analytics.ts` obtains state from saved alert preferences, which is not necessarily where the test occurred. Repeat/corrected logs can create more rows/events.
+- **Missing:** rename community reporters to Lookouts without profiles, ranks, identities or messaging. Separate this S copy change from counting work. Define the measure as distinct tested checks with a valid latest result, not button presses, people, tests performed by a lab, or positive-only alerts.
+- **Privacy design proposal:** opt-in coarse area attribution, server-side deduplication and a public aggregate-only response. Start with state-level closed monthly periods, no finer than H3 resolution 6 if smaller areas are ever introduced. Suppress sparse cells; use bands rather than exact live counts; avoid overlapping filters, daily increments, result/imprint breakdowns and totals that reveal suppressed cells by subtraction.
+- **Gate:** privacy review must choose minimum group thresholds, contributor protections and release cadence, and test differencing attacks. H3 size alone does **not** guarantee anonymity. Do not collect new identities to enforce thresholds; if contributor privacy cannot be established from permitted data, publish only wider aggregates or no count. Never expose private logs/points or assert “no individual can be identified.” Update policy with any data-handling change.
+
+#### 8. “via [group]” source credit — Partly exists · M · Both + shared images
+- **Current:** `external_sources` provides name, organization and attribution; `DataSourcesSheet.tsx:40–62` displays full credits. `CommunityAlerts.tsx:115–116` passes source names to lab cards, map popups and early warnings; `AdvisoryCard` shows issuer/original link. This is not consistent partner-group credit on each item.
+- **Missing:** approved display name, attribution text, original link and permission to redistribute images for each allowed source; preserve originating group versus data relay/lab. Use “via [group]” only where provenance establishes it. Do not infer partnership from a source listing or QR referral token. Unknown provenance must remain visibly unknown. Community partner submissions need an authenticated/trusted provenance path if introduced; an editable free-text name is not proof.
+
+#### 9. Never use alone + naloxone one tap from alerts — Partly exists · S–M · Both
+- **Current:** `Layout.tsx:37` includes the emergency button across feed/map pages. `EmergencyFAB.tsx:19` includes Never Use Alone in its expanded panel, but no naloxone action. That hotline’s icon currently uses the success/green token. Modal alert details (`EarlyWarningStrip` + `Sheet`) have no local help actions; the surrounding page control is not a reliable substitute inside a modal.
+- **Missing:** one-tap access to a help panel containing Never use alone guidance/hotline and naloxone information from feed, map popup and alert/detail/share preview. A panel-opening tap is distinct from the subsequent call/navigation tap. Add it inside modal views so focus management does not block access. Remove green from this affected help treatment and preserve the emergency control’s reserved space. Shared images should carry concise guidance too; an image cannot itself offer an interactive button.
+
+### Two site pages
+- **Plain-language privacy — Partly exists · M · New summary web-only; policy remains both.** `/privacy` already has “The short version” (`Privacy.tsx:31–54`), but not a separate summary page. Its SEO description says exact location is never stored, while the body documents optional precise storage; other anonymity statements need review against actual collection. Rewrite and verify the policy first, then publish a short companion linking to it. No stronger anonymity/legal-process claims. Current precise-point and anonymous-image purge schedules were confirmed active; this does not establish every privacy promise.
+- **Fentanyl strip how-to — Partly exists · S–M · New page web-only; shared guide affects both.** `StripGuide` and `/go?mode=test` supply reusable instructions and timer. `App.tsx` has no dedicated how-to route; `/go` redirects on native. Add a searchable, cited page using the same en/es guide, strip limitations and help links, with #6’s honest logging handoff. Review instructions against the actual strip manufacturer rather than promise one universal dilution/read time.
+
+### Recommended shipping order
+1. **Release gates first:** preserve the 1.0 submission; settle evidence wording and source permissions; rewrite/verify privacy. Source metadata query confirms UNC is still enabled, while `DATA_SOURCES.md:141–144` prohibits UNC StreetSafe, derivatives and DrugsData. Public report views and counts do not filter enabled sources. Propose a separately approved exclusion fix across ingestion, public views/counts, feeds/maps, caches and new exports—not just hiding attribution. Do not fetch or reuse their samples. Shared Cloud changes affect the reviewed 1.0 too; assess that impact explicitly before applying anything.
+2. **Fast product value:** #2 homepage search, #6 log handoff, standalone how-to, #9 help access, and #7 Lookouts copy. Web can ship independently; shared UI changes only reach installed native after a new bundle. Hold native and new screenshot upload for 1.1.
+3. **Trust before distribution:** #4 evidence labels and #8 credit together, including map/detail coverage and allowed-source empty states. Publish the plain-language privacy companion only after the rewrite ships.
+4. **Alert-first iOS 1.1:** #1 after APNs configuration and real delivery tests. Start with truthful state-area coverage; broader alert-type/city delivery is a separate expansion. Refresh screenshot 01 to the released search-first home.
+5. **Share loop:** #5 image export first, direct native Story handoff second, using the same evidence/credit rules.
+6. **Newsletter signup:** #3 after provider/consent/privacy decisions. Provider runs weekly publishing; signup work can proceed in parallel with phases 4–5 without entering the current submission.
+7. **Area counts last:** #7 aggregate work after deduplication, privacy thresholds and disclosure approval. This is the most privacy-sensitive item, not a quick counter change.
+
+### Technical and release checks
+- Preserve permanent bundle ID, `pc_*` keys, guest access, existing legal acceptance, and web/native route separation. All new in-app copy gets en + es; no changes to the matching math.
+- Backend/source exclusions require backward-compatible public shapes so the installed 1.0 is not broken. New fields should default to Unverified/unknown rather than silently assert confidence. Source exclusion remains effective even when a caller bypasses the redesigned feed.
+- Before implementation, activate the requested iPhone UX audit guidance: it exists only as a draft in this checkout, with no active workspace version found. Do not execute a draft as an approved skill.
+- Verify web desktop/mobile; iPhone/iPad guest onboarding, manual area/denied permissions, successful/invalid logging, modal help taps, map labels, long credits and exported images. Real-device TestFlight checks cover push and Instagram; simulator/browser tests alone cannot certify them. Follow `RELEASING.md` before any new archive.
+- Outstanding external inputs: APNs credentials/delivery; newsletter provider/domain/editorial owner; Meta App ID for direct Stories; allowed partner provenance/redistribution rights; approved privacy rewrite and count safeguards. Nothing is deployed or implemented by approving the analysis alone.
 
