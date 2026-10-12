@@ -90,6 +90,28 @@ function sanitizeMatchReasons(matchReasons: string | null): string | null {
   return cleaned.length > 0 ? cleaned : null;
 }
 
+// Rows written before the analyze-pill fix carry "imprint metric (42%) below
+// safety floor" and an internal "One-strike safety threshold activated" line.
+// Rewrite those to categorical text and strip any other percentage.
+const LEGACY_METRIC_REASON: Record<string, string> = {
+  imprint: "Imprint doesn't closely match the reference for this pill",
+  shape: "Shape doesn't match typical reference for this pill",
+  color: "Color doesn't match typical reference for this pill",
+  scoring: "Scoring pattern doesn't match the reference for this pill",
+};
+
+function sanitizeAnomalyReasons(reasons: string[]): string[] {
+  const out = reasons
+    .filter((r) => !/one-strike safety threshold/i.test(r))
+    .map((r) => {
+      const legacy = r.match(/^(\w+) metric \(\d{1,3}%\) below safety floor$/i);
+      if (legacy) return LEGACY_METRIC_REASON[legacy[1].toLowerCase()] ?? "Key features don't closely match the reference for this pill";
+      return r.replace(/\s*\(?\b\d{1,3}\s*%\)?/g, "").trim();
+    })
+    .filter(Boolean);
+  return Array.from(new Set(out));
+}
+
 const SAFETY_MODAL_SEEN_KEY = "pc_safety_modal_seen";
 
 const harmReductionStepKeys = ["steps.1", "steps.2", "steps.3", "steps.4", "steps.5", "steps.6"];
@@ -286,7 +308,7 @@ export default function Results() {
   const isOwner = (!!user && report.user_id === user.id) || isMyReport(report.id);
   const canToggleShare = !!user && report.user_id === user.id;
   const riskLevel = (report.risk_level || "medium") as "low" | "medium" | "high";
-  const anomalyReasons = report.anomaly_reasons ?? [];
+  const anomalyReasons = sanitizeAnomalyReasons(report.anomaly_reasons ?? []);
   const riskReasons = report.risk_reasons ?? [];
 
 
@@ -424,6 +446,9 @@ export default function Results() {
             onOpenChange={setWarnOpen}
             prefill={{ imprint: report.imprint_text, drug: matches[0]?.drug_name, strip: loggedStrip, reportId: report.id }}
           />
+
+          {/* Never use alone: right after testing, before the person uses. */}
+          {isOwner && <BuddyAlert className="mb-6" />}
 
           {/* Share: the emotional peak is right after logging a strip. */}
           {isOwner && (
@@ -652,16 +677,6 @@ export default function Results() {
           {/* Drug Interaction Checker */}
           {matches.length > 0 && (
             <InteractionChecker drugName={matches[0].drug_name} className="mb-6" />
-          )}
-
-          {/* Buddy Alert System */}
-          {isOwner && (
-          <BuddyAlert
-            reportId={report.id}
-            drugName={matches.length > 0 ? matches[0].drug_name : undefined}
-            riskLevel={riskLevel}
-            className="mb-6"
-          />
           )}
 
           {/* Report This Pill */}

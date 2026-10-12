@@ -31,8 +31,8 @@ interface Facility {
   website: string | null;
   services: string[];
   type: string | null;
-  lat?: number;
-  lng?: number;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 type FilterType = "all" | "treatment" | "naloxone" | "harm-reduction";
@@ -69,6 +69,12 @@ export default function NearbyHelpMap() {
   const [showList, setShowList] = useState(false);
 
   const filteredFacilities = facilities.filter((f) => matchesFilter(f, filter));
+
+  // An empty filter leaves the map blank; open the list so the fallback
+  // (helpline, naloxone without a facility) is what people see.
+  useEffect(() => {
+    if (searched && filteredFacilities.length === 0) setShowList(true);
+  }, [searched, filteredFacilities.length]);
 
   useEffect(() => {
     track("help_map_opened", { filter: initialFilter });
@@ -123,9 +129,10 @@ export default function NearbyHelpMap() {
     if (center) bounds.extend([center.lat, center.lng]);
 
     facs.forEach((f) => {
-      // Use actual facility coordinates if available, otherwise offset from center
-      const lat = f.lat ?? (center ? center.lat + (Math.random() - 0.5) * 0.1 : null);
-      const lng = f.lng ?? (center ? center.lng + (Math.random() - 0.5) * 0.1 : null);
+      // Only plot real coordinates. A guessed pin can send someone to an
+      // empty street; facilities without coordinates stay list-only.
+      const lat = f.lat;
+      const lng = f.lng;
       if (lat != null && lng != null) {
 
         const facilityIcon = L.divIcon({
@@ -314,10 +321,27 @@ export default function NearbyHelpMap() {
                     Search by location to find nearby facilities.
                   </p>
                 )}
-                {searched && filteredFacilities.length === 0 && (
+                {searched && filteredFacilities.length === 0 && filter !== "naloxone" && (
                   <p className="text-sm text-muted-foreground text-center py-8">
-                    No facilities found matching this filter.
+                    {t("help.noResults")}
                   </p>
+                )}
+                {searched && filter === "naloxone" && (
+                  <Card className="border-danger/40">
+                    <CardContent className="p-4 space-y-2">
+                      <h3 className="font-bold text-sm text-foreground">{t("help.naloxone.title")}</h3>
+                      <p className="text-xs text-muted-foreground">{t("help.naloxone.otc")}</p>
+                      <a
+                        href="https://nextdistro.org/naloxone"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 min-h-11 text-sm font-semibold text-primary hover:underline"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        {t("hr.freeByMail")}
+                      </a>
+                    </CardContent>
+                  </Card>
                 )}
                 {filteredFacilities.map((f, i) => (
                   <Card key={i}>
@@ -331,6 +355,9 @@ export default function NearbyHelpMap() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">{f.address}</p>
+                      {(f.lat == null || f.lng == null) && (
+                        <p className="text-xs text-muted-foreground italic">{t("help.notOnMap")}</p>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         {f.phone && (
                           <a href={`tel:${f.phone}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">

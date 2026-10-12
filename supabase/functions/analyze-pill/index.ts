@@ -86,6 +86,15 @@ const CONFIDENCE_THRESHOLDS = {
 const ONE_STRIKE_FLOOR = 0.65;
 const ONE_STRIKE_MAX_SCORE = 40;
 const ONE_STRIKE_MIN_ANOMALY = 80;
+// anomaly_reasons are shown to users and returned by the public API, so they
+// stay categorical: no metric ratios or percentages (see CLAUDE.md).
+const ONE_STRIKE_REASON: Record<string, string> = {
+  imprint: "Imprint doesn't closely match the reference for this pill",
+  shape: "Shape doesn't match typical reference for this pill",
+  color: "Color doesn't match typical reference for this pill",
+  scoring: "Scoring pattern doesn't match the reference for this pill",
+  default: "Key features don't closely match the reference for this pill",
+};
 
 const SOURCE_PRIORITY: Record<string, number> = {
   manual: 3,
@@ -575,8 +584,8 @@ serve(async (req) => {
         if (dominated.length > 0) {
           topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
           oneStrikeTriggered = true;
-          oneStrikeReasons = dominated.map(([k, v]) => `${k} metric (${Math.round(v * 100)}%) below safety floor`);
-          console.log(`⚠ ONE-STRIKE triggered (quick-check): ${oneStrikeReasons.join(", ")}`);
+          oneStrikeReasons = dominated.map(([k]) => ONE_STRIKE_REASON[k] ?? ONE_STRIKE_REASON.default);
+          console.log(`⚠ ONE-STRIKE triggered (quick-check): ${dominated.map(([k, v]) => `${k}=${v.toFixed(2)}`).join(", ")}`);
         }
       }
 
@@ -649,7 +658,7 @@ serve(async (req) => {
           has_reference_object: false,
           match_confidence: matchConfidence,
           anomaly_score: oneStrikeTriggered ? Math.max(ONE_STRIKE_MIN_ANOMALY, topMatch ? 0 : 25) : (topMatch ? 0 : 25),
-          anomaly_reasons: oneStrikeTriggered ? [...oneStrikeReasons, "One-strike safety threshold activated"] : (topMatch ? [] : ["No matching pill found in reference database"]),
+          anomaly_reasons: oneStrikeTriggered ? oneStrikeReasons : (topMatch ? [] : ["No matching pill found in reference database"]),
           risk_reasons: riskReasons,
           notes: "Quick check (text-only, no photo)",
           user_id: userId || null,
@@ -1210,8 +1219,8 @@ Respond with JSON only:
       if (dominated.length > 0) {
         topMatch.score = Math.min(topMatch.score, ONE_STRIKE_MAX_SCORE);
         oneStrikeTriggered = true;
-        oneStrikeReasons = dominated.map(([k, v]) => `${k} metric (${Math.round(v * 100)}%) below safety floor`);
-        console.log(`⚠ ONE-STRIKE triggered (full-analysis): ${oneStrikeReasons.join(", ")}`);
+        oneStrikeReasons = dominated.map(([k]) => ONE_STRIKE_REASON[k] ?? ONE_STRIKE_REASON.default);
+        console.log(`⚠ ONE-STRIKE triggered (full-analysis): ${dominated.map(([k, v]) => `${k}=${v.toFixed(2)}`).join(", ")}`);
       }
     }
 
@@ -1239,7 +1248,7 @@ Respond with JSON only:
     // Apply one-strike anomaly spike
     if (oneStrikeTriggered) {
       anomalyScore = Math.max(anomalyScore, ONE_STRIKE_MIN_ANOMALY);
-      anomalyReasons.push(...oneStrikeReasons, "One-strike safety threshold activated");
+      anomalyReasons = Array.from(new Set([...anomalyReasons, ...oneStrikeReasons]));
     }
 
     const { level: riskLevel, reasons: riskReasons } = deriveRiskLevel(
