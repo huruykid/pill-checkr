@@ -1,4 +1,4 @@
-// External verified data (UNC Street Drug Analysis Lab, and future sources).
+// External verified data from permitted sources.
 // One typed boundary over the external_* tables until the generated Supabase
 // types are refreshed; every consumer imports from here, never queries directly.
 import { supabase } from "@/integrations/supabase/client";
@@ -66,7 +66,7 @@ export function flagTrue(flags: ExternalLabReport["lab_flags"], key: string): bo
 export interface ExternalStateCount { state: string; n: number; }
 
 // States that actually have lab data, most first. Powers the lab-results state
-// picker — national reference data, independent of the community location.
+// picker — reference data, independent of the community location.
 export async function fetchExternalStates(): Promise<ExternalStateCount[]> {
   const { data, error } = await db
     .from("external_reports_state_counts")

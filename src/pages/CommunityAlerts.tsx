@@ -95,7 +95,7 @@ export default function CommunityAlerts() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Lab results are NATIONAL reference data — never gated behind the community
+  // Lab results are reference data — never gated behind the community
   // "near me" location. Optional labState filter is the user's own explicit choice.
   useEffect(() => {
     if (feed !== "lab") return;
@@ -321,14 +321,15 @@ export default function CommunityAlerts() {
               {labState ? `No lab results in ${labState} yet` : "No lab results yet"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Verified results appear here as partner labs publish new data.
+              {t("alerts.labCoverage")}
             </p>
             {labState && (
-              <Button variant="link" className="mt-2" onClick={() => setLabState(null)}>Show all states</Button>
+              <Button variant="link" className="mt-2" onClick={() => setLabState(null)}>{t("alerts.labAllResults")}</Button>
             )}
           </div>
         ) : (
           <>
+            <p className="mb-3 text-sm text-muted-foreground">{t("alerts.labCoverage")}</p>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <label htmlFor="labState" className="sr-only">Filter lab results by state</label>
@@ -338,7 +339,7 @@ export default function CommunityAlerts() {
                   onChange={(e) => setLabState(e.target.value || null)}
                   className="min-h-[40px] rounded-full border bg-card px-4 text-sm font-medium"
                 >
-                  <option value="">All states (national)</option>
+                  <option value="">{t("alerts.labAllResults")}</option>
                   {labStates.map((st) => (
                     <option key={st.state} value={st.state}>{st.state} ({st.n})</option>
                   ))}
