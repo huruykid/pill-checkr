@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -865,30 +865,6 @@ export type Database = {
           },
         ]
       }
-      partner_links: {
-        Row: {
-          created_at: string
-          label: string | null
-          revoked_at: string | null
-          source: string
-          token: string
-        }
-        Insert: {
-          created_at?: string
-          label?: string | null
-          revoked_at?: string | null
-          source: string
-          token?: string
-        }
-        Update: {
-          created_at?: string
-          label?: string | null
-          revoked_at?: string | null
-          source?: string
-          token?: string
-        }
-        Relationships: []
-      }
       official_advisories: {
         Row: {
           city: string | null
@@ -1047,6 +1023,30 @@ export type Database = {
           period_end?: string
           state?: string | null
           synced_at?: string
+        }
+        Relationships: []
+      }
+      partner_links: {
+        Row: {
+          created_at: string
+          label: string | null
+          revoked_at: string | null
+          source: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          label?: string | null
+          revoked_at?: string | null
+          source: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          label?: string | null
+          revoked_at?: string | null
+          source?: string
+          token?: string
         }
         Relationships: []
       }
@@ -2005,18 +2005,45 @@ export type Database = {
         Args: { p_token: string }
         Returns: {
           first_checks: number
-          label: string | null
+          label: string
           period: string
           scans: number
           source: string
           strips_logged: number
-          updated_through: string | null
+          updated_through: string
         }[]
+      }
+      probe_result: {
+        Args: { rid: number }
+        Returns: {
+          bytes: number
+          content_type: string
+          error_msg: string
+          head: string
+          status_code: number
+          verdict: string
+        }[]
+      }
+      probe_source: {
+        Args: { timeout_ms?: number; ua?: string; url: string }
+        Returns: number
       }
       purge_expired_report_locations: { Args: never; Returns: number }
       rollup_app_events: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      source_health: {
+        Args: never
+        Returns: {
+          enabled: boolean
+          flag: string
+          latest: string
+          rows: number
+          source_id: string
+          sync_age_hours: number
+          tbl: string
+        }[]
+      }
       subscribe_area_alerts: {
         Args: {
           p_city?: string
@@ -2027,6 +2054,7 @@ export type Database = {
         Returns: undefined
       }
       unsubscribe_area_alerts: { Args: { p_token: string }; Returns: undefined }
+      verify_source: { Args: { sid: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
